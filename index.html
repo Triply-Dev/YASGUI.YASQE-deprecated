@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>Test</title>
+<link href="dist/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<textarea id="code">
+	alert('woeiii');
+</textarea>
+<script src="dist/YASGUI-QueryEditor.js"></script>
+
+
+<script type="text/javascript">
+
+      var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        lineNumbers: true,
+        //extraKeys: {"Ctrl-Space": "autocomplete"},
+        mode: "javascript"
+      });
+    
+</script>
+</body>
+</html>
