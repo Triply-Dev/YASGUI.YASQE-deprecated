@@ -1,6 +1,13 @@
 {
   "name": "YASGUI-QueryEditor",
   "version": "0.1.0",
+  "main": "build/yasqe.js",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/LaurensRietveld/yasgui/blob/master/license.txt"
+    }
+  ],
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-jshint": "~0.6.3",
@@ -9,6 +16,51 @@
     "grunt-contrib-qunit": "~0.4.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-contrib-concat": "~0.4.0",
-    "grunt-contrib-cssmin": "~0.9.0"
+    "grunt-contrib-cssmin": "~0.9.0",
+    "grunt-contrib-requirejs": "~0.4.3",
+    "gulp": "~3.6.0",
+    "vinyl-source-stream": "~0.1.1",
+    "watchify": "^0.6.4",
+    "gulp-uglify": "^0.2.1",
+    "gulp-concat": "^2.2.0",
+    "gulp-minify-css": "^0.3.0",
+    "gulp-browserify": "^0.5.0",
+    "vinyl-buffer": "0.0.0",
+    "browserify": "^3.38.1",
+    "gulp-if": "0.0.5",
+    "gulp-buster": "^0.2.1",
+    "express": "^3.5.1",
+    "connect-livereload": "^0.3.2",
+    "tiny-lr": "0.0.5",
+    "gulp-livereload": "^1.2.0",
+    "gulp-util": "^2.2.14"
+  },
+  "bugs": "https://github.com/LaurensRietveld/yasgui/issues/",
+  "keywords": [
+    "JavaScript",
+    "SPARQL",
+    "Editor",
+    "Semantic Web",
+    "Linked Data"
+  ],
+  "homepage": "http://laurensrietveld.nl/yasgui",
+  "maintainers": [
+    {
+      "name": "Laurens Rietveld",
+      "email": "laurens.rietveld@gmail.com",
+      "web": "http://laurensrietveld.nl"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "todo"
+  },
+  "dependencies": {
+    "jquery": "~ 1.11.0",
+    "codemirror": "~ 4.0.3",
+    "browserify-shim": "~3.4.1"
+  },
+  "browserify-shim": {
+    "jquery": "$"
   }
 }

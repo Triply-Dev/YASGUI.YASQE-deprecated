@@ -1,24 +1,23 @@
 <html>
 <head>
 <title>Test</title>
-<link href="dist/style.css" rel="stylesheet" type="text/css" />
+<link href="dist/yasqe.css" rel="stylesheet" type="text/css" />
+<!-- <script src="build/yasqe.min.js"></script> -->
+<script src="dist/bundle.js"></script>
 </head>
 <body>
-
-<textarea id="code">
-	alert('woeiii');
-</textarea>
-<script src="dist/YASGUI-QueryEditor.js"></script>
 
 
 <script type="text/javascript">
 
-      var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+	var yas = Yasqe(document.body, {
         lineNumbers: true,
         //extraKeys: {"Ctrl-Space": "autocomplete"},
-        mode: "javascript"
+        mode: "javascript",
+        value: "blaat"
       });
-    
+	
+      
 </script>
 </body>
 </html>
