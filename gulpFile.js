@@ -25,7 +25,7 @@ var EXPRESS_PORT = 4000;
 var EXPRESS_ROOT = __dirname;
 var LIVERELOAD_PORT = 35729;
 
-
+var debug = require('gulp-debug');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var watchify = require('watchify');
@@ -34,6 +34,9 @@ var minifyCSS = require('gulp-minify-css');
 var source = require('vinyl-source-stream');
 var browserify = require('browserify');
 var bust = require('gulp-buster');
+var connect = require('gulp-connect');
+var embedlr = require('gulp-embedlr');
+var livereload = require('gulp-livereload');
 
 var dest = "dist";
 
@@ -44,7 +47,6 @@ var log = function(mainMsg, secondaryMsg) {
 	gutil.log.apply(null, args);
 };
 
-//log("blaat", "blaa2");
 gulp.task('concatCmResources', function() {
   // Minify and copy all JavaScript (except vendor scripts)
   return gulp.src(paths.cmResources)
@@ -55,72 +57,65 @@ gulp.task('concatCmResources', function() {
 
 gulp.task('concatCss', function() {
   gulp.src(paths.style)
+  
   	.pipe(concat('yasqe.css'))
-    .pipe(gulp.dest(dest));
+    .pipe(gulp.dest(dest))
+//    .on('err', function(error) {
+//    	console.log("browserify error");
+//    	notify("error");
+//    });
+    ;
 });
 gulp.task('minifyCss', ['concatCss'], function() {
 	gulp.src(dest + "/yasqe.css")
 	.pipe(concat('yasqe.min.css'))
     .pipe(minifyCSS())
-	.pipe(gulp.dest(dest));
-	if (lr) notifyLivereload({path: "./" + dest + "/yasqe.min.css"});
+	.pipe(gulp.dest(dest))
+	 .pipe(connect.reload());
+	
 });
 
-var startExpress = function() {
-	 
-	 var express = require('express');
-	  var app = express();
-	  app.use(require('connect-livereload')());
-	  app.use(express.static(EXPRESS_ROOT));
-	  app.listen(EXPRESS_PORT);
-};
-var lr;
-function notifyLivereload(event) {
-	
-	var fileName = require('path').relative(EXPRESS_ROOT, event.path);
-	log(fileName, event.path);
-	  lr.changed({
-	    body: {
-	      files: [fileName]
-	    }
-	  });
-	gulp.src(event.path, {
-		read : false
-	}).pipe(require('gulp-livereload')(lr));
-	
-}
-
-function startLivereload() {
-  lr = require('tiny-lr')();
-  lr.listen(LIVERELOAD_PORT);
-}
+gulp.task('connect', function() {
+//	log('Running on http://localhost:' + EXPRESS_PORT);
+	connect.server({
+//		root : './',
+		port : 4000,
+		livereload: true
+	});
+});
 gulp.task('browserify', ["concatCmResources"], function() {
-	console.log("browserifying!!!!!!!!!!!");
 	browserify('./src/main.js').bundle({standalone: "Yasqe", debug: true})
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest(dest));
 	
-	if (lr) notifyLivereload({path: "./dist/bundle.js"});
+    .pipe(source('bundle.js'))
+    .pipe(embedlr())
+    .pipe(gulp.dest(dest))
+    .pipe(connect.reload())
+//    .on('error', function(error) {
+//    	console.log("browserify error");
+//    	notify("error");
+//    })
+    ;
+    ;
 });
-
-
 gulp.task('watch', function() {
-	gulp.watch(paths.cmScripts, [ 'browserify' ]);
+	gulp.watch(paths.cmResources, [ 'browserify' ]);
 	gulp.watch(paths.trieScripts, [ 'browserify' ]);
 	gulp.watch("src/main.js", [ 'browserify' ]);
 	gulp.watch(paths.style, [ 'minifyCss' ]);
-//	gulp.watch("dist/bundle.js", function(event) {
-//		watchEvent(event, "bundle", true);
-//	});
+//	var server = livereload();
+//	  gulp.watch('./dist/**').on('change', function(file) {
+//		  console.log("dist change");
+//		  console.log(file.path);
+////	      server.changed(file.path);
+//		  server.changed("dist/bundle.js");
+//	  });
+//	  gulp.watch('./*.html').on('change', function(file) {
+//	      server.changed(file.path);
+//	  });
 });
 
-gulp.task('default', ['browserify', 'minifyCss', 'watch'], function() {
-	startExpress();
-	startLivereload();
-//	gutil.log(new Date().toLocaleTimeString());  
-	log('Running on http://localhost:' + EXPRESS_PORT);
-//	gutil.log('[' + gutil.colors.green(new Date().toLocaleTimeString()) + ']', gutil.colors.cyan('Running on http://localhost:' + EXPRESS_PORT));
-});
+
+gulp.task('default', ['browserify', 'minifyCss', 'watch', 'connect']);
 
 
 

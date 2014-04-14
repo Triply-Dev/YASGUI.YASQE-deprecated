@@ -13,8 +13,9 @@
 	var yas = Yasqe(document.body, {
         lineNumbers: true,
         //extraKeys: {"Ctrl-Space": "autocomplete"},
-        mode: "javascript",
-        value: "blaat"
+       // mode: "javascript",
+        value: "PREFIX rdf: <http://blaat> \n SELECT * {\n_:1 rdfs:label 'blaat'@en\n} LIMIT 10000",
+        theme: "default"
       });
 	
       

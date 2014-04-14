@@ -2,31 +2,20 @@
 var $ = require("jquery");
 var CodeMirror = require("codemirror");
 
-// require("codemirror/mode/javascript/javascript.js");
-// require('codemirror/mode/xml/xml.js');
-// require('codemirror/mode/turtle/turtle.js');
 require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 require('../lib/formatting.js');
 require('../lib/flint.js');
-// console.log(cmJs);
 var root = module.exports = function(parent, config) {
-	console.log("bla19765322sssssee2", new Date());
-	$.extend(config, defaults);
-	console.log("in yasqe");
-
-	
-	
-	
-	// return extendCmInstance(CodeMirror(parent, config));
-	return CodeMirror(parent, config);
+	console.log("bla1234");
+	return extendCmInstance(CodeMirror(parent, $.extend(true, {}, defaults, config)));
 };
 
 var extendCmInstance = function(cm) {
 	cm.query = function() {
-		console.log("queryingfddssddssssssdssssss! " + cm.getValue());
+		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
 
 	return cm;
@@ -35,7 +24,7 @@ var extendCmInstance = function(cm) {
 /**
  * helpers
  */
-var fetchFromPrefixCc = function() {
+var fetchFromPrefixCc = function(callback) {
 	$.get("http://prefix.cc/popular/all.file.json", function(data) {
 		console.log(data);
 	});
@@ -46,6 +35,7 @@ var fetchFromPrefixCc = function() {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
+
 
 // now add all the static functions
 root.deleteLines = function(cm) {
@@ -463,7 +453,7 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 
 var defaults = {
 	mode : "sparql11",
-	theme : "yasqe",
+//	theme : "yasqe",
 	value : "SELECT * {?x ?y ?z} LIMIT 10",
 	highlightSelectionMatches : {
 		showToken : /\w/
