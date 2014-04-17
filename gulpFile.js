@@ -52,32 +52,23 @@ gulp.task('connect', function() {
 //		root : './',
 		port : 4000,
 		livereload: true
-	}).on("error", errorHandler);
+	});
 });
-var onPackageError = function(err){
-	
-	this.emit('end');
-};
 gulp.task('browserify', function() {
 		var browse = browserify("./src/main.js")
-		.bundle({debug: true}).on('error', onPackageError);
-		
+		.bundle({debug: true}).on('error', notify.onError({
+	        message: "Error: <%= error.message %>",
+	        title: "Failed running browserify"
+	      }));
 		
 	    browse.pipe(source(outputName + '.js'))
 	    .pipe(embedlr())
+	    .pipe(notify("Found file: <%= file.relative %>!"))
 	    .pipe(gulp.dest(dest))
-	    .pipe(connect.reload())
-	    .on('error', function(error) {
-	    	console.log("browserify error");
-	    	notify("error");
-	    });
-		
-		
+	    .pipe(connect.reload());
 });
 gulp.task('watch', function() {
-	gulp.watch(paths.cmResources, [ 'browserify' ]);
-	gulp.watch(paths.trieScripts, [ 'browserify' ]);
-	gulp.watch("src/main.js", [ 'browserify' ]);
+	gulp.watch(["./src/main.js", './lib/*.js'], [ 'browserify' ]);
 	gulp.watch(paths.style, [ 'minifyCss' ]);
 });
 
