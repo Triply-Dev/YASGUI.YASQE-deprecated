@@ -41,7 +41,9 @@
     "gulp-imagemin": "^0.2.0",
     "gulp-open": "^0.2.8",
     "connect": "^2.14.4",
-    "gulp-debug": "^0.3.0"
+    "gulp-debug": "^0.3.0",
+    "stream-combiner": "0.0.4",
+    "gulp-plumber": "^0.6.1"
   },
   "bugs": "https://github.com/LaurensRietveld/yasgui/issues/",
   "keywords": [

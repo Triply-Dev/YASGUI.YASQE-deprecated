@@ -324,6 +324,10 @@ root.appendPrefixIfNeeded = function(cm) {
 		}
 	}
 };
+root.version = {
+	"CodeMirror": root.version
+	"YASGUI-Query": "1.0.0"
+};
 
 /**
  * Get defined prefixes from query as array, in format {"prefix:" "uri"}
