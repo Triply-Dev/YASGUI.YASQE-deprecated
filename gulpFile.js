@@ -56,14 +56,13 @@ gulp.task('connect', function() {
 });
 gulp.task('browserify', function() {
 		var browse = browserify("./src/main.js")
-		.bundle({debug: true}).on('error', notify.onError({
+		.bundle({standalone: "Yasqe", debug: true}).on('error', notify.onError({
 	        message: "Error: <%= error.message %>",
 	        title: "Failed running browserify"
 	      }));
 		
 	    browse.pipe(source(outputName + '.js'))
 	    .pipe(embedlr())
-	    .pipe(notify("Found file: <%= file.relative %>!"))
 	    .pipe(gulp.dest(dest))
 	    .pipe(connect.reload());
 });

@@ -325,8 +325,8 @@ root.appendPrefixIfNeeded = function(cm) {
 	}
 };
 root.version = {
-	"CodeMirror": root.version
-	"YASGUI-Query": "1.0.0"
+	"CodeMirror": CodeMirror.version,
+	"YASGUI-Query": require("../package.json").version
 };
 
 /**
