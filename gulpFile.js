@@ -77,6 +77,14 @@ gulp.task('minifyJs', function() {
 gulp.task('watch', function() {
 	gulp.watch(["./src/main.js", './lib/*.js'], [ 'browserify' ]);
 	gulp.watch(paths.style, [ 'minifyCss' ]);
+	  gulp.watch(
+		'./*.html'
+	, function(files) {
+		gulp.src(files.path).pipe(connect.reload());
+//		console.log(files);
+//		connect.reload(files.path);
+//		return files.pipe(connect.reload());
+	});
 });
 
 

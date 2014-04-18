@@ -16,6 +16,9 @@ var extendCmInstance = function(cm) {
 	cm.query = function() {
 		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
+	cm.test = function() {
+		return root.determineId(cm);
+	};
 	return cm;
 };
 
@@ -35,12 +38,7 @@ var fetchFromPrefixCc = function(callback) {
 $.extend(root, CodeMirror);
 
 root.determineId = function(cm) {
-	var getClosestId = function(el) {
-		if (el.id) return el.id;
-		if (el.parentNode) return getClosestId(parentNode);
-		return null;
-	};
-	return getClosestId(cm.getWrapperElement());
+	return $(cm.getWrapperElement()).closest('[id]').attr('id');
 };
 // now add all the static functions
 root.deleteLines = function(cm) {
