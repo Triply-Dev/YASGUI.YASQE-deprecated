@@ -21,7 +21,7 @@ var connect = require('gulp-connect');
 var embedlr = require('gulp-embedlr');
 var livereload = require('gulp-livereload');
 var notify = require("gulp-notify");
-
+var uglify = require('gulp-uglify');
 
 var log = function(mainMsg, secondaryMsg) {
 	var args = ['[' + gutil.colors.green(new Date().toLocaleTimeString()) + ']'];
@@ -66,13 +66,22 @@ gulp.task('browserify', function() {
 	    .pipe(gulp.dest(dest))
 	    .pipe(connect.reload());
 });
+gulp.task('minifyJs', function() {
+	gulp.src(dest + "/" + outputName + ".js")
+	.pipe(concat(outputName + '.min.js'))
+    .pipe(uglify())
+	.pipe(gulp.dest(dest));
+});
+
+
 gulp.task('watch', function() {
 	gulp.watch(["./src/main.js", './lib/*.js'], [ 'browserify' ]);
 	gulp.watch(paths.style, [ 'minifyCss' ]);
 });
 
 
-gulp.task('default', ['browserify', 'minifyCss', 'watch', 'connect']);
+gulp.task('packageMinified', ['minifyJs', 'minifyCss']);
+gulp.task('default', ['browserify', 'packageMinified']);
 
-
+gulp.task('serve', ['browserify', 'watch', 'connect']);
 
