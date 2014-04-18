@@ -1,5 +1,6 @@
 {
   "name": "YASGUI-QueryEditor",
+  "description": "TODO",
   "version": "1.0.0",
   "main": "build/yasqe.js",
   "licenses": [
@@ -30,7 +31,8 @@
     "gulp-open": "^0.2.8",
     "connect": "^2.14.4",
     "gulp-debug": "^0.3.0",
-    "stream-combiner": "0.0.4"
+    "stream-combiner": "0.0.4",
+    "amplify": "0.0.11"
   },
   "bugs": "https://github.com/LaurensRietveld/yasgui/issues/",
   "keywords": [
@@ -52,6 +54,7 @@
     "type": "git",
     "url": "todo"
   },
+  "readme": "TODO",
   "dependencies": {
     "jquery": "~ 1.11.0",
     "codemirror": "~ 4.0.3"

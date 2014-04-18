@@ -9,15 +9,13 @@ require('codemirror/addon/runmode/runmode.js');
 require('../lib/formatting.js');
 require('../lib/flint.js');
 var root = module.exports = function(parent, config) {
-	console.log("bla1234");
-	return extendCmInstance(CodeMirror(parent, $.extend(true, {}, defaults, config)));
+	return extendCmInstance(CodeMirror(parent, $.extend(true, {}, root.defaults, config)));
 };
 
 var extendCmInstance = function(cm) {
 	cm.query = function() {
 		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
-
 	return cm;
 };
 
@@ -36,7 +34,14 @@ var fetchFromPrefixCc = function(callback) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
-
+root.determineId = function(cm) {
+	var getClosestId = function(el) {
+		if (el.id) return el.id;
+		if (el.parentNode) return getClosestId(parentNode);
+		return null;
+	};
+	return getClosestId(cm.getWrapperElement());
+};
 // now add all the static functions
 root.deleteLines = function(cm) {
 	var startLine = cm.getCursor(true).line;
@@ -324,6 +329,44 @@ root.appendPrefixIfNeeded = function(cm) {
 		}
 	}
 };
+
+root.defaults = {
+	mode : "sparql11",
+	value : "SELECT * {?x ?y ?z} \nLIMIT 10",
+	highlightSelectionMatches : {
+		showToken : /\w/
+	},
+	tabMode : "indent",
+	lineNumbers : true,
+	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
+	matchBrackets : true,
+	fixedGutter : true,
+	extraKeys : {
+		"Ctrl-Space" : "autoComplete",
+		"Cmd-Space" : "autoComplete",
+		"Ctrl-D" : root.deleteLines,
+		"Ctrl-K" : root.deleteLine,
+		"Cmd-D" : root.deleteLine,
+		"Cmd-K" : root.deleteLine,
+		"Ctrl-/" : root.commentLines,
+		"Cmd-/" : root.commentLines,
+		"Ctrl-Alt-Down" : root.copyLineDown,
+		"Ctrl-Alt-Up" : root.copyLineUp,
+		"Cmd-Alt-Down" : root.copyLineDown,
+		"Cmd-Alt-Up" : root.copyLineUp,
+		"Shift-Ctrl-F" : root.doAutoFormat,
+		"Shift-Cmd-F" : root.doAutoFormat,
+		"Tab" : root.indentTab,
+		"Shift-Tab" : root.unindentTab
+	},
+	//non CodeMirror options
+	persistency: {
+		query: true,
+		completions: {
+			
+		}
+	},
+};
 root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASGUI-Query": require("../package.json").version
@@ -455,34 +498,3 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	return token;
 };
 
-var defaults = {
-	mode : "sparql11",
-//	theme : "yasqe",
-	value : "SELECT * {?x ?y ?z} LIMIT 10",
-	highlightSelectionMatches : {
-		showToken : /\w/
-	},
-	tabMode : "indent",
-	lineNumbers : true,
-	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
-	matchBrackets : true,
-	fixedGutter : true,
-	extraKeys : {
-		"Ctrl-Space" : "autoComplete",
-		"Cmd-Space" : "autoComplete",
-		"Ctrl-D" : root.deleteLines,
-		"Ctrl-K" : root.deleteLine,
-		"Cmd-D" : root.deleteLine,
-		"Cmd-K" : root.deleteLine,
-		"Ctrl-/" : root.commentLines,
-		"Cmd-/" : root.commentLines,
-		"Ctrl-Alt-Down" : root.copyLineDown,
-		"Ctrl-Alt-Up" : root.copyLineUp,
-		"Cmd-Alt-Down" : root.copyLineDown,
-		"Cmd-Alt-Up" : root.copyLineUp,
-		"Shift-Ctrl-F" : root.doAutoFormat,
-		"Shift-Cmd-F" : root.doAutoFormat,
-		"Tab" : root.indentTab,
-		"Shift-Tab" : root.unindentTab
-	}
-};

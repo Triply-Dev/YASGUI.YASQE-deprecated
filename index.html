@@ -1,21 +1,21 @@
 <html>
 <head>
-<title>Test</title>
+<title>YASGUI-Query</title>
 <link href="dist/yasgui-query.css" rel="stylesheet" type="text/css" />
 <!-- <script src="build/yasqe.min.js"></script> -->
 <script src="dist/yasgui-query.js"></script>
 </head>
 <body>
-
+<button id='draw'>draw</button>
 
 <script type="text/javascript">
-
-	var yas = Yasqe(document.body, {
+	//document.
+	var yasguiQuery = YasguiQuery(document.body, {
         lineNumbers: true,
         //extraKeys: {"Ctrl-Space": "autocomplete"},
        // mode: "javascript",
         value: "PREFIX rdf: <http://blaat> \n SELECT * {\n_:1 rdfs:label 'blaat'@en\n} LIMIT 10000",
-        theme: "default"
+        //theme: "default"
       });
 	
       

@@ -56,7 +56,7 @@ gulp.task('connect', function() {
 });
 gulp.task('browserify', function() {
 		var browse = browserify("./src/main.js")
-		.bundle({standalone: "Yasqe", debug: true}).on('error', notify.onError({
+		.bundle({standalone: "YasguiQuery", debug: true}).on('error', notify.onError({
 	        message: "Error: <%= error.message %>",
 	        title: "Failed running browserify"
 	      }));
