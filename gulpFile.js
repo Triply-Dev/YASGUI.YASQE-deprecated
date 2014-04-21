@@ -22,6 +22,13 @@ var embedlr = require('gulp-embedlr');
 var livereload = require('gulp-livereload');
 var notify = require("gulp-notify");
 var uglify = require('gulp-uglify');
+var jsValidate = require('gulp-jsvalidate');
+
+gulp.on('err', function(err){
+	console.log("on general err");
+	  console.log(err);
+});
+
 
 var log = function(mainMsg, secondaryMsg) {
 	var args = ['[' + gutil.colors.green(new Date().toLocaleTimeString()) + ']'];
@@ -54,17 +61,32 @@ gulp.task('connect', function() {
 		livereload: true
 	});
 });
-gulp.task('browserify', function() {
-		var browse = browserify("./src/main.js")
-		.bundle({standalone: "YasguiQuery", debug: true}).on('error', notify.onError({
-	        message: "Error: <%= error.message %>",
-	        title: "Failed running browserify"
-	      }));
+gulp.task('validate', function() {
+//	gulp.src("./src/*.js").pipe(jsValidate()).on('error', function() {
+//		console.log("errrorrrr");
+//		this.emit('end');
+//	});
+});
+gulp.task('browserify', ['validate'], function() {
+	gulp.src("./src/*.js").pipe(jsValidate()).on('error', 
+		notify.onError({
+			message: "Error: <%= error.message %>",
+			title: "Failed running browserify"
+		})).on('finish', function(){
+			browserify("./src/main.js")
+			.bundle({standalone: "YasguiQuery", debug: true}).on('error', notify.onError({
+		        message: "Error: <%= error.message %>",
+		        title: "Failed running browserify"
+		      })).on('prebundle', function(bundle) {
+		    	  console.log("prebundle!");
+		    	})
+		    .pipe(source(outputName + '.js'))
+		    .pipe(embedlr())
+		    .pipe(gulp.dest(dest))
+		    .pipe(connect.reload());
+		});
 		
-	    browse.pipe(source(outputName + '.js'))
-	    .pipe(embedlr())
-	    .pipe(gulp.dest(dest))
-	    .pipe(connect.reload());
+		
 });
 gulp.task('minifyJs', function() {
 	gulp.src(dest + "/" + outputName + ".js")

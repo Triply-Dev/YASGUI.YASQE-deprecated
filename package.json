@@ -58,6 +58,8 @@
   "readme": "TODO",
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "~ 4.0.3"
+    "codemirror": "~ 4.0.3",
+    "amplify": "0.0.11",
+    "store": "^1.3.14"
   }
 }

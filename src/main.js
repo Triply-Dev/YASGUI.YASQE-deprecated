@@ -9,19 +9,58 @@ require('codemirror/addon/runmode/runmode.js');
 require('../lib/formatting.js');
 require('../lib/flint.js');
 var root = module.exports = function(parent, config) {
-	return extendCmInstance(CodeMirror(parent, $.extend(true, {}, root.defaults, config)));
+	config = extendConfig(config);
+	var cm = extendCmInstance(CodeMirror(parent, config));
+	postProcessCmElement(cm);
+	return cm;
 };
 
+/**
+ * Extend config object, which we will pass on to the CM constructor later on.
+ * Need this, to make sure our own 'onBlur' etc events do not get overwritten by people who add their own onblur events to the config
+ * Additionally, need this to include the CM defaults ourselves. CodeMirror has a method for including defaults, but we can't rely on that one: it assumes flat config object, where we have nested objects (e.g. the persistency option)
+ */
+var extendConfig = function(config) {
+	var extendedConfig = $.extend(true, {}, root.defaults, config);//I know, codemirror deals with default options as well. However, it does not do this recursively (i.e. the persistency option)
+	
+//	if (extendedConfig.persistency && extendedConfig.persistency.query) {
+		
+//	}
+	return extendedConfig;
+};
+/**
+ * Add extra functions to the CM document (i.e. the codemirror instantiated object)
+ */
 var extendCmInstance = function(cm) {
 	cm.query = function() {
 		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
-	cm.test = function() {
-		return root.determineId(cm);
+	cm.store = function() {
+		root.storeInStorage(cm);
+	};
+	cm.getFromStorage = function() {
+		var valFromStorage = root.getFromStorage(cm);
+		if (valFromStorage) cm.setValue(valFromStorage);
 	};
 	return cm;
 };
 
+var postProcessCmElement = function(cm) {
+	if (cm.getOption("persistency") && cm.getOption("persistency").query) {
+		cm.getFromStorage();
+	}
+	
+	cm.on('blur',function(cm, eventInfo) {
+		if (cm.getOption("persistency") && cm.getOption("persistency").query) {
+			cm.store();
+		}
+	});
+	cm.on('change', function(cm, eventInfo) {
+		checkSyntax(cm, true);
+		root.showHint(cm, root.prefixHint, {closeCharacters: /(?=a)b/});
+		root.appendPrefixIfNeeded(cm);
+	});
+};
 /**
  * helpers
  */
@@ -30,15 +69,77 @@ var fetchFromPrefixCc = function(callback) {
 		console.log(data);
 	});
 };
-
+var checkSyntax = function(cm, deepcheck) {
+	var queryValid = true,
+		prevQueryValid = true,
+		clearError = null;
+	if (clearError) {
+		clearError();
+		clearError = null;
+	}
+	cm.clearGutter("gutterErrorBar");
+	var state = null;
+	for ( var l = 0; l < cm.lineCount(); ++l) {
+		var precise = false;
+		if (!prevQueryValid) {
+			//we don't want cached information in this case, otherwise the previous error sign might still show up,
+			//even though the syntax error might be gone already
+			precise = true;
+		}
+		state = cm.getTokenAt({
+			line : l,
+			ch : cm.getLine(l).length
+		}, precise).state;
+		if (state.OK == false) {
+			var error = document.createElement('span');
+			error.innerHTML = "&rarr;";
+			error.className = "gutterError";
+			cm.setGutterMarker(l,"gutterErrorBar", error);
+			clearError = function() {
+				cm.markText({
+					line : l,
+					ch : state.errorStartPos
+				}, {
+					line : l,
+					ch : state.errorEndPos
+				}, "sp-error");
+			};
+			queryValid = false;
+			break;
+		}
+	}
+	prevQueryValid = queryValid;
+	if (deepcheck) {
+		if (state != null && state.stack != undefined) {
+			var stack = state.stack, len = state.stack.length;
+			// Because incremental parser doesn't receive end-of-input
+			// it can't clear stack, so we have to check that whatever
+			// is left on the stack is nillable
+			if (len > 1)
+				queryValid = false;
+			else if (len == 1) {
+				if (stack[0] != "solutionModifier" && stack[0] != "?limitOffsetClauses"
+						&& stack[0] != "?offsetClause")
+					queryValid = false;
+			}
+		}
+	}
+};
 /**
  * Static Utils
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
+
 root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
+};
+root.storeInStorage = function(cm) {
+	require("./storage.js").set("queryVal_" + root.determineId(cm), cm.getValue(), "year");
+};
+root.getFromStorage = function(cm) {
+	return require("./storage.js").get("queryVal_" + root.determineId(cm));
 };
 // now add all the static functions
 root.deleteLines = function(cm) {
@@ -208,7 +309,7 @@ root.prefixHint = function(cm) {
 	// Find the token at the cursor
 	var cur = cm.getCursor(), token = cm.getTokenAt(cur);
 
-	includePreviousTokens = function(token, cur) {
+	var includePreviousTokens = function(token, cur) {
 		var prevToken = cm.getTokenAt({
 			line : cur.line,
 			ch : token.start
@@ -239,10 +340,11 @@ root.prefixHint = function(cm) {
 		// typed a space after the prefix tag, don't get the complete token
 		token = getCompleteToken(cm);
 	}
+//	console.log(token);
 	// we shouldnt be at the uri part the prefix declaration
 	// also check whether current token isnt 'a' (that makes codemirror
 	// thing a namespace is a possiblecurrent
-	if (!token.string.startsWith("a")
+	if (!token.string.indexOf("a") == 0 
 			&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
 		return;
 
@@ -328,7 +430,7 @@ root.appendPrefixIfNeeded = function(cm) {
 	}
 };
 
-root.defaults = {
+root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
 	value : "SELECT * {?x ?y ?z} \nLIMIT 10",
 	highlightSelectionMatches : {
@@ -364,7 +466,7 @@ root.defaults = {
 			
 		}
 	},
-};
+});
 root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASGUI-Query": require("../package.json").version
@@ -387,9 +489,9 @@ var getPrefixesFromQuery = function(cm) {
 			if (prefix != null && prefix.string.length > 0 && uri != null
 					&& uri.string.length > 0) {
 				uriString = uri.string;
-				if (uriString.startsWith("<"))
+				if (uriString.indexOf("<") == 0 )
 					uriString = uriString.substring(1);
-				if (uriString.endsWith(">"))
+				if (uriString.indexOf(">", this.length - suffix.length) !== -1)
 					uriString = uriString.substring(0, uriString.length - 1);
 				queryPrefixes[prefix.string] = uriString;
 			}
