@@ -308,43 +308,7 @@ div.CodeMirror-cursors {
   color: white;
 }
 
-span.cm-sp-keyword {
-	color: #92a;
-}
-
-span.cm-sp-prefixed {
-	color: #f80;
-}
-
-span.cm-sp-var {
-	color: #00c;
-}
-
-span.cm-sp-comment {
-	color: #a70;
-}
-
-span.cm-sp-literal {
-	color: #a22;
-}
-
-span.cm-sp-uri {
-	color: #292;
-}
-
-span.cm-sp-operator {
-	color: #088;
-}
-
-span.cm-sp-punc {
-	color: #088;
-}
-
-span.cm-sp-number {
-	color: #a22;
-}
-
-span.cm-sp-error {
+span.cm-error {
 	/* color:rgb(0,255,255); */
 	/* background-color:rgb(255,0,0); */
 	/* text-decoration: underline; */
@@ -370,103 +334,12 @@ span.cm-sp-error {
 	background-color: #d9d9d9
 }
 
-.cm-s-yasgui .cm-keyword {
-	color: #708;
-}
-
-.cm-s-yasgui .cm-atom {
-	color: #219;
-}
-
-.cm-s-yasgui .cm-number {
-	color: #164;
-}
-
-.cm-s-yasgui .cm-def {
-	color: #00f;
-}
-
-.cm-s-yasgui .cm-variable {
-	color: black;
-}
-
-.cm-s-yasgui .cm-variable-2 {
-	color: #05a;
-}
-
-.cm-s-yasgui .cm-variable-3 {
-	color: #085;
-}
-
-.cm-s-yasgui .cm-property {
-	color: black;
-}
-
-.cm-s-yasgui .cm-operator {
-	color: black;
-}
-
-.cm-s-yasgui .cm-comment {
-	color: #a50;
-}
-
-.cm-s-yasgui .cm-string {
-	color: #a11;
-}
-
-.cm-s-yasgui .cm-string-2 {
-	color: #f50;
-}
-
-.cm-s-yasgui .cm-meta {
-	color: #555;
-}
-
-.cm-s-yasgui .cm-error {
-	color: #f00;
-}
-
-.cm-s-yasgui .cm-qualifier {
-	color: #555;
-}
-
-.cm-s-yasgui .cm-builtin {
-	color: #30a;
-}
-
-.cm-s-yasgui .cm-bracket {
-	color: #997;
-}
-
-.cm-s-yasgui .cm-tag {
-	color: #170;
-}
-
-.cm-s-yasgui .cm-attribute {
-	color: #00c;
-}
-
-.cm-s-yasgui .cm-header {
-	color: blue;
-}
-
-.cm-s-yasgui .cm-quote {
-	color: #090;
-}
-
-.cm-s-yasgui .cm-hr {
-	color: #999;
-}
-
-.cm-s-yasgui .cm-link {
-	color: #00c;
-}
-
 .gutterError {
 	color: #f00;
+	display:inline-block;
 	font-size: large;
-	margin-left: 15px;
-	margin-bottom: 3px;
+	margin-left: 3px;
+	margin-top: 1px;
 }
 
 .gutterErrorBar {
@@ -474,5 +347,5 @@ span.cm-sp-error {
 }
 
 .CodeMirror-gutter {
-	width: 37px;
+	width: 25px;
 }

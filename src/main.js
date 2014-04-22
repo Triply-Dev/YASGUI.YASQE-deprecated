@@ -60,6 +60,7 @@ var postProcessCmElement = function(cm) {
 		root.showHint(cm, root.prefixHint, {closeCharacters: /(?=a)b/});
 		root.appendPrefixIfNeeded(cm);
 	});
+	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
 };
 /**
  * helpers
@@ -351,7 +352,7 @@ root.prefixHint = function(cm) {
 	// First token of line needs to be PREFIX,
 	// there should be no trailing text (otherwise, text is wrongly inserted
 	// in between)
-	firstToken = getNextNonWsToken(cm, cur.line);
+	var firstToken = getNextNonWsToken(cm, cur.line);
 	if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
 		return;
 
