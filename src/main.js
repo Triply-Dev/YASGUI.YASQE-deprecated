@@ -8,6 +8,7 @@ require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 require('../lib/formatting.js');
 require('../lib/flint.js');
+var Trie = require('../lib/trie.js');
 var root = module.exports = function(parent, config) {
 	config = extendConfig(config);
 	var cm = extendCmInstance(CodeMirror(parent, config));
@@ -35,24 +36,40 @@ var extendCmInstance = function(cm) {
 	cm.query = function() {
 		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
-	cm.store = function() {
-		root.storeInStorage(cm);
-	};
-	cm.getFromStorage = function() {
-		var valFromStorage = root.getFromStorage(cm);
-		if (valFromStorage) cm.setValue(valFromStorage);
+	cm.storePrefixes = function(prefixArray) {
+		//store array as trie
+		tries["prefixes"] = new Trie();
+		for (var i = 0; i < prefixArray.length; i++) {
+			var prefix = prefixArray[i];
+			if (prefix.substring(0, 4) == "bif:") continue;//skip this one! see #231
+			tries["prefixes"].insert(prefixArray[i]);
+		}
+//		require('../lib/formatting.js')
+		
+		//store in localstorage as well
+		var storageId = getPersistencyId(cm, "prefixes");
+		if (storageId) require("./storage.js").set(storageId, prefixArray, "month");
 	};
 	return cm;
 };
 
 var postProcessCmElement = function(cm) {
-	if (cm.getOption("persistency") && cm.getOption("persistency").query) {
-		cm.getFromStorage();
+	var storageId = getPersistencyId(cm, "query");
+	if (storageId) {
+		var valueFromStorage = require("./storage.js").get(storageId);
+		if (valueFromStorage) cm.setValue(valueFromStorage);
 	}
 	
+	/**
+	 * Add event handlers
+	 */
 	cm.on('blur',function(cm, eventInfo) {
-		if (cm.getOption("persistency") && cm.getOption("persistency").query) {
-			cm.store();
+		/**
+		 * save query to local storage
+		 */
+		var storageId = getPersistencyId(cm, "query");
+		if (storageId) {
+			require("./storage.js").set(storageId, cm.getValue(), "month");
 		}
 	});
 	cm.on('change', function(cm, eventInfo) {
@@ -61,15 +78,179 @@ var postProcessCmElement = function(cm) {
 		root.appendPrefixIfNeeded(cm);
 	});
 	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
+	
+	
+	loadPrefixesIfAny(cm);
+	
+	
+	
 };
 /**
- * helpers
+ * privates
  */
-var fetchFromPrefixCc = function(callback) {
-	$.get("http://prefix.cc/popular/all.file.json", function(data) {
-		console.log(data);
-	});
+//used to store autocompletions in
+var tries = {};
+//this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
+var tokenTypes = {
+	"string-2": "prefixed",
 };
+var loadPrefixesIfAny = function(cm) {
+	var prefixes = null;
+	if (cm.getOption("autocompletions")) prefixes = cm.getOption("autocompletions").prefixes;
+	if (prefixes instanceof Array) {
+		//we don't care whether the prefixes are already stored in localstorage. just use this one
+		cm.storePrefixes(prefixes);
+	} else {
+		//if prefixes are defined in localstorage, use that one! (calling the function may come with overhead (e.g. async calls))
+		
+		var prefixesFromStorage = null;
+		if (getPersistencyId(cm, "prefixes")) prefixesFromStorage = require("./storage.js").get(getPersistencyId(cm, "prefixes"));
+		if (prefixesFromStorage && prefixesFromStorage instanceof Array && prefixesFromStorage.length > 0) {
+			cm.storePrefixes(prefixesFromStorage);
+		} else {
+			//nothing in storage. check whether we have a function via which we can get our prefixes
+			if (prefixes instanceof Function) {
+				var functionResult = prefixes(cm);
+				if (functionResult && functionResult instanceof Array && functionResult.length > 0) {
+					//function returned an array (if this an async function, we won't get a direct function result)
+					cm.storePrefixes(functionResult);
+				} 
+			}
+		}
+	}
+};
+
+
+/**
+ * Get defined prefixes from query as array, in format {"prefix:" "uri"}
+ * 
+ * @param cm
+ * @returns {Array}
+ */
+var getPrefixesFromQuery = function(cm) {
+	var queryPrefixes = {};
+	var numLines = cm.lineCount();
+	for (var i = 0; i < numLines; i++) {
+		var firstToken = getNextNonWsToken(cm, i);
+		if (firstToken != null && firstToken.string.toUpperCase() == "PREFIX") {
+			var prefix = getNextNonWsToken(cm, i, firstToken.end + 1);
+			if (prefix) {
+				var uri = getNextNonWsToken(cm, i, prefix.end + 1);
+				if (prefix != null && prefix.string.length > 0 && uri != null
+						&& uri.string.length > 0) {
+					var uriString = uri.string;
+					if (uriString.indexOf("<") == 0 )
+						uriString = uriString.substring(1);
+					if (uriString.slice(-1) == ">")
+						uriString = uriString.substring(0, uriString.length - 1);
+					queryPrefixes[prefix.string] = uriString;
+				}
+			}
+		}
+	}
+	return queryPrefixes;
+};
+
+/**
+ * Append prefix declaration to list of prefixes in query window.
+ * 
+ * @param cm
+ * @param prefix
+ */
+var appendToPrefixes = function(cm, prefix) {
+	var lastPrefix = null;
+	var lastPrefixLine = 0;
+	var numLines = cm.lineCount();
+	for (var i = 0; i < numLines; i++) {
+		var firstToken = getNextNonWsToken(cm, i);
+		if (firstToken != null
+				&& (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
+			lastPrefix = firstToken;
+			lastPrefixLine = i;
+		}
+	}
+
+	if (lastPrefix == null) {
+		cm.replaceRange("PREFIX " + prefix + "\n", {
+			line : 0,
+			ch : 0
+		});
+	} else {
+		var previousIndent = getIndentFromLine(cm, lastPrefixLine);
+		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix, {
+			line : lastPrefixLine
+		});
+	}
+};
+
+/**
+ * Get the used indentation for a certain line
+ * 
+ * @param cm
+ * @param line
+ * @param charNumber
+ * @returns
+ */
+var getIndentFromLine = function(cm, line, charNumber) {
+	if (charNumber == undefined)
+		charNumber = 1;
+	var token = cm.getTokenAt({
+		line : line,
+		ch : charNumber
+	});
+	if (token == null || token == undefined || token.type != "ws") {
+		return "";
+	} else {
+		return token.string + getIndentFromLine(cm, line, token.end + 1);
+	}
+	;
+};
+
+var getCompleteToken = function(editor, token, cur) {
+	if (cur == null) {
+		cur = editor.getCursor();
+	}
+	if (token == null) {
+		token = editor.getTokenAt(cur);
+	}
+	// we cannot use token.string alone (e.g. http://bla results in 2
+	// tokens: http: and //bla)
+
+	var prevToken = editor.getTokenAt({
+		line : cur.line,
+		ch : token.start
+	});
+	if (prevToken.type != null && prevToken.type != "ws") {
+		token.start = prevToken.start;
+		token.string = prevToken.string + token.string;
+		return getCompleteToken(editor, token, {
+			line : cur.line,
+			ch : prevToken.start
+		});// recursively, might have multiple tokens which it should
+		// include
+	} else {
+		return token;
+	}
+};
+
+var getNextNonWsToken = function(cm, lineNumber, charNumber) {
+	if (charNumber == undefined)
+		charNumber = 1;
+	var token = cm.getTokenAt({
+		line : lineNumber,
+		ch : charNumber
+	});
+	if (token == null || token == undefined || token.end < charNumber) {
+		return null;
+	}
+	if (token.type == "ws") {
+		return getNextNonWsToken(cm, lineNumber, token.end + 1);
+	}
+	return token;
+};
+
+
+
 var checkSyntax = function(cm, deepcheck) {
 	var queryValid = true,
 		prevQueryValid = true,
@@ -132,33 +313,18 @@ var checkSyntax = function(cm, deepcheck) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
-
+root.fetchFromPrefixCc = function(cm) {
+	$.get("http://prefix.cc/popular/all.file.json", function(data) {
+		var prefixArray = [];
+		for (var prefix in data) {
+			var completeString = prefix + ": <" + data[prefix] + ">";
+			prefixArray.push(completeString);//the array we want to store in localstorage
+		}
+		cm.storePrefixes(prefixArray);
+	});
+};
 root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
-};
-root.storeInStorage = function(cm) {
-	require("./storage.js").set("queryVal_" + root.determineId(cm), cm.getValue(), "year");
-};
-root.getFromStorage = function(cm) {
-	return require("./storage.js").get("queryVal_" + root.determineId(cm));
-};
-// now add all the static functions
-root.deleteLines = function(cm) {
-	var startLine = cm.getCursor(true).line;
-	var endLine = cm.getCursor(false).line;
-	var min = Math.min(startLine, endLine);
-	var max = Math.max(startLine, endLine);
-	for (var i = min; i <= max; i++) {
-		// Do not remove i, because line counter changes after deleting 1 line.
-		// Therefore, keep on deleting the minimum of the selection
-		cm.removeLine(min);
-	}
-	var cursor = cm.getCursor(true);
-	if (cursor.line + 1 <= cm.lineCount()) {
-		cursor.line++;
-		cursor.ch = 0;
-		cm.setCursor(cursor);
-	}
 };
 
 root.commentLines = function(cm) {
@@ -307,16 +473,16 @@ root.autoComplete = function(cm) {
 	}
 };
 root.prefixHint = function(cm) {
+	if (!tries["prefixes"]) return;//no prefixed defined. just stop
 	// Find the token at the cursor
 	var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-
 	var includePreviousTokens = function(token, cur) {
 		var prevToken = cm.getTokenAt({
 			line : cur.line,
 			ch : token.start
 		});
-		if (prevToken.className == "sp-punct"
-				|| prevToken.className == "sp-keyword") {
+		if (prevToken.type == "sp-punct"
+				|| prevToken.type == "sp-keyword") {
 			token.start = prevToken.start;
 			cur.ch = prevToken.start;
 			token.string = prevToken.string + token.string;
@@ -333,15 +499,15 @@ root.prefixHint = function(cm) {
 	// not at end of line
 	if (cm.getLine(cur.line).length > cur.ch)
 		return;
-
-	if (token.className != "sp-ws") {
+	
+	if (token.type != "ws") {
 		// we want to complete token, e.g. when the prefix starts with an a
 		// (treated as a token in itself..)
 		// but we to avoid including the PREFIX tag. So when we have just
 		// typed a space after the prefix tag, don't get the complete token
 		token = getCompleteToken(cm);
 	}
-//	console.log(token);
+	
 	// we shouldnt be at the uri part the prefix declaration
 	// also check whether current token isnt 'a' (that makes codemirror
 	// thing a namespace is a possiblecurrent
@@ -380,7 +546,7 @@ root.prefixHint = function(cm) {
 	}
 
 	return {
-		list : Yasgui.prefixes.complete(token.string),
+		list : tries["prefixes"].autoComplete(token.string),
 		from : {
 			line : cur.line,
 			ch : token.start
@@ -399,10 +565,11 @@ root.prefixHint = function(cm) {
  * @param cm
  */
 root.appendPrefixIfNeeded = function(cm) {
+	if (!tries["prefixes"]) return;//no prefixed defined. just stop
 	var cur = cm.getCursor();
 	
 	var token = cm.getTokenAt(cur);
-	if (token.className == "sp-prefixed") {
+	if (tokenTypes[token.type] == "prefixed") {
 		var colonIndex = token.string.indexOf(":");
 		if (colonIndex !== -1) {
 			// check first token isnt PREFIX, and previous token isnt a '<'
@@ -414,14 +581,14 @@ root.appendPrefixIfNeeded = function(cm) {
 				ch : token.start
 			});// needs to be null (beginning of line), or whitespace
 			if (firstTokenString != "PREFIX"
-					&& (previousToken.className == "sp-ws" || previousToken.className == null)) {
+					&& (previousToken.type == "ws" || previousToken.type == null)) {
 				// check whether it isnt defined already (saves us from looping
 				// through the array)
 				var currentPrefix = token.string.substring(0, colonIndex + 1);
 				var queryPrefixes = getPrefixesFromQuery(cm);
 				if (queryPrefixes[currentPrefix] == null) {
 					// ok, so it isnt added yet!
-					var completions = Yasgui.prefixes.complete(currentPrefix);
+					var completions = tries["prefixes"].autoComplete(currentPrefix);
 					if (completions.length > 0) {
 						appendToPrefixes(cm, completions[0]);
 					}
@@ -430,7 +597,19 @@ root.appendPrefixIfNeeded = function(cm) {
 		}
 	}
 };
-
+var getPersistencyId = function(cm, key) {
+	var persistencyId = null;
+	var persistencyIds = cm.getOption("persistency");
+	
+	if (persistencyIds && persistencyIds[key]) {
+		if (typeof persistencyIds[key] == "string") {
+			persistencyId = persistencyIds[key];
+		} else {
+			persistencyId = persistencyIds[key](cm);
+		}
+	}
+	return persistencyId;
+};
 root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
 	value : "SELECT * {?x ?y ?z} \nLIMIT 10",
@@ -443,9 +622,9 @@ root.defaults = $.extend(root.defaults, {
 	matchBrackets : true,
 	fixedGutter : true,
 	extraKeys : {
-		"Ctrl-Space" : "autoComplete",
-		"Cmd-Space" : "autoComplete",
-		"Ctrl-D" : root.deleteLines,
+		"Ctrl-Space" : root.autoComplete,
+		"Cmd-Space" : root.autoComplete,
+		"Ctrl-D" : root.deleteLine,
 		"Ctrl-K" : root.deleteLine,
 		"Cmd-D" : root.deleteLine,
 		"Cmd-K" : root.deleteLine,
@@ -460,142 +639,17 @@ root.defaults = $.extend(root.defaults, {
 		"Tab" : root.indentTab,
 		"Shift-Tab" : root.unindentTab
 	},
-	//non CodeMirror options
 	persistency: {
-		query: true,
-		completions: {
-			
-		}
+		query: function(cm){return "queryVal_" + root.determineId(cm);},
+		prefixes: "prefixes",
 	},
+	//non CodeMirror options
+	autocompletions: {
+		prefixes: root.fetchFromPrefixCc
+	}
 });
 root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASGUI-Query": require("../package.json").version
-};
-
-/**
- * Get defined prefixes from query as array, in format {"prefix:" "uri"}
- * 
- * @param cm
- * @returns {Array}
- */
-var getPrefixesFromQuery = function(cm) {
-	var queryPrefixes = {};
-	var numLines = cm.lineCount();
-	for (var i = 0; i < numLines; i++) {
-		var firstToken = getNextNonWsToken(cm, i);
-		if (firstToken != null && firstToken.string.toUpperCase() == "PREFIX") {
-			var prefix = getNextNonWsToken(cm, i, firstToken.end + 1);
-			var uri = getNextNonWsToken(cm, i, prefix.end + 1);
-			if (prefix != null && prefix.string.length > 0 && uri != null
-					&& uri.string.length > 0) {
-				uriString = uri.string;
-				if (uriString.indexOf("<") == 0 )
-					uriString = uriString.substring(1);
-				if (uriString.indexOf(">", this.length - suffix.length) !== -1)
-					uriString = uriString.substring(0, uriString.length - 1);
-				queryPrefixes[prefix.string] = uriString;
-			}
-		}
-	}
-	return queryPrefixes;
-};
-
-/**
- * Append prefix declaration to list of prefixes in query window.
- * 
- * @param cm
- * @param prefix
- */
-var appendToPrefixes = function(cm, prefix) {
-	var lastPrefix = null;
-	var lastPrefixLine = 0;
-	var numLines = cm.lineCount();
-	for (var i = 0; i < numLines; i++) {
-		var firstToken = getNextNonWsToken(cm, i);
-		if (firstToken != null
-				&& (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
-			lastPrefix = firstToken;
-			lastPrefixLine = i;
-		}
-	}
-
-	if (lastPrefix == null) {
-		cm.replaceRange("PREFIX " + prefix + "\n", {
-			line : 0,
-			ch : 0
-		});
-	} else {
-		var previousIndent = getIndentFromLine(cm, lastPrefixLine);
-		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix, {
-			line : lastPrefixLine
-		});
-	}
-};
-
-/**
- * Get the used indentation for a certain line
- * 
- * @param cm
- * @param line
- * @param charNumber
- * @returns
- */
-var getIndentFromLine = function(cm, line, charNumber) {
-	if (charNumber == undefined)
-		charNumber = 1;
-	var token = cm.getTokenAt({
-		line : line,
-		ch : charNumber
-	});
-	if (token == null || token == undefined || token.className != "sp-ws") {
-		return "";
-	} else {
-		return token.string + getIndentFromLine(cm, line, token.end + 1);
-	}
-	;
-};
-
-var getCompleteToken = function(editor, token, cur) {
-	if (cur == null) {
-		cur = editor.getCursor();
-	}
-	if (token == null) {
-		token = editor.getTokenAt(cur);
-	}
-	// we cannot use token.string alone (e.g. http://bla results in 2
-	// tokens: http: and //bla)
-
-	var prevToken = editor.getTokenAt({
-		line : cur.line,
-		ch : token.start
-	});
-	if (prevToken.className != null && prevToken.className != "sp-ws") {
-		token.start = prevToken.start;
-		token.string = prevToken.string + token.string;
-		return getCompleteToken(editor, token, {
-			line : cur.line,
-			ch : prevToken.start
-		});// recursively, might have multiple tokens which it should
-		// include
-	} else {
-		return token;
-	}
-};
-
-var getNextNonWsToken = function(cm, lineNumber, charNumber) {
-	if (charNumber == undefined)
-		charNumber = 1;
-	var token = cm.getTokenAt({
-		line : lineNumber,
-		ch : charNumber
-	});
-	if (token == null || token == undefined || token.end < charNumber) {
-		return null;
-	}
-	if (token.className == "sp-ws") {
-		return getNextNonWsToken(cm, lineNumber, token.end + 1);
-	}
-	return token;
 };
 

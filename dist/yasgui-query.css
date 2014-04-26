@@ -308,24 +308,10 @@ div.CodeMirror-cursors {
   color: white;
 }
 
-span.cm-error {
-	/* color:rgb(0,255,255); */
-	/* background-color:rgb(255,0,0); */
-	/* text-decoration: underline; */
-	border-bottom: 2px dotted red;
-}
-
 .CodeMirror {
 	line-height: 1.7em;
 	border: 1px solid #d1d1d1;
-/* 	height: auto; */
 }
-
-
-.CodeMirror-hint {
-	max-width: 30em !important;
-}
-
 .CodeMirror pre {
 	font-size: 14px;
 }
@@ -334,18 +320,18 @@ span.cm-error {
 	background-color: #d9d9d9
 }
 
+.CodeMirror-hint {
+	max-width: 30em !important;
+}
+
 .gutterError {
 	color: #f00;
 	display:inline-block;
 	font-size: large;
 	margin-left: 3px;
-	margin-top: 1px;
+	margin-top: -1px;
 }
 
-.gutterErrorBar {
-	width: 0px !important;
-}
-
-.CodeMirror-gutter {
-	width: 25px;
+span.cm-error {
+	border-bottom: 2px dotted red;
 }
