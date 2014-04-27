@@ -113,27 +113,22 @@ var drawDocs = function(data) {
 	/**
 	 * draw props (often config objects)
 	 */
-	var mainConf = null;
 	for (var i = 0; i < attributesAndProperties.length; i++ ){
 		
 		var attrOrProp = attributesAndProperties[i];
-		
-		if (attrOrProp.itemtype == "attribute") {
-			if (mainConf) docs.append(mainConf);
-			mainConf = $("<div></div>").addClass("doc");
-			$("<code></code>").text(attrOrProp.name).appendTo(mainConf);
-			$("<p></p>").text(attrOrProp.description).appendTo(mainConf);
-		} else {
-			var prop = $("<div></div>").addClass("doc doc-sub");
-			var codeText = attrOrProp.name;
-			if (attrOrProp.type) codeText += ": " + attrOrProp.type;
-			if (attrOrProp["default"]) codeText += " (default: " + attrOrProp["default"] +")";
-			$("<code></code>").text(codeText).appendTo(prop);
-			$("<p></p>").text(attrOrProp.description).appendTo(prop);
-			mainConf.append(prop);
-			
+		var prop = $("<div></div>").addClass("doc");
+		var name = attrOrProp.name;
+		if (attrOrProp.itemtype == "property") prop.addClass("doc-sub");
+		if (attrOrProp.itemtype == "property" && name.indexOf(".") > 0) {
+			prop.addClass("doc-sub-sub");
+			name = name.substring(name.indexOf(".") + 1);
 		}
+		var codeText = name;
+		if (attrOrProp.type) codeText += ": " + attrOrProp.type;
+		if (attrOrProp["default"]) codeText += " (default: " + attrOrProp["default"] +")";
+		$("<code></code>").text(codeText).appendTo(prop);
+		$("<p></p>").text(attrOrProp.description).appendTo(prop);
+		docs.append(prop);
 		console.log(attrOrProp);
 	}
-	if (mainConf) docs.append(mainConf);
 };

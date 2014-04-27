@@ -706,15 +706,28 @@ root.defaults = $.extend(root.defaults, {
 	
 	//non CodeMirror options
 	/**
-	 * Change persistency settings for query and completions. Possible keys: "query" and "prefixes". Setting the values to null, will disable persistancy: nothing is stored between browser sessions
+	 * Change persistency settings for query and completions. Setting the values to null, will disable persistancy: nothing is stored between browser sessions
 	 * Setting the values to a string (or a function which returns a string), will store e.g. the query in localstorage using the specified string.
-	 * By default, prefixes are stored using the simple "prefixes" ID (i.e., multiple Yasgui-Query instances use the same set of prefixes). Queries are stored via the 'YasguiQuery.determineId()' function
 	 *
 	 * @property persistency
 	 * @type object
 	 */
 	persistency: {
+		/**
+		 * Persistency setting for query. Default ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASGUI-Query items on one page
+		 * 
+		 * @property persistency.query
+		 * @type function|string
+		 * @default YasguiQuery.determineId()'
+		 */
 		query: function(cm){return "queryVal_" + root.determineId(cm);},
+		/**
+		 * Persistency setting for query. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of prefixes
+		 * 
+		 * @property persistency.prefixes
+		 * @type function|string
+		 * @default "prefixes" 
+		 */
 		prefixes: "prefixes",
 	},
 	/**
@@ -728,6 +741,65 @@ root.defaults = $.extend(root.defaults, {
 	 */
 	autocompletions: {
 		prefixes: root.fetchFromPrefixCc
+	},
+	
+	/**
+	 * Settings for querying sparql endpoints
+	 *
+	 * @property query
+	 * @type object
+	 */
+	query: {
+		/**
+		 * Endpoint to query
+		 * 
+		 * @property query.endpoint
+		 * @type String
+		 * @default "http://dbpedia.org/sparql"
+		 */
+		endpoint: "http://dbpedia.org/sparql",
+		/**
+		 * Request method via which to access SPARQL endpoint
+		 * 
+		 * @property query.requestMethod
+		 * @type String
+		 * @default "GET"
+		 */
+		requestMethod: "GET",
+		/**
+		 * Query accept header
+		 * 
+		 * @property query.acceptHeader
+		 * @type String
+		 * @default application/sparql-results+json
+		 */
+		acceptHeader: "application/sparql-results+json",
+		
+		/**
+		 * Named graphs to query.
+		 * 
+		 * @property query.namedGraphs
+		 * @type array
+		 * @default []
+		 */
+		namedGraphs: [],
+		/**
+		 * Default graphs to query.
+		 * 
+		 * @property query.defaultGraphs
+		 * @type array
+		 * @default []
+		 */
+		defaultGraphs: [],
+		
+		/**
+		 * On query finished
+		 * 
+		 * @property query.onQueryFinish
+		 * @type function
+		 * @default null
+		 */
+		onFinish: null
 	}
 });
 root.version = {
