@@ -1,0 +1,19 @@
+.affix-top {
+	top: 100px;
+}
+.CodeMirror {
+  height: auto;
+}
+.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+body{
+	margin-top:40px;
+}
+.doc {
+	margin: 10px;
+}
+.doc-sub{
+	margin-left: 30px;
+}

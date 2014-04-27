@@ -1,15 +1,112 @@
-<html>
-<head>
-<title>YASGUI-Query</title>
-<link href="dist/yasgui-query.css" rel="stylesheet" type="text/css" />
-<!-- <script src="build/yasqe.min.js"></script> -->
-<script src="dist/yasgui-query.js"></script>
-</head>
-<body>
-<button id='draw'>draw</button>
-<div id="yWrapper"></div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YASGUI-Query</title>
+
+  <link href="dist/yasgui-query.css" rel="stylesheet" type="text/css" />
+  <link href="doc/doc.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+  
+  <a href="https://github.com/LaurensRietveld/yasgui" target="_blank"><img style="z-index: 11111; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+   <!-- Fixed navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">YASGUI-Query</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">About</a></li>
+            <li><a href="doc/doc.html">Documentation</a></li>
+            <li><a href="http://laurensrietveld.nl">About me</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+<div class="jumbotron text-center">
+        <img width="30%" src="doc/imgs/yasgui.png">^Query
+        <p>
+			Yet another SPARQL GUI, funded by <a href="http://data2semantics.org" target="_blank"><img width="30%" src="doc/imgs/data2semantics.png"></a>
+		</p>
+       <p>
+				<a class="btn btn-primary btn-large" href="http://yasgui.laurensrietveld.nl" target="_blank"><i class="icon-share-alt icon-white"></i>Try it out!</a> <a class="btn btn-large btn-info" href="https://github.com/LaurensRietveld/yasgui" target="_blank">View
+					source on GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png">
+				</a>
+			</p>
+      </div>
+    <div class="container" role="main">
+
+		
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      
+
+	
+      	<div id="aboutYQuery">
+      	<h1>About YASGUI<sup>query</sup></h1>
+      	YASGUI<sup>query</sup> is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASGUI<sup>query</sup> provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
+      	<div id="showcase"></div>
+      	<code>var yasguiQuery = YasguiQuery(document.getElementById("showcase"));</code>
+      	</div>
+      
+      	<div id="features">
+      	<h1>Features</h1>
+      	YASGUI<sup>query</sup> features:
+      	<ul>
+      	<li>SPARQL syntax highlighting and error checking </li>
+      	<li>Extremely customizable: All functions and handlers from <a href="http://codemirror.net" target="_blank">CodeMirror library</a> are accessible</li>
+      	<li>Persistent values (optional): your query is stored for easier reuse between browser sessions
+      	<li>Prefix autocompletion (using <a href="http://prefix.cc" target="_blank">prefix.cc</a>)</li>
+      	<li>Handlers to easily add your own property and class autocompletion</li>
+      	<li>Possible to execute the query directly</li>
+      	</ul>
+      	</div>
+      	<div id="releases">
+      	<h1>Download</h1>
+		<a class="btn btn-primary" href="https://github.com/LaurensRietveld/YASGUI-QueryEditor" target="_blank">Download latest release</a>
+      	</div>
+      	
+      	
+      	<div id="thanks">
+      	<h1>Thanks!</h1>
+      	A big thanks goes out to: 
+      	<ul>
+      	<li>The people behind the <a href="http://openuplabs.tso.co.uk/demos/sparqleditor" target="_blank">Flint SPARQL editor</a> for publishing the javascript SPARQL grammar</li>
+      	<li>Marijn Haverbeke for his great work on the <a href="http://codemirror.net" target="_blank">CodeMirror library</a> syntax highlighting library</li>
+      	</ul>
+      	</div>
+      	
+      
+     
+    </div> <!-- /container -->
+
+
+
+<!-- 	<div id="yWrapper"></div> -->
+
+
+
+
+ <script src="dist/yasgui-query.js"></script>
+<script src="doc/doc.js"></script>
 <script type="text/javascript">
-	var yasguiQuery = YasguiQuery(document.getElementById("yWrapper"));
+	var yasguiQuery = YasguiQuery(document.getElementById("showcase"));
+	//yasguiQuery.setSize(null, 90);
 </script>
-</body>
+  </body>
 </html>
+
+
+
+
+
+

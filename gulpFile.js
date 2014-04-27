@@ -23,7 +23,8 @@ var livereload = require('gulp-livereload');
 var notify = require("gulp-notify");
 var uglify = require('gulp-uglify');
 var jsValidate = require('gulp-jsvalidate');
-
+var jsdoc = require("gulp-jsdoc");
+var yuidoc = require("gulp-yuidoc");
 gulp.on('err', function(err){
 	console.log("on general err");
 	  console.log(err);
@@ -56,16 +57,9 @@ gulp.task('minifyCss', ['concatCss'], function() {
 gulp.task('connect', function() {
 //	log('Running on http://localhost:' + EXPRESS_PORT);
 	connect.server({
-//		root : './',
 		port : 4000,
 		livereload: true
 	});
-});
-gulp.task('validate', function() {
-//	gulp.src("./src/*.js").pipe(jsValidate()).on('error', function() {
-//		console.log("errrorrrr");
-//		this.emit('end');
-//	});
 });
 gulp.task('browserify', ['validate'], function() {
 	gulp.src("./src/*.js").pipe(jsValidate()).on('error', 
@@ -103,15 +97,48 @@ gulp.task('watch', function() {
 		'./*.html'
 	, function(files) {
 		gulp.src(files.path).pipe(connect.reload());
-//		console.log(files);
-//		connect.reload(files.path);
-//		return files.pipe(connect.reload());
 	});
 });
 
 
+gulp.task('makeDocLib', function() {
+	gulp.src("./doc/*.js").pipe(jsValidate()).on('error', 
+			notify.onError({
+				message: "Error: <%= error.message %>",
+				title: "Failed running browserify"
+			})).on('finish', function(){
+				browserify("./doc/main.js")
+				.bundle({debug: true}).on('error', notify.onError({
+			        message: "Error: <%= error.message %>",
+			        title: "Failed running browserify"
+			      })).on('prebundle', function(bundle) {
+			    	  console.log("prebundle!");
+			    	})
+			    .pipe(source('doc.js'))
+			    .pipe(embedlr())
+			    .pipe(gulp.dest('doc'));
+//			    .pipe(connect.reload());
+			});
+});
+gulp.task('makeDocCss', function() {
+	gulp.src(['node_modules/twitter-bootstrap-3.0.0/dist/css/bootstrap.css', './doc/main.css'])
+  	.pipe(concat('doc.css'))
+    .pipe(gulp.dest("doc"))
+    ;
+	
+});
+gulp.task('makedoc', ['makeDocLib', 'makeDocCss'], function() {
+	//copy bootstrap, used for our documentation
+//	gulp.src("./src/main.js")
+//	.pipe(jsdoc.parser())
+//	.pipe(gulp.dest("./doc"));
+	gulp.src("./src/main.js")
+	.pipe(yuidoc.parser())
+	.pipe(gulp.dest("./doc"));
+	
+	
+});
 gulp.task('packageMinified', ['minifyJs', 'minifyCss']);
 gulp.task('default', ['browserify', 'packageMinified']);
-
 gulp.task('serve', ['browserify', 'watch', 'connect']);
 

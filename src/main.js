@@ -9,6 +9,16 @@ require('codemirror/addon/runmode/runmode.js');
 require('../lib/formatting.js');
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
+
+/**
+ * Main YASGUI-Query constructor
+ * 
+ * @constructor
+ * @param {DOM-Element} parent element to append editor to.
+ * @param {object} settings
+ * @class YasguiQuery
+ * @return {doc} YASGUI-query document
+ */
 var root = module.exports = function(parent, config) {
 	config = extendConfig(config);
 	var cm = extendCmInstance(CodeMirror(parent, config));
@@ -20,6 +30,8 @@ var root = module.exports = function(parent, config) {
  * Extend config object, which we will pass on to the CM constructor later on.
  * Need this, to make sure our own 'onBlur' etc events do not get overwritten by people who add their own onblur events to the config
  * Additionally, need this to include the CM defaults ourselves. CodeMirror has a method for including defaults, but we can't rely on that one: it assumes flat config object, where we have nested objects (e.g. the persistency option)
+ * 
+ * @private
  */
 var extendConfig = function(config) {
 	var extendedConfig = $.extend(true, {}, root.defaults, config);//I know, codemirror deals with default options as well. However, it does not do this recursively (i.e. the persistency option)
@@ -31,24 +43,39 @@ var extendConfig = function(config) {
 };
 /**
  * Add extra functions to the CM document (i.e. the codemirror instantiated object)
+ * @private
  */
 var extendCmInstance = function(cm) {
+	
+	/**
+	 * Execute query (TODO: finish implementation)
+	 * 
+	 * @method doc.query
+	 * @return {object} Http response
+	 */
 	cm.query = function() {
 		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
 	};
-	cm.storePrefixes = function(prefixArray) {
+	
+	/**
+	 * Store completions
+	 * 
+	 * @method doc.storeCompletions
+	 * @param type {string} Type of completions: ["prefixes", "properties", "classes"]
+	 * @param completions {array} Array containing a set of strings (IRIs)
+	 */
+	cm.storeCompletions = function(type, completions) {
 		//store array as trie
-		tries["prefixes"] = new Trie();
-		for (var i = 0; i < prefixArray.length; i++) {
-			var prefix = prefixArray[i];
-			if (prefix.substring(0, 4) == "bif:") continue;//skip this one! see #231
-			tries["prefixes"].insert(prefixArray[i]);
+		tries[type] = new Trie();
+		for (var i = 0; i < completions.length; i++) {
+//			var prefix = prefixArray[i];
+//			if (prefix.substring(0, 4) == "bif:") continue;//skip this one! see #231
+			tries[type].insert(completions[i]);
 		}
-//		require('../lib/formatting.js')
 		
 		//store in localstorage as well
-		var storageId = getPersistencyId(cm, "prefixes");
-		if (storageId) require("./storage.js").set(storageId, prefixArray, "month");
+		var storageId = getPersistencyId(cm, type);
+		if (storageId) require("./storage.js").set(storageId, completions, "month");
 	};
 	return cm;
 };
@@ -100,21 +127,20 @@ var loadPrefixesIfAny = function(cm) {
 	if (cm.getOption("autocompletions")) prefixes = cm.getOption("autocompletions").prefixes;
 	if (prefixes instanceof Array) {
 		//we don't care whether the prefixes are already stored in localstorage. just use this one
-		cm.storePrefixes(prefixes);
+		cm.storeCompletions("prefixes", prefixes);
 	} else {
 		//if prefixes are defined in localstorage, use that one! (calling the function may come with overhead (e.g. async calls))
-		
 		var prefixesFromStorage = null;
 		if (getPersistencyId(cm, "prefixes")) prefixesFromStorage = require("./storage.js").get(getPersistencyId(cm, "prefixes"));
 		if (prefixesFromStorage && prefixesFromStorage instanceof Array && prefixesFromStorage.length > 0) {
-			cm.storePrefixes(prefixesFromStorage);
+			cm.storeCompletions("prefixes", prefixesFromStorage);
 		} else {
 			//nothing in storage. check whether we have a function via which we can get our prefixes
 			if (prefixes instanceof Function) {
 				var functionResult = prefixes(cm);
 				if (functionResult && functionResult instanceof Array && functionResult.length > 0) {
 					//function returned an array (if this an async function, we won't get a direct function result)
-					cm.storePrefixes(functionResult);
+					cm.storeCompletions("prefixes", functionResult);
 				} 
 			}
 		}
@@ -314,16 +340,31 @@ var checkSyntax = function(cm, deepcheck) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
+/**
+ * Fetch prefixes from prefix.cc, and store in the YASGUI-Query object
+ * 
+ * @param doc {Yasgui-Query} 
+ * @method YasguiQuery.fetchFromPrefixCc
+ */
 root.fetchFromPrefixCc = function(cm) {
 	$.get("http://prefix.cc/popular/all.file.json", function(data) {
 		var prefixArray = [];
 		for (var prefix in data) {
+			if (prefix == "bif") continue;//skip this one! see #231
 			var completeString = prefix + ": <" + data[prefix] + ">";
 			prefixArray.push(completeString);//the array we want to store in localstorage
 		}
-		cm.storePrefixes(prefixArray);
+		cm.storeCompletions("prefixes", prefixArray);
 	});
 };
+
+/**
+ * Determine unique ID of the YASGUI-Query object. Useful when several objects are loaded on the same page, and all have 'persistency' enabled.
+ * Currently, the ID is determined by selecting the nearest parent in the DOM with an ID set
+ * 
+ * @param doc {Yasgui-Query} 
+ * @method YasguiQuery.fetchFromPrefixCc
+ */
 root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
 };
@@ -611,8 +652,24 @@ var getPersistencyId = function(cm, key) {
 	}
 	return persistencyId;
 };
+
+
+/**
+ * The default options of Yasgui-Query (check the CodeMirror documentation for even more options, such as disabling line numbers, or changing keyboard shortcut keys). 
+ * Either change the default options by setting YasguiQuery.defaults, or by passing your own options as second argument to the YasguiQuery constructor
+ *
+ * @attribute
+ * @attribute YasguiQuery.defaults
+ */
 root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
+	/**
+	 * Query string
+	 *
+	 * @property value
+	 * @type String
+	 * @default "SELECT * {?x ?y ?z} \nLIMIT 10"
+	 */
 	value : "SELECT * {?x ?y ?z} \nLIMIT 10",
 	highlightSelectionMatches : {
 		showToken : /\w/
@@ -642,10 +699,27 @@ root.defaults = $.extend(root.defaults, {
 	},
 	
 	//non CodeMirror options
+	/**
+	 * Change persistency settings for query and completions. Possible keys: "query" and "prefixes". Setting the values to null, will disable persistancy: nothing is stored between browser sessions
+	 * Setting the values to a string (or a function which returns a string), will store e.g. the query in localstorage using the specified string.
+	 * By default, prefixes are stored using the simple "prefixes" ID (i.e., multiple Yasgui-Query instances use the same set of prefixes). Queries are stored via the 'YasguiQuery.determineId()' function
+	 *
+	 * @property persistency
+	 * @type object
+	 */
 	persistency: {
 		query: function(cm){return "queryVal_" + root.determineId(cm);},
 		prefixes: "prefixes",
 	},
+	/**
+	 * Types of completions. Possible keys: "prefixes". Setting the value to null, will disable autocompletion for this particular type. 
+	 * Set the values to an array (or a function which returns an array), and you'll be able to use the specified prefixes. 
+	 * An asynchronous function is possible. Just make sure you call doc.storeCompletions() in your callback
+	 * By default, only prefix autocompletions are fetched (from prefix.cc)
+	 *
+	 * @property autocompletions
+	 * @type object
+	 */
 	autocompletions: {
 		prefixes: root.fetchFromPrefixCc
 	}
