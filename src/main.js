@@ -76,6 +76,7 @@ var postProcessCmElement = function(cm) {
 		checkSyntax(cm, true);
 		root.showHint(cm, root.prefixHint, {closeCharacters: /(?=a)b/});
 		root.appendPrefixIfNeeded(cm);
+		
 	});
 	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
 	
@@ -177,7 +178,7 @@ var appendToPrefixes = function(cm, prefix) {
 		});
 	} else {
 		var previousIndent = getIndentFromLine(cm, lastPrefixLine);
-		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix, {
+		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix , {
 			line : lastPrefixLine
 		});
 	}
@@ -250,11 +251,11 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 };
 
 
-
+var prevQueryValid = false;
+var clearError = null;
 var checkSyntax = function(cm, deepcheck) {
-	var queryValid = true,
-		prevQueryValid = true,
-		clearError = null;
+	var queryValid = true;
+		
 	if (clearError) {
 		clearError();
 		clearError = null;
@@ -639,11 +640,12 @@ root.defaults = $.extend(root.defaults, {
 		"Tab" : root.indentTab,
 		"Shift-Tab" : root.unindentTab
 	},
+	
+	//non CodeMirror options
 	persistency: {
 		query: function(cm){return "queryVal_" + root.determineId(cm);},
 		prefixes: "prefixes",
 	},
-	//non CodeMirror options
 	autocompletions: {
 		prefixes: root.fetchFromPrefixCc
 	}
