@@ -679,6 +679,12 @@ root.defaults = $.extend(root.defaults, {
 	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
 	matchBrackets : true,
 	fixedGutter : true,
+	/**
+	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
+	 *
+	 * @property extraKeys
+	 * @type object
+	 */
 	extraKeys : {
 		"Ctrl-Space" : root.autoComplete,
 		"Cmd-Space" : root.autoComplete,
