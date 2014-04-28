@@ -36,9 +36,6 @@ var root = module.exports = function(parent, config) {
 var extendConfig = function(config) {
 	var extendedConfig = $.extend(true, {}, root.defaults, config);//I know, codemirror deals with default options as well. However, it does not do this recursively (i.e. the persistency option)
 	
-//	if (extendedConfig.persistency && extendedConfig.persistency.query) {
-		
-//	}
 	return extendedConfig;
 };
 /**
@@ -48,13 +45,67 @@ var extendConfig = function(config) {
 var extendCmInstance = function(cm) {
 	
 	/**
-	 * Execute query (TODO: finish implementation)
+	 * Execute query. Pass a callback function, or a configuration object (see default settings below for possible values)
+	 * I.e., you can change the query configuration by either changing the default settings, changing the settings of this document, or by passing query settings to this function
 	 * 
 	 * @method doc.query
-	 * @return {object} Http response
+	 * @param function|object
 	 */
-	cm.query = function() {
-		console.log("queryingffddssddssssssdssssss! " + cm.getValue());
+	cm.query = function(callbackOrConfig) {
+		var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
+		var config = (typeof callbackOrConfig == "object" ? callbackOrConfig: {});
+		if (cm.getOption("query")) config = $.extend({}, cm.getOption("query"), config);
+		
+		if (!config.endpoint || config.endpoint.length == 0) return;//nothing to query!
+		
+		/**
+		 * initialize ajax config
+		 */
+		var ajaxConfig = {
+			url: config.endpoint,
+			type: config.requestMethod,
+			data: [{name: "query", value: cm.getValue()}],
+			headers: {
+				Accept: config.acceptHeader
+			}
+		};
+		
+		/**
+		 * add complete, beforesend, etc handlers (if specified)
+		 */
+		if (config.handlers) {
+			for (var handler in config.handlers) {
+				if (config.handlers[handler]) {
+					ajaxConfig[handler] = config.handlers[handler];
+				}
+			}
+		}
+		//if only callback is passed as arg, add that on as 'onComplete' callback
+		if (callback) ajaxConfig.complete = callback;
+		
+		/**
+		 * add named graphs to ajax config
+		 */
+		if (config.namedGraphs && config.namedGraphs.length > 0) {
+			for (var i = 0; i < config.namedGraphs.length; i++) ajaxConfig.data.push({name: "named-graph-uri", value: config.namedGraphs[i]});
+		}
+		/**
+		 * add default graphs to ajax config
+		 */
+		if (config.defaultGraphs && config.defaultGraphs.length > 0) {
+			for (var i = 0; i < config.defaultGraphs.length; i++) ajaxConfig.data.push({name: "default-graph-uri", value: config.defaultGraphs[i]});
+		}
+		
+		/**
+		 * merge additional request headers
+		 */
+		if (config.headers && !$.isEmptyObject(config.headers)) $.extend(ajaxConfig.headers, config.headers);
+		/**
+		 * add additional request args
+		 */
+		if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
+		$.ajax(ajaxConfig);
+		
 	};
 	
 	/**
@@ -793,13 +844,36 @@ root.defaults = $.extend(root.defaults, {
 		defaultGraphs: [],
 		
 		/**
-		 * On query finished
+		 * Additional request arguments. Add them in the form: {name: "name", value: "value"}
 		 * 
-		 * @property query.onQueryFinish
-		 * @type function
-		 * @default null
+		 * @property query.args
+		 * @type array
+		 * @default []
 		 */
-		onFinish: null
+		args: [],
+		
+		/**
+		 * Additional request headers
+		 * 
+		 * @property query.headers
+		 * @type array
+		 * @default {}
+		 */
+		headers: {},
+		
+		
+		/**
+		 * Handlers to execute query. Possible keys beforeSend, complete, error, success. See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments:
+		 * 
+		 * @property query.handlers
+		 * @type object
+		 */
+		handlers: {
+			beforeSend: null,
+			complete: null,
+			error: null,
+			success: null
+		}
 	}
 });
 root.version = {

@@ -61,7 +61,7 @@ gulp.task('connect', function() {
 		livereload: true
 	});
 });
-gulp.task('browserify', ['validate'], function() {
+gulp.task('browserify', function() {
 	gulp.src("./src/*.js").pipe(jsValidate()).on('error', 
 		notify.onError({
 			message: "Error: <%= error.message %>",
