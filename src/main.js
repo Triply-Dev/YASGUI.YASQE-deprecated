@@ -43,7 +43,6 @@ var extendConfig = function(config) {
  * @private
  */
 var extendCmInstance = function(cm) {
-	
 	/**
 	 * Execute query. Pass a callback function, or a configuration object (see default settings below for possible values)
 	 * I.e., you can change the query configuration by either changing the default settings, changing the settings of this document, or by passing query settings to this function
@@ -131,6 +130,7 @@ var extendCmInstance = function(cm) {
 	return cm;
 };
 
+
 var postProcessCmElement = function(cm) {
 	var storageId = getPersistencyId(cm, "query");
 	if (storageId) {
@@ -164,6 +164,8 @@ var postProcessCmElement = function(cm) {
 	
 	
 };
+
+
 /**
  * privates
  */
@@ -863,7 +865,7 @@ root.defaults = $.extend(root.defaults, {
 		
 		
 		/**
-		 * Handlers to execute query. Possible keys beforeSend, complete, error, success. See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments:
+		 * Handlers to execute query. Possible keys beforeSend, complete, error, success. See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
 		 * 
 		 * @property query.handlers
 		 * @type object
@@ -881,3 +883,28 @@ root.version = {
 	"YASGUI-Query": require("../package.json").version
 };
 
+
+
+
+//end with some documentation stuff we'd like to include in the documentation (yes, ugly, but easier than messing about and adding it manually to the generated html ;))
+/**
+ * Set query (CodeMirror)
+ * 
+ * @method doc.setValue
+ * @param query {string} 
+ */
+
+/**
+ * Get value (CodeMirror)
+ * 
+ * @method doc.getValue
+ * @return query {string} 
+ */
+
+/**
+ * Set size (CodeMirror). Use null value to leave width or height unchanged
+ * 
+ * @param width {number|string}
+ * @param height: {number|string}
+ * @method doc.setSize
+ */
