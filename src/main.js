@@ -118,8 +118,6 @@ var extendCmInstance = function(cm) {
 		//store array as trie
 		tries[type] = new Trie();
 		for (var i = 0; i < completions.length; i++) {
-//			var prefix = prefixArray[i];
-//			if (prefix.substring(0, 4) == "bif:") continue;//skip this one! see #231
 			tries[type].insert(completions[i]);
 		}
 		
@@ -142,13 +140,7 @@ var postProcessCmElement = function(cm) {
 	 * Add event handlers
 	 */
 	cm.on('blur',function(cm, eventInfo) {
-		/**
-		 * save query to local storage
-		 */
-		var storageId = getPersistencyId(cm, "query");
-		if (storageId) {
-			require("./storage.js").set(storageId, cm.getValue(), "month");
-		}
+		root.storeQuery(cm);
 	});
 	cm.on('change', function(cm, eventInfo) {
 		checkSyntax(cm, true);
@@ -422,6 +414,13 @@ root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
 };
 
+
+root.storeQuery = function(cm) {
+	var storageId = getPersistencyId(cm, "query");
+	if (storageId) {
+		require("./storage.js").set(storageId, cm.getValue(), "month");
+	}
+};
 root.commentLines = function(cm) {
 	var startLine = cm.getCursor(true).line;
 	var endLine = cm.getCursor(false).line;
@@ -502,54 +501,6 @@ root.doAutoFormat = function(cm) {
 			line : totalLines,
 			ch : totalChars
 		});
-	}
-
-};
-root.indentTab = function(cm) {
-	var indentSpaces = Array(cm.getOption("indentUnit") + 1).join(" ");
-	if (cm.somethingSelected()) {
-		for (var i = cm.getCursor(true).line; i <= cm.getCursor(false).line; i++) {
-			cm.replaceRange(indentSpaces, {
-				line : i,
-				ch : 0
-			});
-		}
-	} else {
-		cm.replaceSelection(indentSpaces, "end", "+input");
-	}
-
-};
-root.unindentTab = function(cm) {
-	
-	for (var i = cm.getCursor(true).line; i <= cm.getCursor(false).line; i++) {
-		var line = cm.getLine(i);
-		var lineAfterCursor = null;
-		if (!cm.somethingSelected()) {
-			//use this info to make sure our cursor does not jump to end of line;
-			lineAfterCursor = line.substring(cm.getCursor().ch);
-		}
-		
-		var lineLength = line.length;
-		if (/^\t/.test(line)) {
-			line = line.replace(/^\t(.*)/, "$1");
-		} else if (/^ /.test(line)) {
-			var re = new RegExp("^ {1," + cm.getOption("indentUnit") + "}(.*)",
-					"");
-			line = line.replace(re, "$1");
-		}
-		var newCursor = null;
-		if (lineAfterCursor) {
-			newCursor = {line: i, ch: line.indexOf(lineAfterCursor)};
-		}
-		
-		cm.replaceRange(line, {
-			line : i,
-			ch : 0
-		}, {
-			line : i,
-			ch : lineLength
-		});
-		if (newCursor) cm.setCursor(newCursor);
 	}
 
 };
@@ -732,6 +683,7 @@ root.defaults = $.extend(root.defaults, {
 	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
 	matchBrackets : true,
 	fixedGutter : true,
+	
 	/**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
 	 *
@@ -753,8 +705,12 @@ root.defaults = $.extend(root.defaults, {
 		"Cmd-Alt-Up" : root.copyLineUp,
 		"Shift-Ctrl-F" : root.doAutoFormat,
 		"Shift-Cmd-F" : root.doAutoFormat,
-		"Tab" : root.indentTab,
-		"Shift-Tab" : root.unindentTab
+		"Ctrl-]": root.indentMore,
+		"Cmd-]": root.indentMore,
+		"Ctrl-[": root.indentLess,
+		"Cmd-[": root.indentLess,
+		"Ctrl-S": root.storeQuery,
+		"Cmd-S": root.storeQuery
 	},
 	
 	//non CodeMirror options
