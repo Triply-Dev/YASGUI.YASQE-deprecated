@@ -858,7 +858,7 @@ root.version = {
  */
 
 /**
- * Set size (CodeMirror). Use null value to leave width or height unchanged
+ * Set size (CodeMirror). Use null value to leave width or height unchanged. To resize the editor to fit its content, check out http://codemirror.net/demo/resize.html
  * 
  * @param width {number|string}
  * @param height: {number|string}
