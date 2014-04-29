@@ -437,11 +437,11 @@ root.doAutoFormat = function(cm) {
 			line : cm.getCursor(false).line,
 			ch : cm.getSelection().length
 		};
-		cm.autoFormatRange(cm.getCursor(true), to);
+		autoFormatRange(cm, cm.getCursor(true), to);
 	} else {
 		var totalLines = cm.lineCount();
 		var totalChars = cm.getTextArea().value.length;
-		cm.autoFormatRange({
+		autoFormatRange(cm,{
 			line : 0,
 			ch : 0
 		}, {
@@ -846,7 +846,76 @@ root.version = {
 	"YASGUI-Query": require("../package.json").version
 };
 
+var autoFormatRange = function (cm, from, to) {
+	  var absStart = cm.indexFromPos(from);
+	  var absEnd = cm.indexFromPos(to);
+	  // Insert additional line breaks where necessary according to the
+	  // mode's syntax
+	  var res = autoFormatLineBreaks(cm.getValue(), absStart, absEnd);
 
+	  // Replace and auto-indent the range
+	  cm.operation(function () {
+	    cm.replaceRange(res, from, to);
+	    var startLine = cm.posFromIndex(absStart).line;
+	    var endLine = cm.posFromIndex(absStart + res.length).line;
+	    for (var i = startLine; i <= endLine; i++) {
+	      cm.indentLine(i, "smart");
+	    }
+  });
+}
+
+var autoFormatLineBreaks = function (text, start, end) {
+//		text = text.substring(start, end).replace(/\r?\n|\r/g, " ");
+		text = text.substring(start, end);
+		var breakAfterArray = [
+		    ["keyword", "ws", "prefixed", "ws", "uri"], //i.e. prefix declaration
+		    ["keyword", "ws", "uri"]//i.e. base
+		];
+		var breakAfterCharacters = ["{", ".", ";"];
+		var breakBeforeCharacters = ["}"];
+		var getBreakType = function(stringVal, type) {
+			for (var i = 0; i < breakAfterArray.length; i++) {
+				if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf().toString()) {
+					return 1;
+				}
+			}
+			for (var i = 0; i < breakAfterCharacters.length; i++) {
+				if (stringVal == breakAfterCharacters[i]) {
+					return 1;
+				}
+			}
+			for (var i = 0; i < breakBeforeCharacters.length; i++) {
+				//don't want to issue 'breakbefore' AND 'breakafter', so check current line
+				if ($.trim(currentLine) != '' && stringVal == breakBeforeCharacters[i]) {
+					return -1;
+				}
+			}
+			return 0;
+		};
+		var formattedQuery = "";
+		var currentLine = "";
+		var stackTrace = [];
+		CodeMirror.runMode(text, "sparql11", function(stringVal, type) {
+			stackTrace.push(type);
+			var breakType = getBreakType(stringVal, type);
+			if (breakType != 0) {
+				if (breakType == 1) {
+					formattedQuery += stringVal + "\n";
+					currentLine = "";
+				} else {//(-1)
+					formattedQuery += "\n" + stringVal;
+					currentLine = stringVal;
+				}
+				stackTrace = [];
+			} else {
+				currentLine += stringVal;
+				formattedQuery += stringVal;
+			}
+			if (stackTrace.length == 1 && stackTrace[0] == "sp-ws") stackTrace = [];
+		});
+		return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
+	};
+//  };
 
 
 //end with some documentation stuff we'd like to include in the documentation (yes, ugly, but easier than messing about and adding it manually to the generated html ;))
