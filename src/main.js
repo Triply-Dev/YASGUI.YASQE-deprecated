@@ -6,7 +6,6 @@ require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
-require('../lib/formatting.js');
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
 
