@@ -6,7 +6,7 @@ var paths = {
 	]
 };
 var dest = "dist";
-var outputName = "yasgui-query";
+var outputName = "yasqe";
 var EXPRESS_PORT = 4000;
 
 
@@ -23,7 +23,6 @@ var livereload = require('gulp-livereload');
 var notify = require("gulp-notify");
 var uglify = require('gulp-uglify');
 var jsValidate = require('gulp-jsvalidate');
-var jsdoc = require("gulp-jsdoc");
 var yuidoc = require("gulp-yuidoc");
 gulp.on('err', function(err){
 	console.log("on general err");
@@ -68,7 +67,7 @@ gulp.task('browserify', function() {
 			title: "Failed running browserify"
 		})).on('finish', function(){
 			browserify("./src/main.js")
-			.bundle({standalone: "YasguiQuery", debug: true}).on('error', notify.onError({
+			.bundle({standalone: "YASQE", debug: true}).on('error', notify.onError({
 		        message: "Error: <%= error.message %>",
 		        title: "Failed running browserify"
 		      })).on('prebundle', function(bundle) {

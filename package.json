@@ -31,11 +31,8 @@
     "gulp-open": "^0.2.8",
     "connect": "^2.14.4",
     "gulp-debug": "^0.3.0",
-    "stream-combiner": "0.0.4",
     "amplify": "0.0.11",
-    "gulp-jsvalidate": "^0.1.1",
     "twitter-bootstrap-3.0.0": "^3.0.0",
-    "gulp-jsdoc": "^0.1.4",
     "gulp-yuidoc": "^0.1.2"
   },
   "bugs": "https://github.com/LaurensRietveld/yasgui/issues/",

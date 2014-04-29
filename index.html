@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>YASGUI-Query</title>
+    <title>YASQE</title>
 
-  <link href="dist/yasgui-query.css" rel="stylesheet" type="text/css" />
+  <link href="dist/yasqe.css" rel="stylesheet" type="text/css" />
   <link href="doc/doc.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
@@ -22,7 +22,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">YASGUI-Query</a>
+          <a class="navbar-brand" href="#">YASQE</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -36,7 +36,7 @@
 <div class="jumbotron text-center">
         <img width="30%" src="doc/imgs/yasgui.png">Query
         <p>
-			Yet another SPARQL GUI, funded by <a href="http://data2semantics.org" target="_blank"><img width="30%" src="doc/imgs/data2semantics.png"></a>
+			Yet Another SPARQL Query Editor, funded by <a href="http://data2semantics.org" target="_blank"><img width="30%" src="doc/imgs/data2semantics.png"></a>
 		</p>
        <p>
 				<a class="btn btn-large btn-info" href="https://github.com/LaurensRietveld/yasgui" target="_blank">View
@@ -52,15 +52,15 @@
 
 	
       	<div id="aboutYQuery">
-      	<h1>About YASGUI<sup>query</sup></h1>
-      	YASGUI<sup>query</sup> is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASGUI<sup>query</sup> provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
+      	<h1>About YASQE</h1>
+      	YASQE is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASQE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
       	<div id="showcase"></div>
-      	<code>var yasguiQuery = YasguiQuery(document.getElementById("showcase"));</code>
+      	<code>var yasqe = YASQE(document.getElementById("showcase"));</code>
       	</div>
       
       	<div id="features">
       	<h1>Features</h1>
-      	YASGUI<sup>query</sup> features:
+      	YASQE features:
       	<ul>
       	<li>SPARQL syntax highlighting and error checking </li>
       	<li>Extremely customizable: All functions and handlers from <a href="http://codemirror.net" target="_blank">CodeMirror library</a> are accessible</li>
@@ -78,7 +78,7 @@
       	
       	<div id="keyboardShortcuts">
       	<h1>Keyboard shortcuts</h1>
-      	YASGUI<sup>query</sup> comes with some useful keyboard shortcuts. And even better, take a look at the <a href="doc/doc.html">documentation</a> on how to add your own.
+      	YASQE comes with some useful keyboard shortcuts. And even better, take a look at the <a href="doc/doc.html">documentation</a> on how to add your own.
       	Some examples:
       	<ul>
       	<li><code>[CTRL|CMD] - /</code>: Comment/uncomment line(s)</li>
@@ -113,10 +113,10 @@
 
 
 
- <script src="dist/yasgui-query.js"></script>
+ <script src="dist/yasqe.js"></script>
 <script src="doc/doc.js"></script>
 <script type="text/javascript">
-	var yasguiQuery = YasguiQuery(document.getElementById("showcase"));
+	var yasguiQuery = YASQE(document.getElementById("showcase"));
 	//yasguiQuery.setSize(null, 90);
 </script>
   </body>
