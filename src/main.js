@@ -569,15 +569,24 @@ root.autoComplete = function(cm, fromAutoShow) {
 		}
 		var hints = getHints[type](cm);
 		if (hints && hints.list.length > 0) {
-			root.showHint(cm, function(){return hints;}, {closeCharacters: /(?=a)b/});
+			
+			if (cm.options.autocompletions[type].handlers) {
+				hints['_handlers'] = {};
+				if (cm.options.autocompletions[type].handlers.close) hints['_handlers'].close = [cm.options.autocompletions[type].handlers.close];
+				if (cm.options.autocompletions[type].handlers.select) hints['_handlers'].select = [cm.options.autocompletions[type].handlers.select];
+				if (cm.options.autocompletions[type].handlers.shown) hints['_handlers'].shown = [cm.options.autocompletions[type].handlers.shown];
+				if (cm.options.autocompletions[type].handlers.pick) hints['_handlers'].pick = [cm.options.autocompletions[type].handlers.pick];
+			}
+			
+			root.showHint(cm, function(){return hints;}, {closeCharacters: /(?=a)b/, shown: function(){console.log("shownnn");}});
 			return true;
 		}
 		return false;
 	};
 	for (var type in cm.options.autocompletions) {
 		if (!validCompletionPosition[type](cm)) continue;
-		if (cm.options.autocompletions[type].onValidPosition) {
-			if (cm.options.autocompletions[type].onValidPosition(cm) === false) continue;
+		if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.validPosition) {
+			if (cm.options.autocompletions[type].handlers.validPosition(cm) === false) continue;
 		}
 		var success = tryHintType(type);
 		if (success) break;
@@ -739,8 +748,8 @@ getHints.resourceHints = function(cm, type) {
 			});
 		}
 		
-		
 		return {
+		
 			list : hintList,
 			from : {
 				line : cur.line,
@@ -751,6 +760,7 @@ getHints.resourceHints = function(cm, type) {
 				ch : token.end
 			}
 		};
+		
 	}
 };
 getHints.properties = function(cm) {
@@ -1008,21 +1018,38 @@ root.defaults = $.extend(root.defaults, {
 			autoAddDeclaration: true,
 			get: root.fetchFromPrefixCc,
 			persistent: "prefixes", //only works for bulk loading
-			onValidPosition: function(){console.log("prefix pos");}
+			handlers: {
+				validPosition: null,
+				shown: null,
+				select: null,
+				pick: null,
+				close: null,
+			}
 		},
 		properties: {
 			bulk: false,
 			get: ["http://blaaat1", "http://blaaaat2", "http://blaaat3"],
 			autoShow: true,
 			persistent: "properties",
-			onValidPosition: function(){console.log("property pos");}
+			handlers: {
+				validPosition: null,
+				shown: null,
+				select: null,
+				pick: null,
+				close: null,
+			}
 		},
 		classes: {
 			bulk: true,
 			autoShow: true,
 			get: function(){return ["http://blaaatclass1", "http://blaaaatclass2", "http://blaaat3class"];},
-			onValidPosition: function(){console.log("class pos");}
-//			persistent: "classes"
+			handlers: {
+				validPosition: null,
+				shown: null,
+				select: null,
+				pick: null,
+				close: null,
+			}
 		}
 	},
 	
