@@ -54,13 +54,13 @@ var extendCmInstance = function(cm) {
 	};
 	
 	/**
-	 * Store completions
+	 * Store bulk completions
 	 * 
-	 * @method doc.storeCompletions
+	 * @method doc.storeBulkCompletions
 	 * @param type {string} Type of completions: ["prefixes", "properties", "classes"]
 	 * @param completions {array} Array containing a set of strings (IRIs)
 	 */
-	cm.storeCompletions = function(type, completions) {
+	cm.storeBulkCompletions = function(type, completions) {
 		//store array as trie
 		tries[type] = new Trie();
 		for (var i = 0; i < completions.length; i++) {
@@ -68,7 +68,7 @@ var extendCmInstance = function(cm) {
 		}
 		
 		//store in localstorage as well
-		var storageId = getPersistencyId(cm, type);
+		var storageId = getPersistencyId(cm, cm.options.autocompletions[type].persistent);
 		if (storageId) require("./storage.js").set(storageId, completions, "month");
 	};
 	return cm;
@@ -76,7 +76,8 @@ var extendCmInstance = function(cm) {
 
 
 var postProcessCmElement = function(cm) {
-	var storageId = getPersistencyId(cm, "query");
+	
+	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
 		var valueFromStorage = require("./storage.js").get(storageId);
 		if (valueFromStorage) cm.setValue(valueFromStorage);
@@ -90,48 +91,63 @@ var postProcessCmElement = function(cm) {
 	});
 	cm.on('change', function(cm, eventInfo) {
 		checkSyntax(cm, true);
-		root.showHint(cm, root.prefixHint, {closeCharacters: /(?=a)b/});
+		root.autoComplete(cm, true);
 		root.appendPrefixIfNeeded(cm);
 		
 	});
 	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
 	
 	
-	loadPrefixesIfAny(cm);
-	
-	
-	
+	/**
+	 * load bulk completions
+	 */
+	if (cm.options.autocompletions) {
+		for (var completionType in cm.options.autocompletions) {
+			if (cm.options.autocompletions[completionType].bulk) {
+				loadBulkCompletions(cm, completionType);
+			}
+		}
+	}
 };
 
 
 /**
  * privates
  */
-//used to store autocompletions in
+//used to store bulk autocompletions in
 var tries = {};
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2": "prefixed",
 };
-var loadPrefixesIfAny = function(cm) {
-	var prefixes = null;
-	if (cm.getOption("autocompletions")) prefixes = cm.getOption("autocompletions").prefixes;
-	if (prefixes instanceof Array) {
-		//we don't care whether the prefixes are already stored in localstorage. just use this one
-		cm.storeCompletions("prefixes", prefixes);
+var keyExists = function(objectToTest, key) {
+	var exists = false;
+	
+	try {
+	  if (objectToTest[key] !== undefined) exists = true;
+	} catch(e) {
+	}
+	return exists;
+};
+var loadBulkCompletions = function(cm, type) {
+	var completions = null;
+	if (keyExists(cm.options.autocompletions[type], "get")) completions = cm.options.autocompletions[type].get;
+	if (completions instanceof Array) {
+		//we don't care whether the completions are already stored in localstorage. just use this one
+		cm.storeBulkCompletions(type, completions);
 	} else {
-		//if prefixes are defined in localstorage, use that one! (calling the function may come with overhead (e.g. async calls))
-		var prefixesFromStorage = null;
-		if (getPersistencyId(cm, "prefixes")) prefixesFromStorage = require("./storage.js").get(getPersistencyId(cm, "prefixes"));
-		if (prefixesFromStorage && prefixesFromStorage instanceof Array && prefixesFromStorage.length > 0) {
-			cm.storeCompletions("prefixes", prefixesFromStorage);
+		//if completions are defined in localstorage, use those! (calling the function may come with overhead (e.g. async calls))
+		var completionsFromStorage = null;
+		if (getPersistencyId(cm, cm.options.autocompletions[type].persistent)) completionsFromStorage = require("./storage.js").get(getPersistencyId(cm, cm.options.autocompletions[type].persistent));
+		if (completionsFromStorage && completionsFromStorage instanceof Array && completionsFromStorage.length > 0) {
+			cm.storeBulkCompletions(type, completionsFromStorage);
 		} else {
 			//nothing in storage. check whether we have a function via which we can get our prefixes
-			if (prefixes instanceof Function) {
-				var functionResult = prefixes(cm);
+			if (completions instanceof Function) {
+				var functionResult = completions(cm);
 				if (functionResult && functionResult instanceof Array && functionResult.length > 0) {
 					//function returned an array (if this an async function, we won't get a direct function result)
-					cm.storeCompletions("prefixes", functionResult);
+					cm.storeBulkCompletions(type, functionResult);
 				} 
 			}
 		}
@@ -224,32 +240,6 @@ var getIndentFromLine = function(cm, line, charNumber) {
 	;
 };
 
-var getCompleteToken = function(editor, token, cur) {
-	if (cur == null) {
-		cur = editor.getCursor();
-	}
-	if (token == null) {
-		token = editor.getTokenAt(cur);
-	}
-	// we cannot use token.string alone (e.g. http://bla results in 2
-	// tokens: http: and //bla)
-
-	var prevToken = editor.getTokenAt({
-		line : cur.line,
-		ch : token.start
-	});
-	if (prevToken.type != null && prevToken.type != "ws") {
-		token.start = prevToken.start;
-		token.string = prevToken.string + token.string;
-		return getCompleteToken(editor, token, {
-			line : cur.line,
-			ch : prevToken.start
-		});// recursively, might have multiple tokens which it should
-		// include
-	} else {
-		return token;
-	}
-};
 
 var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	if (charNumber == undefined)
@@ -345,7 +335,7 @@ root.fetchFromPrefixCc = function(cm) {
 			var completeString = prefix + ": <" + data[prefix] + ">";
 			prefixArray.push(completeString);//the array we want to store in localstorage
 		}
-		cm.storeCompletions("prefixes", prefixArray);
+		cm.storeBulkCompletions("prefixes", prefixArray);
 	});
 };
 
@@ -362,7 +352,7 @@ root.determineId = function(cm) {
 
 
 root.storeQuery = function(cm) {
-	var storageId = getPersistencyId(cm, "query");
+	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
 		require("./storage.js").set(storageId, cm.getValue(), "month");
 	}
@@ -451,23 +441,11 @@ root.doAutoFormat = function(cm) {
 
 };
 
-root.autoComplete = function(cm) {
-	if (cm.somethingSelected()) {
-		// do nothing
-		
-	} else {
-		root.showHint(cm, CodeMirror.AutocompletionBase, {
-			completeSingle : false,
-			closeOnUnfocus : false,
-			async : true,
-			closeCharacters : /(?=a)b/
-		});
-	}
-};
+
 root.executeQuery = function(cm, callbackOrConfig) {
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig: {});
-	if (cm.getOption("query")) config = $.extend({}, cm.getOption("query"), config);
+	if (cm.options.query) config = $.extend({}, cm.options.query, config);
 	
 	if (!config.endpoint || config.endpoint.length == 0) return;//nothing to query!
 	
@@ -522,91 +500,90 @@ root.executeQuery = function(cm, callbackOrConfig) {
 	if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
 	$.ajax(ajaxConfig);
 };
-root.prefixHint = function(cm) {
-	if (!tries["prefixes"]) return;//no prefixed defined. just stop
-	// Find the token at the cursor
-	var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-	var includePreviousTokens = function(token, cur) {
-		var prevToken = cm.getTokenAt({
-			line : cur.line,
-			ch : token.start
-		});
-		if (prevToken.type == "sp-punct"
-				|| prevToken.type == "sp-keyword") {
-			token.start = prevToken.start;
-			cur.ch = prevToken.start;
-			token.string = prevToken.string + token.string;
-			return includePreviousTokens(token, cur);// recursively,
-			// might have
-			// multiple tokens
-			// which it should
-			// include
-		} else {
-			return token;
+
+var validCompletionPosition = {
+	properties: function(cm) {
+		var token = getCompleteToken(cm);
+		
+		if (token.type == "var") return false; //we are typing a var
+		if ($.inArray("a", token.state.possibleCurrent) >= 0) return true;//predicate pos
+		var cur = cm.getCursor();
+		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
+		if (previousToken.string == "rdfs:subPropertyOf") return true;
+		
+		//hmm, we would like -better- checks here, e.g. checking whether we are in a subject, and whether next item is a rdfs:subpropertyof.
+		//difficult though... the grammar we use is unreliable when the query is invalid (i.e. during typing), and often the predicate is not typed yet, when we are busy writing the subject...
+		return false;
+	},
+	classes: function(cm) {
+		var token = getCompleteToken(cm);
+		if (token.type == "var") return false;
+		var cur = cm.getCursor();
+		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
+		if (previousToken.string == "a") return true;
+		if (previousToken.string == "rdf:type") return true;
+		if (previousToken.string == "rdfs:domain") return true;
+		if (previousToken.string == "rdfs:range") return true;
+		return false;
+	},
+	prefixes: function(cm) {
+		var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+		
+		// not at end of line
+		if (cm.getLine(cur.line).length > cur.ch)
+			return false;
+		
+		if (token.type != "ws") {
+			// we want to complete token, e.g. when the prefix starts with an a
+			// (treated as a token in itself..)
+			// but we to avoid including the PREFIX tag. So when we have just
+			// typed a space after the prefix tag, don't get the complete token
+			token = getCompleteToken(cm);
 		}
-	};
+		
+		// we shouldnt be at the uri part the prefix declaration
+		// also check whether current token isnt 'a' (that makes codemirror
+		// thing a namespace is a possiblecurrent
+		if (!token.string.indexOf("a") == 0 
+				&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
+			return false;
 
-	// not at end of line
-	if (cm.getLine(cur.line).length > cur.ch)
-		return;
-	
-	if (token.type != "ws") {
-		// we want to complete token, e.g. when the prefix starts with an a
-		// (treated as a token in itself..)
-		// but we to avoid including the PREFIX tag. So when we have just
-		// typed a space after the prefix tag, don't get the complete token
-		token = getCompleteToken(cm);
+		// First token of line needs to be PREFIX,
+		// there should be no trailing text (otherwise, text is wrongly inserted
+		// in between)
+		var firstToken = getNextNonWsToken(cm, cur.line);
+		if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX") return false;
+		return true;
 	}
-	
-	// we shouldnt be at the uri part the prefix declaration
-	// also check whether current token isnt 'a' (that makes codemirror
-	// thing a namespace is a possiblecurrent
-	if (!token.string.indexOf("a") == 0 
-			&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
-		return;
-
-	// First token of line needs to be PREFIX,
-	// there should be no trailing text (otherwise, text is wrongly inserted
-	// in between)
-	var firstToken = getNextNonWsToken(cm, cur.line);
-	if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
-		return;
-
-	// If this is a whitespace, and token is just after PREFIX, proceed
-	// using empty string as token
-	if (/\s*/.test(token.string) && cm.getTokenAt({
-		line : cur.line,
-		ch : token.start
-	}).string.toUpperCase() == "PREFIX") {
-		token = {
-			start : cur.ch,
-			end : cur.ch,
-			string : "",
-			state : token.state
-		};
-	} else {
-		// We know we are in a PREFIX line. Now check whether the string
-		// starts with a punct or keyword
-		// Good example is 'a', which is a valid punct in our grammar.
-		// This is parsed as separate token which messes up the token for
-		// autocompletion (the part after 'a' is used as separate token)
-		// If previous token is in keywords or keywords, prepend this token
-		// to current token
-		token = includePreviousTokens(token, cur);
-	}
-
-	return {
-		list : tries["prefixes"].autoComplete(token.string),
-		from : {
-			line : cur.line,
-			ch : token.start
-		},
-		to : {
-			line : cur.line,
-			ch : token.end
-		}
-	};
 };
+
+root.autoComplete = function(cm, fromAutoShow) {
+	if (cm.somethingSelected()) return;
+	if (!cm.options.autocompletions) return;
+	var tryHintType = function(type) {
+		if (fromAutoShow //from autoShow, i.e. this gets called each time the editor content changes 
+				&& (!keyExists(cm.options.autocompletions[type], "autoShow") || !cm.options.autocompletions[type].autoShow) //autoshow for this particular type of autocompletion is -not- enabled
+				&& (cm.options.autocompletions[type].bulk)//bulk loading should be enabled (don't want to re-do ajax-like request for every editor change)
+			) {
+			return false;
+		}
+		var hints = getHints[type](cm);
+		if (hints && hints.list.length > 0) {
+			root.showHint(cm, function(){return hints;}, {closeCharacters: /(?=a)b/});
+			return true;
+		}
+		return false;
+	};
+	for (var type in cm.options.autocompletions) {
+		if (!validCompletionPosition[type](cm)) continue;
+		if (cm.options.autocompletions[type].onValidPosition) {
+			if (cm.options.autocompletions[type].onValidPosition(cm) === false) continue;
+		}
+		var success = tryHintType(type);
+		if (success) break;
+	}
+};
+
 
 /**
  * Check whether typed prefix is declared. If not, automatically add declaration
@@ -647,18 +624,264 @@ root.appendPrefixIfNeeded = function(cm) {
 		}
 	}
 };
-var getPersistencyId = function(cm, key) {
+
+/**
+ * When typing a query, this query is sometimes syntactically invalid, causing the current tokens to be incorrect
+ * This causes problem for autocompletion. http://bla might result in two tokens: http:// and bla. We'll want to combine these
+ */
+var getCompleteToken = function(cm, token, cur) {
+	if (!cur) {
+		cur = cm.getCursor();
+	}
+	if (!token) {
+		token = cm.getTokenAt(cur);
+	}
+	var prevToken = cm.getTokenAt({
+		line : cur.line,
+		ch : token.start
+	});
+	//not start of line, and not whitespace
+	if (prevToken.type != null && prevToken.type != "ws") {
+		token.start = prevToken.start;
+		token.string = prevToken.string + token.string;
+		return getCompleteToken(cm, token, {
+			line : cur.line,
+			ch : prevToken.start
+		});// recursively, might have multiple tokens which it should
+		// include
+	} else {
+		return token;
+	}
+};
+function getPreviousNonWsToken(cm, line, token) {
+	var previousToken = cm.getTokenAt({
+		line : line,
+		ch : token.start
+	});
+	if (previousToken != null && previousToken.type == "ws") {
+		previousToken = getPreviousNonWsToken(cm, line, previousToken);
+	}
+	return previousToken;
+}
+var preprocessCompletionToken = function(cm, token) {
+	var completionToken = null;
+	if (token.string.indexOf(":") > -1 || token.string.indexOf("<") == 0) {
+		completionToken = {};
+		token = getCompleteToken(cm, token);
+		var queryPrefixes = getPrefixesFromQuery(cm);
+		if (!token.string.indexOf("<") == 0) {
+			completionToken.tokenPrefix = token.string.substring(0, token.string.indexOf(":") + 1);
+			
+			
+			if (queryPrefixes[completionToken.tokenPrefix] != null) {
+				completionToken.tokenPrefixUri = queryPrefixes[completionToken.tokenPrefix];
+			}
+		}
+		
+		completionToken.uri = token.string;
+		if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
+			//hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
+			for (var prefix in queryPrefixes) {
+				if (queryPrefixes.hasOwnProperty(prefix)) {
+					if (token.string.indexOf(prefix) == 0) {
+						completionToken.uri = queryPrefixes[prefix];
+						completionToken.uri += token.string.substring(prefix.length);
+						break;
+					}
+				}
+			}
+		}
+		
+		if (completionToken.uri.indexOf("<") == 0)
+			completionToken.uri = completionToken.uri.substring(1);
+		if (completionToken.uri.indexOf(">", completionToken.length - 1) !== -1)
+			completionToken.uri = completionToken.uri.substring(0, completionToken.uri.length - 1);
+	}
+	return completionToken;
+};
+
+var getHints = {};
+getHints.resourceHints = function(cm, type) {
+	var token = getCompleteToken(cm);
+	var cur = cm.getCursor();
+	var completionToken = preprocessCompletionToken(cm, token);
+	//console.log(completionToken);
+	if (completionToken) {
+		// use custom completionhint function, to avoid reaching a loop when the
+		// completionhint is the same as the current token
+		// regular behaviour would keep changing the codemirror dom, hence
+		// constantly calling this callback
+		var completionHint = function(cm, data, completion) {
+			if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
+				cm.replaceRange(completion.text, data.from, data.to);
+			}
+		};
+		if (!tries[type]) return;
+		var suggestions = tries[type].autoComplete(completionToken.uri);
+		
+		var hintList = [];
+		for ( var i = 0; i < suggestions.length; i++) {
+			var suggestedString = suggestions[i];
+			if (completionToken.tokenPrefix != null && completionToken.uri != null) {
+				// we need to get the suggested string back to prefixed form
+				suggestedString = suggestedString
+						.substring(completionToken.tokenPrefixUri.length);
+				suggestedString = completionToken.tokenPrefix + suggestedString;
+			} else {
+				// it is a regular uri. add '<' and '>' to string
+				suggestedString = "<" + suggestedString + ">";
+			}
+			hintList.push({
+				text : suggestedString,
+				displayText: suggestedString,
+				hint : completionHint,
+				className: type + "Hint"
+			});
+		}
+		
+		
+		return {
+			list : hintList,
+			from : {
+				line : cur.line,
+				ch : token.start
+			},
+			to : {
+				line : cur.line,
+				ch : token.end
+			}
+		};
+	}
+};
+getHints.properties = function(cm) {
+	return getHints.resourceHints(cm, "properties");
+};
+getHints.classes = function(cm) {
+	return getHints.resourceHints(cm, "classes");
+};
+getHints.prefixes = function(cm) {
+	if (!tries["prefixes"]) return;//no prefix completions defined
+	var token = getCompleteToken(cm);
+	var cur = cm.getCursor();
+
+	// If this is a whitespace, and token is just after PREFIX, proceed
+	// using empty string as token
+	if (/\s*/.test(token.string) && cm.getTokenAt({
+		line : cur.line,
+		ch : token.start
+	}).string.toUpperCase() == "PREFIX") {
+		token = {
+			start : cur.ch,
+			end : cur.ch,
+			string : "",
+			state : token.state
+		};
+	} else {
+		// We know we are in a PREFIX line. Now check whether the string
+		// starts with a punct or keyword
+		// Good example is 'a', which is a valid punct in our grammar.
+		// This is parsed as separate token which messes up the token for
+		// autocompletion (the part after 'a' is used as separate token)
+		// If previous token is in keywords or keywords, prepend this token
+		// to current token
+		token = getCompleteToken(cm, token, cur);
+	}
+
+	return {
+		list : tries["prefixes"].autoComplete(token.string),
+		from : {
+			line : cur.line,
+			ch : token.start
+		},
+		to : {
+			line : cur.line,
+			ch : token.end
+		}
+	};
+};
+
+
+
+var getPersistencyId = function(cm, persistentIdCreator) {
 	var persistencyId = null;
-	var persistencyIds = cm.getOption("persistency");
 	
-	if (persistencyIds && persistencyIds[key]) {
-		if (typeof persistencyIds[key] == "string") {
-			persistencyId = persistencyIds[key];
+	if (persistentIdCreator) {
+		if (typeof persistentIdCreator == "string") {
+			persistencyId = persistentIdCreator;
 		} else {
-			persistencyId = persistencyIds[key](cm);
+			persistencyId = persistentIdCreator(cm);
 		}
 	}
 	return persistencyId;
+};
+
+var autoFormatRange = function (cm, from, to) {
+	  var absStart = cm.indexFromPos(from);
+	  var absEnd = cm.indexFromPos(to);
+	  // Insert additional line breaks where necessary according to the
+	  // mode's syntax
+	  var res = autoFormatLineBreaks(cm.getValue(), absStart, absEnd);
+
+	  // Replace and auto-indent the range
+	  cm.operation(function () {
+	    cm.replaceRange(res, from, to);
+	    var startLine = cm.posFromIndex(absStart).line;
+	    var endLine = cm.posFromIndex(absStart + res.length).line;
+	    for (var i = startLine; i <= endLine; i++) {
+	      cm.indentLine(i, "smart");
+	    }
+  });
+};
+
+var autoFormatLineBreaks = function (text, start, end) {
+	text = text.substring(start, end);
+	var breakAfterArray = [
+	    ["keyword", "ws", "prefixed", "ws", "uri"], //i.e. prefix declaration
+	    ["keyword", "ws", "uri"]//i.e. base
+	];
+	var breakAfterCharacters = ["{", ".", ";"];
+	var breakBeforeCharacters = ["}"];
+	var getBreakType = function(stringVal, type) {
+		for (var i = 0; i < breakAfterArray.length; i++) {
+			if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf().toString()) {
+				return 1;
+			}
+		}
+		for (var i = 0; i < breakAfterCharacters.length; i++) {
+			if (stringVal == breakAfterCharacters[i]) {
+				return 1;
+			}
+		}
+		for (var i = 0; i < breakBeforeCharacters.length; i++) {
+			//don't want to issue 'breakbefore' AND 'breakafter', so check current line
+			if ($.trim(currentLine) != '' && stringVal == breakBeforeCharacters[i]) {
+				return -1;
+			}
+		}
+		return 0;
+	};
+	var formattedQuery = "";
+	var currentLine = "";
+	var stackTrace = [];
+	CodeMirror.runMode(text, "sparql11", function(stringVal, type) {
+		stackTrace.push(type);
+		var breakType = getBreakType(stringVal, type);
+		if (breakType != 0) {
+			if (breakType == 1) {
+				formattedQuery += stringVal + "\n";
+				currentLine = "";
+			} else {//(-1)
+				formattedQuery += "\n" + stringVal;
+				currentLine = stringVal;
+			}
+			stackTrace = [];
+		} else {
+			currentLine += stringVal;
+			formattedQuery += stringVal;
+		}
+		if (stackTrace.length == 1 && stackTrace[0] == "sp-ws") stackTrace = [];
+	});
+	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 
 
@@ -719,6 +942,7 @@ root.defaults = $.extend(root.defaults, {
 		"Cmd-Enter": root.executeQuery
 	},
 	
+	persistent: function(cm){return "queryVal_" + root.determineId(cm);},
 	//non CodeMirror options
 	/**
 	 * Change persistency settings for query and completions. Setting the values to null, will disable persistancy: nothing is stored between browser sessions
@@ -727,36 +951,83 @@ root.defaults = $.extend(root.defaults, {
 	 * @property persistency
 	 * @type object
 	 */
-	persistency: {
-		/**
-		 * Persistency setting for query. Default ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASGUI-Query items on one page
-		 * 
-		 * @property persistency.query
-		 * @type function|string
-		 * @default YasguiQuery.determineId()'
-		 */
-		query: function(cm){return "queryVal_" + root.determineId(cm);},
-		/**
-		 * Persistency setting for query. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of prefixes
-		 * 
-		 * @property persistency.prefixes
-		 * @type function|string
-		 * @default "prefixes" 
-		 */
-		prefixes: "prefixes",
-	},
+//	persistency: {
+//		/**
+//		 * Persistency setting for query. Default ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASGUI-Query items on one page
+//		 * 
+//		 * @property persistency.query
+//		 * @type function|string
+//		 * @default YasguiQuery.determineId()'
+//		 */
+//		query: function(cm){return "queryVal_" + root.determineId(cm);},
+//		/**
+//		 * Persistency setting for prefixes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of prefixes
+//		 * 
+//		 * @property persistency.prefixes
+//		 * @type function|string
+//		 * @default "prefixes" 
+//		 */
+//		prefixes: "prefixes",
+//		/**
+//		 * Persistency setting for properties. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of properties
+//		 * 
+//		 * @property persistency.properties
+//		 * @type function|string
+//		 * @default "properties" 
+//		 */
+//		
+//		/**
+//		 * Persistency setting for classes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of classes
+//		 * 
+//		 * @property persistency.classes
+//		 * @type function|string
+//		 * @default "classes" 
+//		 */
+////		classes: "classes",
+//	},
 	/**
-	 * Types of completions. Possible keys: "prefixes". Setting the value to null, will disable autocompletion for this particular type. 
+	 * Types of completions. Setting the value to null, will disable autocompletion for this particular type. 
 	 * Set the values to an array (or a function which returns an array), and you'll be able to use the specified prefixes. 
-	 * An asynchronous function is possible. Just make sure you call doc.storeCompletions() in your callback
+	 * An asynchronous function is possible. Just make sure you call doc.storeBulkCompletions() in your callback
 	 * By default, only prefix autocompletions are fetched (from prefix.cc)
 	 *
 	 * @property autocompletions
 	 * @type object
 	 */
 	autocompletions: {
-		prefixes: root.fetchFromPrefixCc
+		/**
+		 * Persistency setting for classes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of classes
+		 * 
+		 * @property persistency.classes
+		 * @type function|string
+		 * @default "classes" 
+		 */
+		prefixes: {
+			bulk: false,//default false
+			autoShow: true,
+			autoAddDeclaration: true,
+			get: root.fetchFromPrefixCc,
+			persistent: "prefixes", //only works for bulk loading
+			onValidPosition: function(){console.log("prefix pos");}
+		},
+		properties: {
+			bulk: false,
+			get: ["http://blaaat1", "http://blaaaat2", "http://blaaat3"],
+			autoShow: true,
+			persistent: "properties",
+			onValidPosition: function(){console.log("property pos");}
+		},
+		classes: {
+			bulk: true,
+			autoShow: true,
+			get: function(){return ["http://blaaatclass1", "http://blaaaatclass2", "http://blaaat3class"];},
+			onValidPosition: function(){console.log("class pos");}
+//			persistent: "classes"
+		}
 	},
+	
+	
+	
 	
 	/**
 	 * Settings for querying sparql endpoints
@@ -844,77 +1115,6 @@ root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASGUI-Query": require("../package.json").version
 };
-
-var autoFormatRange = function (cm, from, to) {
-	  var absStart = cm.indexFromPos(from);
-	  var absEnd = cm.indexFromPos(to);
-	  // Insert additional line breaks where necessary according to the
-	  // mode's syntax
-	  var res = autoFormatLineBreaks(cm.getValue(), absStart, absEnd);
-
-	  // Replace and auto-indent the range
-	  cm.operation(function () {
-	    cm.replaceRange(res, from, to);
-	    var startLine = cm.posFromIndex(absStart).line;
-	    var endLine = cm.posFromIndex(absStart + res.length).line;
-	    for (var i = startLine; i <= endLine; i++) {
-	      cm.indentLine(i, "smart");
-	    }
-  });
-}
-
-var autoFormatLineBreaks = function (text, start, end) {
-//		text = text.substring(start, end).replace(/\r?\n|\r/g, " ");
-		text = text.substring(start, end);
-		var breakAfterArray = [
-		    ["keyword", "ws", "prefixed", "ws", "uri"], //i.e. prefix declaration
-		    ["keyword", "ws", "uri"]//i.e. base
-		];
-		var breakAfterCharacters = ["{", ".", ";"];
-		var breakBeforeCharacters = ["}"];
-		var getBreakType = function(stringVal, type) {
-			for (var i = 0; i < breakAfterArray.length; i++) {
-				if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf().toString()) {
-					return 1;
-				}
-			}
-			for (var i = 0; i < breakAfterCharacters.length; i++) {
-				if (stringVal == breakAfterCharacters[i]) {
-					return 1;
-				}
-			}
-			for (var i = 0; i < breakBeforeCharacters.length; i++) {
-				//don't want to issue 'breakbefore' AND 'breakafter', so check current line
-				if ($.trim(currentLine) != '' && stringVal == breakBeforeCharacters[i]) {
-					return -1;
-				}
-			}
-			return 0;
-		};
-		var formattedQuery = "";
-		var currentLine = "";
-		var stackTrace = [];
-		CodeMirror.runMode(text, "sparql11", function(stringVal, type) {
-			stackTrace.push(type);
-			var breakType = getBreakType(stringVal, type);
-			if (breakType != 0) {
-				if (breakType == 1) {
-					formattedQuery += stringVal + "\n";
-					currentLine = "";
-				} else {//(-1)
-					formattedQuery += "\n" + stringVal;
-					currentLine = stringVal;
-				}
-				stackTrace = [];
-			} else {
-				currentLine += stringVal;
-				formattedQuery += stringVal;
-			}
-			if (stackTrace.length == 1 && stackTrace[0] == "sp-ws") stackTrace = [];
-		});
-		return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
-	};
-//  };
 
 
 //end with some documentation stuff we'd like to include in the documentation (yes, ugly, but easier than messing about and adding it manually to the generated html ;))
