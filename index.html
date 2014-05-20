@@ -54,7 +54,7 @@
       	<div id="aboutYQuery">
       	<h1>About YASQE</h1>
       	YASQE is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASQE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
-      	<div style="position:relative;"id="showcase"></div>
+      	<div id="showcase"></div>
       	<code>var yasqe = YASQE(document.getElementById("showcase"));</code>
       	</div>
       
@@ -73,7 +73,7 @@
       	</div>
       	<div id="releases">
       	<h1>Download</h1>
-		<a class="btn btn-primary" href="https://github.com/LaurensRietveld/YASGUI-QueryEditor" target="_blank">Download latest release</a>
+		<a class="btn btn-primary" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release</a>
       	</div>
       	
       	<div id="keyboardShortcuts">
@@ -116,8 +116,7 @@
  <script src="dist/yasqe.js"></script>
 <script src="doc/doc.js"></script>
 <script type="text/javascript">
-	var yasguiQuery = YASQE(document.getElementById("showcase"));
-	//yasguiQuery.setSize(null, 90);
+	var yasqe = YASQE(document.getElementById("showcase"), {viewportMargin: Infinity});
 </script>
   </body>
 </html>

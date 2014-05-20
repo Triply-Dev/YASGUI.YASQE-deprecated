@@ -10,13 +10,13 @@ require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
 
 /**
- * Main YASGUI-Query constructor
+ * Main YASQE constructor
  * 
  * @constructor
  * @param {DOM-Element} parent element to append editor to.
  * @param {object} settings
- * @class YasguiQuery
- * @return {doc} YASGUI-query document
+ * @class YASQE
+ * @return {doc} YASQE document
  */
 var root = module.exports = function(parent, config) {
 	config = extendConfig(config);
@@ -322,9 +322,9 @@ var checkSyntax = function(cm, deepcheck) {
 $.extend(root, CodeMirror);
 
 /**
- * Fetch prefixes from prefix.cc, and store in the YASGUI-Query object
+ * Fetch prefixes from prefix.cc, and store in the YASQE object
  * 
- * @param doc {Yasgui-Query} 
+ * @param doc {YASQE} 
  * @method YasguiQuery.fetchFromPrefixCc
  */
 root.fetchFromPrefixCc = function(cm) {
@@ -339,11 +339,16 @@ root.fetchFromPrefixCc = function(cm) {
 	});
 };
 
+
+root.fetchFromLov = function(cm, type, term) {
+	var args = {q:term, page: 1, type: type};
+	var url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
+};
 /**
- * Determine unique ID of the YASGUI-Query object. Useful when several objects are loaded on the same page, and all have 'persistency' enabled.
+ * Determine unique ID of the YASQE object. Useful when several objects are loaded on the same page, and all have 'persistency' enabled.
  * Currently, the ID is determined by selecting the nearest parent in the DOM with an ID set
  * 
- * @param doc {Yasgui-Query} 
+ * @param doc {YASQE} 
  * @method YasguiQuery.fetchFromPrefixCc
  */
 root.determineId = function(cm) {
@@ -672,6 +677,7 @@ function getPreviousNonWsToken(cm, line, token) {
 	}
 	return previousToken;
 }
+
 var preprocessCompletionToken = function(cm, token) {
 	var completionToken = null;
 	if (token.string.indexOf(":") > -1 || token.string.indexOf("<") == 0) {
@@ -714,7 +720,6 @@ getHints.resourceHints = function(cm, type) {
 	var token = getCompleteToken(cm);
 	var cur = cm.getCursor();
 	var completionToken = preprocessCompletionToken(cm, token);
-	//console.log(completionToken);
 	if (completionToken) {
 		// use custom completionhint function, to avoid reaching a loop when the
 		// completionhint is the same as the current token
@@ -896,8 +901,8 @@ var autoFormatLineBreaks = function (text, start, end) {
 
 
 /**
- * The default options of Yasgui-Query (check the CodeMirror documentation for even more options, such as disabling line numbers, or changing keyboard shortcut keys). 
- * Either change the default options by setting YasguiQuery.defaults, or by passing your own options as second argument to the YasguiQuery constructor
+ * The default options of YASQE (check the CodeMirror documentation for even more options, such as disabling line numbers, or changing keyboard shortcut keys). 
+ * Either change the default options by setting YASQE.defaults, or by passing your own options as second argument to the YASQE constructor
  *
  * @attribute
  * @attribute YasguiQuery.defaults
@@ -951,50 +956,21 @@ root.defaults = $.extend(root.defaults, {
 		"Ctrl-Enter": root.executeQuery,
 		"Cmd-Enter": root.executeQuery
 	},
+	cursorHeight: 0.9,
 	
-	persistent: function(cm){return "queryVal_" + root.determineId(cm);},
 	//non CodeMirror options
+	
+	
 	/**
-	 * Change persistency settings for query and completions. Setting the values to null, will disable persistancy: nothing is stored between browser sessions
-	 * Setting the values to a string (or a function which returns a string), will store e.g. the query in localstorage using the specified string.
-	 *
-	 * @property persistency
-	 * @type object
+	 * Change persistency settings for the YASQE query value. Setting the values to null, will disable persistancy: nothing is stored between browser sessions
+	 * Setting the values to a string (or a function which returns a string), will store the query in localstorage using the specified string.
+	 * By default, the ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASQE items on one page
+	 * 
+	 * @property persistent
+	 * @type function|string
 	 */
-//	persistency: {
-//		/**
-//		 * Persistency setting for query. Default ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASGUI-Query items on one page
-//		 * 
-//		 * @property persistency.query
-//		 * @type function|string
-//		 * @default YasguiQuery.determineId()'
-//		 */
-//		query: function(cm){return "queryVal_" + root.determineId(cm);},
-//		/**
-//		 * Persistency setting for prefixes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of prefixes
-//		 * 
-//		 * @property persistency.prefixes
-//		 * @type function|string
-//		 * @default "prefixes" 
-//		 */
-//		prefixes: "prefixes",
-//		/**
-//		 * Persistency setting for properties. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of properties
-//		 * 
-//		 * @property persistency.properties
-//		 * @type function|string
-//		 * @default "properties" 
-//		 */
-//		
-//		/**
-//		 * Persistency setting for classes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of classes
-//		 * 
-//		 * @property persistency.classes
-//		 * @type function|string
-//		 * @default "classes" 
-//		 */
-////		classes: "classes",
-//	},
+	persistent: function(cm){return "queryVal_" + root.determineId(cm);},
+
 	/**
 	 * Types of completions. Setting the value to null, will disable autocompletion for this particular type. 
 	 * Set the values to an array (or a function which returns an array), and you'll be able to use the specified prefixes. 
@@ -1006,48 +982,289 @@ root.defaults = $.extend(root.defaults, {
 	 */
 	autocompletions: {
 		/**
-		 * Persistency setting for classes. Default ID is a static string, i.e., multiple Yasgui-Query instances use the same set of classes
+		 * Prefix autocompletion settings
 		 * 
-		 * @property persistency.classes
-		 * @type function|string
-		 * @default "classes" 
+		 * @property autocompletions.prefixes
+		 * @type object
 		 */
 		prefixes: {
-			bulk: false,//default false
-			autoShow: true,
-			autoAddDeclaration: true,
+			/**
+			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * 
+			 * @property autocompletions.prefixes.autoShow
+			 * @type function|array
+			 * @default function (YASQE.fetchFromPrefixCc)
+			 */
 			get: root.fetchFromPrefixCc,
-			persistent: "prefixes", //only works for bulk loading
-			handlers: {
-				validPosition: null,
-				shown: null,
-				select: null,
-				pick: null,
-				close: null,
-			}
-		},
-		properties: {
-			bulk: false,
-			get: ["http://blaaat1", "http://blaaaat2", "http://blaaat3"],
-			autoShow: true,
-			persistent: "properties",
-			handlers: {
-				validPosition: null,
-				shown: null,
-				select: null,
-				pick: null,
-				close: null,
-			}
-		},
-		classes: {
+			/**
+			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
+			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * 
+			 * @property autocompletions.prefixes.bulk
+			 * @type boolean
+			 * @default true
+			 */
 			bulk: true,
+			/**
+			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
+			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.prefixes.autoShow
+			 * @type boolean
+			 * @default true
+			 */
 			autoShow: true,
-			get: function(){return ["http://blaaatclass1", "http://blaaaatclass2", "http://blaaat3class"];},
+			/**
+			 * Auto-add prefix declaration: when prefixes are loaded in memory (bulk: true), and the user types e.g. 'rdf:' in a triple pattern, the editor automatically add this particular PREFIX definition to the query
+			 * 
+			 * @property autocompletions.prefixes.autoAddDeclaration
+			 * @type boolean
+			 * @default true
+			 */
+			autoAddDeclaration: true,
+			/**
+			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
+			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
+			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.prefixes.persistent
+			 * @type string|function
+			 * @default "prefixes"
+			 */
+			persistent: "prefixes",
+			/**
+			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * 
+			 * @property autocompletions.prefixes.handlers
+			 * @type object
+			 */
 			handlers: {
+				/**
+				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * 
+				 * @property autocompletions.prefixes.handlers.validPosition
+				 * @type function
+				 * @default null
+				 */
 				validPosition: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.prefixes.handlers.shown
+				 * @type function
+				 * @default null
+				 */
 				shown: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.prefixes.handlers.select
+				 * @type function
+				 * @default null
+				 */
 				select: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.prefixes.handlers.pick
+				 * @type function
+				 * @default null
+				 */
 				pick: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.prefixes.handlers.close
+				 * @type function
+				 * @default null
+				 */
+				close: null,
+			}
+		},
+		/**
+		 * Property autocompletion settings
+		 * 
+		 * @property autocompletions.properties
+		 * @type object
+		 */
+		properties: {
+			/**
+			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * 
+			 * @property autocompletions.properties.autoShow
+			 * @type function|array
+			 * @default function (YASQE.fetchFromPrefixCc)
+			 */
+			get: ["http://blaaat1", "http://blaaaat2", "http://blaaat3"],
+			/**
+			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
+			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * 
+			 * @property autocompletions.properties.bulk
+			 * @type boolean
+			 * @default false
+			 */
+			bulk: false,
+			/**
+			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
+			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.properties.autoShow
+			 * @type boolean
+			 * @default false
+			 */
+			autoShow: false,
+			/**
+			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
+			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
+			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.properties.persistent
+			 * @type string|function
+			 * @default "properties"
+			 */
+			persistent: "properties",
+			/**
+			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * 
+			 * @property autocompletions.properties.handlers
+			 * @type object
+			 */
+			handlers: {
+				/**
+				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * 
+				 * @property autocompletions.properties.handlers.validPosition
+				 * @type function
+				 * @default null
+				 */
+				validPosition: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.properties.handlers.shown
+				 * @type function
+				 * @default null
+				 */
+				shown: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.properties.handlers.select
+				 * @type function
+				 * @default null
+				 */
+				select: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.properties.handlers.pick
+				 * @type function
+				 * @default null
+				 */
+				pick: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.properties.handlers.close
+				 * @type function
+				 * @default null
+				 */
+				close: null,
+			}
+		},
+		/**
+		 * Class autocompletion settings
+		 * 
+		 * @property autocompletions.classes
+		 * @type object
+		 */
+		classes: {
+			/**
+			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * 
+			 * @property autocompletions.classes.autoShow
+			 * @type function|array
+			 * @default function (YASQE.fetchFromPrefixCc)
+			 */
+			get: ["http://blaaat1class", "http://blaaaat2class", "http://blaaat3class"],
+			/**
+			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
+			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * 
+			 * @property autocompletions.classes.bulk
+			 * @type boolean
+			 * @default false
+			 */
+			bulk: false,
+			/**
+			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
+			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.classes.autoShow
+			 * @type boolean
+			 * @default false
+			 */
+			autoShow: false,
+			/**
+			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
+			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
+			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.classes.persistent
+			 * @type string|function
+			 * @default "classes"
+			 */
+			persistent: "classes",
+			/**
+			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * 
+			 * @property autocompletions.classes.handlers
+			 * @type object
+			 */
+			handlers: {
+				/**
+				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * 
+				 * @property autocompletions.classes.handlers.validPosition
+				 * @type function
+				 * @default null
+				 */
+				validPosition: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.shown
+				 * @type function
+				 * @default null
+				 */
+				shown: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.select
+				 * @type function
+				 * @default null
+				 */
+				select: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.pick
+				 * @type function
+				 * @default null
+				 */
+				pick: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.close
+				 * @type function
+				 * @default null
+				 */
 				close: null,
 			}
 		}
@@ -1125,22 +1342,50 @@ root.defaults = $.extend(root.defaults, {
 		
 		
 		/**
-		 * Handlers to execute query. Possible keys beforeSend, complete, error, success. See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+		 * Set of ajax handlers
 		 * 
 		 * @property query.handlers
 		 * @type object
 		 */
 		handlers: {
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * 
+			 * @property query.handlers.beforeSend
+			 * @type function
+			 * @default null
+			 */
 			beforeSend: null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * 
+			 * @property query.handlers.complete
+			 * @type function
+			 * @default null
+			 */
 			complete: null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * 
+			 * @property query.handlers.error
+			 * @type function
+			 * @default null
+			 */
 			error: null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * 
+			 * @property query.handlers.success
+			 * @type function
+			 * @default null
+			 */
 			success: null
 		}
 	}
 });
 root.version = {
 	"CodeMirror": CodeMirror.version,
-	"YASGUI-Query": require("../package.json").version
+	"YASQE": require("../package.json").version
 };
 
 

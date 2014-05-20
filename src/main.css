@@ -1,9 +1,10 @@
 .CodeMirror {
-	line-height: 1.7em;
+	line-height: 1.5em;
 	border: 1px solid #d1d1d1;
+	
 }
 .CodeMirror pre {
-	font-size: 14px;
+	font-size: 13px;
 }
 
 .CodeMirror-focused .cm-matchhighlight {
@@ -11,7 +12,7 @@
 }
 
 .CodeMirror-hint {
-	max-width: 30em !important;
+	max-width: 30em;
 }
 
 .gutterError {

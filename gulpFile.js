@@ -139,5 +139,5 @@ gulp.task('makedoc', ['makeDocLib', 'makeDocCss'], function() {
 });
 gulp.task('packageMinified', ['minifyJs', 'minifyCss']);
 gulp.task('default', ['browserify', 'packageMinified']);
-gulp.task('serve', ['browserify', 'watch', 'connect']);
+gulp.task('serve', ['browserify', 'minifyCss', 'watch', 'connect']);
 

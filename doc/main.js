@@ -118,10 +118,11 @@ var drawDocs = function(data) {
 		var attrOrProp = attributesAndProperties[i];
 		var prop = $("<div></div>").addClass("doc");
 		var name = attrOrProp.name;
-		if (attrOrProp.itemtype == "property") prop.addClass("doc-sub");
+		if (attrOrProp.itemtype == "property") prop.css("margin-left", "30px");
 		if (attrOrProp.itemtype == "property" && name.indexOf(".") > 0) {
-			prop.addClass("doc-sub-sub");
-			name = name.substring(name.indexOf(".") + 1);
+			var splitted = name.split(".");
+			prop.css("margin-left", ((splitted.length) * 30) + "px");
+			name = splitted[splitted.length - 1];
 		}
 		var codeText = name;
 		if (attrOrProp.type) codeText += ": " + attrOrProp.type;

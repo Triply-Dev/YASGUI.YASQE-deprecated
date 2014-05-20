@@ -4,6 +4,7 @@
 }
 .CodeMirror {
 	height: auto;
+	width: 100%;
 }
 
 .affix-top {
@@ -16,10 +17,4 @@ body{
 }
 .doc {
 	margin: 10px;
-}
-.doc-sub{
-	margin-left: 30px;
-}
-.doc-sub-sub{
-	margin-left: 60px;
 }
