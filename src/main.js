@@ -7,7 +7,8 @@ require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 
-//console = console || {"log":function(){}};//make sure any console statements we use do not break the app in ie
+// console = console || {"log":function(){}};//make sure any console statements
+// we use do not break the app in ie
 
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
@@ -30,24 +31,32 @@ var root = module.exports = function(parent, config) {
 
 /**
  * Extend config object, which we will pass on to the CM constructor later on.
- * Need this, to make sure our own 'onBlur' etc events do not get overwritten by people who add their own onblur events to the config
- * Additionally, need this to include the CM defaults ourselves. CodeMirror has a method for including defaults, but we can't rely on that one: it assumes flat config object, where we have nested objects (e.g. the persistency option)
+ * Need this, to make sure our own 'onBlur' etc events do not get overwritten by
+ * people who add their own onblur events to the config Additionally, need this
+ * to include the CM defaults ourselves. CodeMirror has a method for including
+ * defaults, but we can't rely on that one: it assumes flat config object, where
+ * we have nested objects (e.g. the persistency option)
  * 
  * @private
  */
 var extendConfig = function(config) {
-	var extendedConfig = $.extend(true, {}, root.defaults, config);//I know, codemirror deals with default options as well. However, it does not do this recursively (i.e. the persistency option)
-	
+	var extendedConfig = $.extend(true, {}, root.defaults, config);
+	// I know, codemirror deals with  default options as well. 
+	//However, it does not do this recursively (i.e. the persistency option)
 	return extendedConfig;
 };
 /**
- * Add extra functions to the CM document (i.e. the codemirror instantiated object)
+ * Add extra functions to the CM document (i.e. the codemirror instantiated
+ * object)
+ * 
  * @private
  */
 var extendCmInstance = function(cm) {
 	/**
-	 * Execute query. Pass a callback function, or a configuration object (see default settings below for possible values)
-	 * I.e., you can change the query configuration by either changing the default settings, changing the settings of this document, or by passing query settings to this function
+	 * Execute query. Pass a callback function, or a configuration object (see
+	 * default settings below for possible values) I.e., you can change the
+	 * query configuration by either changing the default settings, changing the
+	 * settings of this document, or by passing query settings to this function
 	 * 
 	 * @method doc.query
 	 * @param function|object
@@ -55,81 +64,82 @@ var extendCmInstance = function(cm) {
 	cm.query = function(callbackOrConfig) {
 		root.executeQuery(cm, callbackOrConfig);
 	};
-	
+
 	/**
 	 * Store bulk completions
 	 * 
 	 * @method doc.storeBulkCompletions
 	 * @param type {string} Type of completions: ["prefixes", "properties", "classes"]
-	 * @param completions {array} Array containing a set of strings (IRIs)
+	 * @param completions {array} Array containing a set of strings
 	 */
 	cm.storeBulkCompletions = function(type, completions) {
-		//store array as trie
+		// store array as trie
 		tries[type] = new Trie();
 		for (var i = 0; i < completions.length; i++) {
 			tries[type].insert(completions[i]);
 		}
-		
-		//store in localstorage as well
-		var storageId = getPersistencyId(cm, cm.options.autocompletions[type].persistent);
-		if (storageId) require("./storage.js").set(storageId, completions, "month");
+		// store in localstorage as well
+		var storageId = getPersistencyId(cm,
+				cm.options.autocompletions[type].persistent);
+		if (storageId)
+			require("./storage.js").set(storageId, completions, "month");
 	};
 	return cm;
 };
 
-
 var postProcessCmElement = function(cm) {
-	
+
 	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
 		var valueFromStorage = require("./storage.js").get(storageId);
-		if (valueFromStorage) cm.setValue(valueFromStorage);
+		if (valueFromStorage)
+			cm.setValue(valueFromStorage);
 	}
-	
+
 	/**
 	 * Add event handlers
 	 */
-	cm.on('blur',function(cm, eventInfo) {
+	cm.on('blur', function(cm, eventInfo) {
 		root.storeQuery(cm);
 	});
 	cm.on('change', function(cm, eventInfo) {
 		checkSyntax(cm, true);
 		root.autoComplete(cm, true);
 		root.appendPrefixIfNeeded(cm);
-		
+
 	});
-	
-//	if (cm.options.autocompletions) {
-//		var handlers = {};
-//		for (var type in cm.options.autocompletions) {
-//			
-//			if (cm.options.autocompletions[type].handlers) {
-//				for (var handlerType in cm.options.autocompletions[type].handlers) {
-//					if (cm.options.autocompletions[type].handlers[handlerType]) {
-//						handlers[handlerType] = handlers[handlerType] || {};
-//						handlers[handlerType][type] = cm.options.autocompletions[type].handlers[handlerType];
-//					}
-//				}
-//			}
-//		}
-//		for (var handler in handlers) {
-//			var combinedHandlers = function() {
-//				console.log(arguments);
-//			};
-//			console.log("bla");
-//			cm.on(root.showHint, handler, combinedHandlers);
-//		}
-//	}
-	
-	
-	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
-	
-	
+
+	// if (cm.options.autocompletions) {
+	// var handlers = {};
+	// for (var type in cm.options.autocompletions) {
+	//			
+	// if (cm.options.autocompletions[type].handlers) {
+	// for (var handlerType in cm.options.autocompletions[type].handlers) {
+	// if (cm.options.autocompletions[type].handlers[handlerType]) {
+	// handlers[handlerType] = handlers[handlerType] || {};
+	// handlers[handlerType][type] =
+	// cm.options.autocompletions[type].handlers[handlerType];
+	// }
+	// }
+	// }
+	// }
+	// for (var handler in handlers) {
+	// var combinedHandlers = function() {
+	// console.log(arguments);
+	// };
+	// console.log("bla");
+	// cm.on(root.showHint, handler, combinedHandlers);
+	// }
+	// }
+
+	checkSyntax(cm, true);// on first load, check as well (our stored or
+							// default query might be incorrect as well)
+
 	/**
 	 * load bulk completions
 	 */
 	if (cm.options.autocompletions) {
-		for (var completionType in cm.options.autocompletions) {
+		for ( var completionType in cm.options.autocompletions) {
 			if (cm.options.autocompletions[completionType].bulk) {
 				loadBulkCompletions(cm, completionType);
 			}
@@ -137,50 +147,60 @@ var postProcessCmElement = function(cm) {
 	}
 };
 
-
 /**
  * privates
  */
-//used to store bulk autocompletions in
+// used to store bulk autocompletions in
 var tries = {};
-//this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
+// this is a mapping from the class names (generic ones, for compatability with
+// codemirror themes), to what they -actually- represent
 var tokenTypes = {
-	"string-2": "prefixed",
+	"string-2" : "prefixed",
 };
 var keyExists = function(objectToTest, key) {
 	var exists = false;
-	
+
 	try {
-	  if (objectToTest[key] !== undefined) exists = true;
-	} catch(e) {
+		if (objectToTest[key] !== undefined)
+			exists = true;
+	} catch (e) {
 	}
 	return exists;
 };
 var loadBulkCompletions = function(cm, type) {
 	var completions = null;
-	if (keyExists(cm.options.autocompletions[type], "get")) completions = cm.options.autocompletions[type].get;
+	if (keyExists(cm.options.autocompletions[type], "get"))
+		completions = cm.options.autocompletions[type].get;
 	if (completions instanceof Array) {
-		//we don't care whether the completions are already stored in localstorage. just use this one
+		// we don't care whether the completions are already stored in
+		// localstorage. just use this one
 		cm.storeBulkCompletions(type, completions);
 	} else {
-		//if completions are defined in localstorage, use those! (calling the function may come with overhead (e.g. async calls))
+		// if completions are defined in localstorage, use those! (calling the
+		// function may come with overhead (e.g. async calls))
 		var completionsFromStorage = null;
-		if (getPersistencyId(cm, cm.options.autocompletions[type].persistent)) completionsFromStorage = require("./storage.js").get(getPersistencyId(cm, cm.options.autocompletions[type].persistent));
-		if (completionsFromStorage && completionsFromStorage instanceof Array && completionsFromStorage.length > 0) {
+		if (getPersistencyId(cm, cm.options.autocompletions[type].persistent))
+			completionsFromStorage = require("./storage.js").get(
+					getPersistencyId(cm,
+							cm.options.autocompletions[type].persistent));
+		if (completionsFromStorage && completionsFromStorage instanceof Array
+				&& completionsFromStorage.length > 0) {
 			cm.storeBulkCompletions(type, completionsFromStorage);
 		} else {
-			//nothing in storage. check whether we have a function via which we can get our prefixes
+			// nothing in storage. check whether we have a function via which we
+			// can get our prefixes
 			if (completions instanceof Function) {
 				var functionResult = completions(cm);
-				if (functionResult && functionResult instanceof Array && functionResult.length > 0) {
-					//function returned an array (if this an async function, we won't get a direct function result)
+				if (functionResult && functionResult instanceof Array
+						&& functionResult.length > 0) {
+					// function returned an array (if this an async function, we
+					// won't get a direct function result)
 					cm.storeBulkCompletions(type, functionResult);
-				} 
+				}
 			}
 		}
 	}
 };
-
 
 /**
  * Get defined prefixes from query as array, in format {"prefix:" "uri"}
@@ -200,10 +220,11 @@ var getPrefixesFromQuery = function(cm) {
 				if (prefix != null && prefix.string.length > 0 && uri != null
 						&& uri.string.length > 0) {
 					var uriString = uri.string;
-					if (uriString.indexOf("<") == 0 )
+					if (uriString.indexOf("<") == 0)
 						uriString = uriString.substring(1);
 					if (uriString.slice(-1) == ">")
-						uriString = uriString.substring(0, uriString.length - 1);
+						uriString = uriString
+								.substring(0, uriString.length - 1);
 					queryPrefixes[prefix.string] = uriString;
 				}
 			}
@@ -238,7 +259,7 @@ var appendToPrefixes = function(cm, prefix) {
 		});
 	} else {
 		var previousIndent = getIndentFromLine(cm, lastPrefixLine);
-		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix , {
+		cm.replaceRange("\n" + previousIndent + "PREFIX " + prefix, {
 			line : lastPrefixLine
 		});
 	}
@@ -267,7 +288,6 @@ var getIndentFromLine = function(cm, line, charNumber) {
 	;
 };
 
-
 var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	if (charNumber == undefined)
 		charNumber = 1;
@@ -284,23 +304,23 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	return token;
 };
 
-
 var prevQueryValid = false;
 var clearError = null;
 var checkSyntax = function(cm, deepcheck) {
 	var queryValid = true;
-		
+
 	if (clearError) {
 		clearError();
 		clearError = null;
 	}
 	cm.clearGutter("gutterErrorBar");
 	var state = null;
-	for ( var l = 0; l < cm.lineCount(); ++l) {
+	for (var l = 0; l < cm.lineCount(); ++l) {
 		var precise = false;
 		if (!prevQueryValid) {
-			//we don't want cached information in this case, otherwise the previous error sign might still show up,
-			//even though the syntax error might be gone already
+			// we don't want cached information in this case, otherwise the
+			// previous error sign might still show up,
+			// even though the syntax error might be gone already
 			precise = true;
 		}
 		state = cm.getTokenAt({
@@ -311,7 +331,7 @@ var checkSyntax = function(cm, deepcheck) {
 			var error = document.createElement('span');
 			error.innerHTML = "&rarr;";
 			error.className = "gutterError";
-			cm.setGutterMarker(l,"gutterErrorBar", error);
+			cm.setGutterMarker(l, "gutterErrorBar", error);
 			clearError = function() {
 				cm.markText({
 					line : l,
@@ -335,7 +355,8 @@ var checkSyntax = function(cm, deepcheck) {
 			if (len > 1)
 				queryValid = false;
 			else if (len == 1) {
-				if (stack[0] != "solutionModifier" && stack[0] != "?limitOffsetClauses"
+				if (stack[0] != "solutionModifier"
+						&& stack[0] != "?limitOffsetClauses"
 						&& stack[0] != "?offsetClause")
 					queryValid = false;
 			}
@@ -351,33 +372,36 @@ $.extend(root, CodeMirror);
 /**
  * Fetch prefixes from prefix.cc, and store in the YASQE object
  * 
- * @param doc {YASQE} 
+ * @param doc
+ *            {YASQE}
  * @method YasguiQuery.fetchFromPrefixCc
  */
 root.fetchFromPrefixCc = function(cm) {
 	$.get("http://prefix.cc/popular/all.file.json", function(data) {
 		var prefixArray = [];
-		for (var prefix in data) {
-			if (prefix == "bif") continue;//skip this one! see #231
+		for ( var prefix in data) {
+			if (prefix == "bif")
+				continue;// skip this one! see #231
 			var completeString = prefix + ": <" + data[prefix] + ">";
-			prefixArray.push(completeString);//the array we want to store in localstorage
+			prefixArray.push(completeString);// the array we want to store in
+												// localstorage
 		}
 		cm.storeBulkCompletions("prefixes", prefixArray);
 	});
 };
 
-
 /**
- * Determine unique ID of the YASQE object. Useful when several objects are loaded on the same page, and all have 'persistency' enabled.
- * Currently, the ID is determined by selecting the nearest parent in the DOM with an ID set
+ * Determine unique ID of the YASQE object. Useful when several objects are
+ * loaded on the same page, and all have 'persistency' enabled. Currently, the
+ * ID is determined by selecting the nearest parent in the DOM with an ID set
  * 
- * @param doc {YASQE} 
+ * @param doc
+ *            {YASQE}
  * @method YasguiQuery.fetchFromPrefixCc
  */
 root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
 };
-
 
 root.storeQuery = function(cm) {
 	var storageId = getPersistencyId(cm, cm.options.persistent);
@@ -458,7 +482,7 @@ root.doAutoFormat = function(cm) {
 	} else {
 		var totalLines = cm.lineCount();
 		var totalChars = cm.getTextArea().value.length;
-		autoFormatRange(cm,{
+		autoFormatRange(cm, {
 			line : 0,
 			ch : 0
 		}, {
@@ -469,98 +493,126 @@ root.doAutoFormat = function(cm) {
 
 };
 
-
 root.executeQuery = function(cm, callbackOrConfig) {
-	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
-	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig: {});
-	if (cm.options.query) config = $.extend({}, cm.options.query, config);
-	
-	if (!config.endpoint || config.endpoint.length == 0) return;//nothing to query!
-	
+	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig
+			: null);
+	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
+	if (cm.options.query)
+		config = $.extend({}, cm.options.query, config);
+
+	if (!config.endpoint || config.endpoint.length == 0)
+		return;// nothing to query!
+
 	/**
 	 * initialize ajax config
 	 */
 	var ajaxConfig = {
-		url: config.endpoint,
-		type: config.requestMethod,
-		data: [{name: "query", value: cm.getValue()}],
-		headers: {
-			Accept: config.acceptHeader
+		url : config.endpoint,
+		type : config.requestMethod,
+		data : [ {
+			name : "query",
+			value : cm.getValue()
+		} ],
+		headers : {
+			Accept : config.acceptHeader
 		}
 	};
-	
+
 	/**
 	 * add complete, beforesend, etc handlers (if specified)
 	 */
 	var handlerDefined = false;
 	if (config.handlers) {
-		for (var handler in config.handlers) {
+		for ( var handler in config.handlers) {
 			if (config.handlers[handler]) {
 				handlerDefined = true;
 				ajaxConfig[handler] = config.handlers[handler];
 			}
 		}
 	}
-	if (!handlerDefined && !callback) return; //ok, we can query, but have no callbacks. just stop now
-	//if only callback is passed as arg, add that on as 'onComplete' callback
-	if (callback) ajaxConfig.complete = callback;
-	
+	if (!handlerDefined && !callback)
+		return; // ok, we can query, but have no callbacks. just stop now
+	// if only callback is passed as arg, add that on as 'onComplete' callback
+	if (callback)
+		ajaxConfig.complete = callback;
+
 	/**
 	 * add named graphs to ajax config
 	 */
 	if (config.namedGraphs && config.namedGraphs.length > 0) {
-		for (var i = 0; i < config.namedGraphs.length; i++) ajaxConfig.data.push({name: "named-graph-uri", value: config.namedGraphs[i]});
+		for (var i = 0; i < config.namedGraphs.length; i++)
+			ajaxConfig.data.push({
+				name : "named-graph-uri",
+				value : config.namedGraphs[i]
+			});
 	}
 	/**
 	 * add default graphs to ajax config
 	 */
 	if (config.defaultGraphs && config.defaultGraphs.length > 0) {
-		for (var i = 0; i < config.defaultGraphs.length; i++) ajaxConfig.data.push({name: "default-graph-uri", value: config.defaultGraphs[i]});
+		for (var i = 0; i < config.defaultGraphs.length; i++)
+			ajaxConfig.data.push({
+				name : "default-graph-uri",
+				value : config.defaultGraphs[i]
+			});
 	}
-	
+
 	/**
 	 * merge additional request headers
 	 */
-	if (config.headers && !$.isEmptyObject(config.headers)) $.extend(ajaxConfig.headers, config.headers);
+	if (config.headers && !$.isEmptyObject(config.headers))
+		$.extend(ajaxConfig.headers, config.headers);
 	/**
 	 * add additional request args
 	 */
-	if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
+	if (config.args && config.args.length > 0)
+		$.merge(ajaxConfig.data, config.args);
 	$.ajax(ajaxConfig);
 };
 
 var validCompletionPosition = {
-	properties: function(cm) {
+	properties : function(cm) {
 		var token = getCompleteToken(cm);
-		
-		if (token.type == "var") return false; //we are typing a var
-		if ($.inArray("a", token.state.possibleCurrent) >= 0) return true;//predicate pos
+
+		if (token.type == "var")
+			return false; // we are typing a var
+		if ($.inArray("a", token.state.possibleCurrent) >= 0)
+			return true;// predicate pos
 		var cur = cm.getCursor();
 		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
-		if (previousToken.string == "rdfs:subPropertyOf") return true;
-		
-		//hmm, we would like -better- checks here, e.g. checking whether we are in a subject, and whether next item is a rdfs:subpropertyof.
-		//difficult though... the grammar we use is unreliable when the query is invalid (i.e. during typing), and often the predicate is not typed yet, when we are busy writing the subject...
+		if (previousToken.string == "rdfs:subPropertyOf")
+			return true;
+
+		// hmm, we would like -better- checks here, e.g. checking whether we are
+		// in a subject, and whether next item is a rdfs:subpropertyof.
+		// difficult though... the grammar we use is unreliable when the query
+		// is invalid (i.e. during typing), and often the predicate is not typed
+		// yet, when we are busy writing the subject...
 		return false;
 	},
-	classes: function(cm) {
+	classes : function(cm) {
 		var token = getCompleteToken(cm);
-		if (token.type == "var") return false;
+		if (token.type == "var")
+			return false;
 		var cur = cm.getCursor();
 		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
-		if (previousToken.string == "a") return true;
-		if (previousToken.string == "rdf:type") return true;
-		if (previousToken.string == "rdfs:domain") return true;
-		if (previousToken.string == "rdfs:range") return true;
+		if (previousToken.string == "a")
+			return true;
+		if (previousToken.string == "rdf:type")
+			return true;
+		if (previousToken.string == "rdfs:domain")
+			return true;
+		if (previousToken.string == "rdfs:range")
+			return true;
 		return false;
 	},
-	prefixes: function(cm) {
+	prefixes : function(cm) {
 		var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-		
+
 		// not at end of line
 		if (cm.getLine(cur.line).length > cur.ch)
 			return false;
-		
+
 		if (token.type != "ws") {
 			// we want to complete token, e.g. when the prefix starts with an a
 			// (treated as a token in itself..)
@@ -568,11 +620,11 @@ var validCompletionPosition = {
 			// typed a space after the prefix tag, don't get the complete token
 			token = getCompleteToken(cm);
 		}
-		
+
 		// we shouldnt be at the uri part the prefix declaration
 		// also check whether current token isnt 'a' (that makes codemirror
 		// thing a namespace is a possiblecurrent
-		if (!token.string.indexOf("a") == 0 
+		if (!token.string.indexOf("a") == 0
 				&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
 			return false;
 
@@ -580,56 +632,55 @@ var validCompletionPosition = {
 		// there should be no trailing text (otherwise, text is wrongly inserted
 		// in between)
 		var firstToken = getNextNonWsToken(cm, cur.line);
-		if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX") return false;
+		if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
+			return false;
 		return true;
 	}
 };
 
 root.autoComplete = function(cm, fromAutoShow) {
-	if (cm.somethingSelected()) return;
-	if (!cm.options.autocompletions) return;
+	if (cm.somethingSelected())
+		return;
+	if (!cm.options.autocompletions)
+		return;
 	var tryHintType = function(type) {
-		if (fromAutoShow //from autoShow, i.e. this gets called each time the editor content changes 
-				&& (!cm.options.autocompletions[type].autoShow //autoshow for this particular type of autocompletion is -not- enabled
-						|| cm.options.autocompletions[type].async) //async is enabled (don't want to re-do ajax-like request for every editor change)
-			) {
+		if (fromAutoShow // from autoShow, i.e. this gets called each time
+							// the editor content changes
+				&& (!cm.options.autocompletions[type].autoShow // autoshow for  this particular type of autocompletion is -not- enabled
+				|| cm.options.autocompletions[type].async) // async is enabled (don't want to re-do ajax-like request for every editor change)
+		) {
 			return false;
 		}
-		
-//		var hints = getHints[type](cm);
-		
-//		if (hints) {
-//			if (cm.options.autocompletions[type].handlers) {
-//				for (var handler in cm.options.autocompletions[type].handlers) {
-//					root.on(hints, handler, cm.options.autocompletions[type].handlers[handler]);
-//				}
-//			}
-			var hintConfig = {closeCharacters: /(?=a)b/, type: type};
-//			var hintFunc = function(){return hints;};
-			if (cm.options.autocompletions[type].async) {
-				hintConfig.async = true;
-//				hintConfig.completionToken = hints.completionToken;
-//				hintFunc = cm.options.autocompletions[type].get;
-			}
-			var result = root.showHint(cm, getHints[type], hintConfig);
-			console.log("showhint result", result);
-			return true;
-//		}
+
+		var hintConfig = {
+			closeCharacters : /(?=a)b/,
+			type : type,
+			completeSingle: false
+		};
+		if (cm.options.autocompletions[type].async) {
+			hintConfig.async = true;
+		}
+		var result = root.showHint(cm, getHints[type], hintConfig);
+		return true;
 		return false;
 	};
-	for (var type in cm.options.autocompletions) {
-		if (!validCompletionPosition[type](cm)) continue;
-		
-		//run valid position handler, if there is one (if it returns false, stop the autocompletion!)
-		if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.validPosition) {
-			if (cm.options.autocompletions[type].handlers.validPosition(cm) === false) continue;
+	for ( var type in cm.options.autocompletions) {
+		if (!validCompletionPosition[type](cm))
+			continue;
+
+		// run valid position handler, if there is one (if it returns false,
+		// stop the autocompletion!)
+		if (cm.options.autocompletions[type].handlers
+				&& cm.options.autocompletions[type].handlers.validPosition) {
+			if (cm.options.autocompletions[type].handlers.validPosition(cm) === false)
+				continue;
 		}
-		
+
 		var success = tryHintType(type);
-		if (success) break;
+		if (success)
+			break;
 	}
 };
-
 
 /**
  * Check whether typed prefix is declared. If not, automatically add declaration
@@ -638,9 +689,10 @@ root.autoComplete = function(cm, fromAutoShow) {
  * @param cm
  */
 root.appendPrefixIfNeeded = function(cm) {
-	if (!tries["prefixes"]) return;//no prefixed defined. just stop
+	if (!tries["prefixes"])
+		return;// no prefixed defined. just stop
 	var cur = cm.getCursor();
-	
+
 	var token = cm.getTokenAt(cur);
 	if (tokenTypes[token.type] == "prefixed") {
 		var colonIndex = token.string.indexOf(":");
@@ -661,7 +713,8 @@ root.appendPrefixIfNeeded = function(cm) {
 				var queryPrefixes = getPrefixesFromQuery(cm);
 				if (queryPrefixes[currentPrefix] == null) {
 					// ok, so it isnt added yet!
-					var completions = tries["prefixes"].autoComplete(currentPrefix);
+					var completions = tries["prefixes"]
+							.autoComplete(currentPrefix);
 					if (completions.length > 0) {
 						appendToPrefixes(cm, completions[0]);
 					}
@@ -672,8 +725,10 @@ root.appendPrefixIfNeeded = function(cm) {
 };
 
 /**
- * When typing a query, this query is sometimes syntactically invalid, causing the current tokens to be incorrect
- * This causes problem for autocompletion. http://bla might result in two tokens: http:// and bla. We'll want to combine these
+ * When typing a query, this query is sometimes syntactically invalid, causing
+ * the current tokens to be incorrect This causes problem for autocompletion.
+ * http://bla might result in two tokens: http:// and bla. We'll want to combine
+ * these
  */
 var getCompleteToken = function(cm, token, cur) {
 	if (!cur) {
@@ -686,7 +741,7 @@ var getCompleteToken = function(cm, token, cur) {
 		line : cur.line,
 		ch : token.start
 	});
-	//not start of line, and not whitespace
+	// not start of line, and not whitespace
 	if (prevToken.type != null && prevToken.type != "ws") {
 		token.start = prevToken.start;
 		token.string = prevToken.string + token.string;
@@ -717,18 +772,18 @@ var preprocessCompletionToken = function(cm, token) {
 		token = getCompleteToken(cm, token);
 		var queryPrefixes = getPrefixesFromQuery(cm);
 		if (!token.string.indexOf("<") == 0) {
-			completionToken.tokenPrefix = token.string.substring(0, token.string.indexOf(":") + 1);
-			
-			
+			completionToken.tokenPrefix = token.string.substring(0,
+					token.string.indexOf(":") + 1);
+
 			if (queryPrefixes[completionToken.tokenPrefix] != null) {
 				completionToken.tokenPrefixUri = queryPrefixes[completionToken.tokenPrefix];
 			}
 		}
-		
+
 		completionToken.uri = token.string;
 		if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
-			//hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
-			for (var prefix in queryPrefixes) {
+			// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
+			for ( var prefix in queryPrefixes) {
 				if (queryPrefixes.hasOwnProperty(prefix)) {
 					if (token.string.indexOf(prefix) == 0) {
 						completionToken.uri = queryPrefixes[prefix];
@@ -738,21 +793,19 @@ var preprocessCompletionToken = function(cm, token) {
 				}
 			}
 		}
-		
-		if (completionToken.uri.indexOf("<") == 0)
-			completionToken.uri = completionToken.uri.substring(1);
-		if (completionToken.uri.indexOf(">", completionToken.length - 1) !== -1)
-			completionToken.uri = completionToken.uri.substring(0, completionToken.uri.length - 1);
+
+		if (completionToken.uri.indexOf("<") == 0)	completionToken.uri = completionToken.uri.substring(1);
+		if (completionToken.uri.indexOf(">", completionToken.length - 1) !== -1) completionToken.uri = completionToken.uri.substring(0,	completionToken.uri.length - 1);
 	}
 	return completionToken;
 };
 
 var getSuggestionsFromToken = function(cm, type, partialToken) {
-	
+
 	var suggestions = [];
 	if (tries[type]) {
 		suggestions = tries[type].autoComplete(partialToken);
-	} else if(typeof cm.options.autocompletions[type].get == "function" && cm.options.autocompletions[type].async == false) {
+	} else if (typeof cm.options.autocompletions[type].get == "function" && cm.options.autocompletions[type].async == false) {
 		suggestions = cm.options.autocompletions[type].get(cm, partialToken, type);
 	} else if (typeof cm.options.autocompletions[type].get == "object") {
 		var partialTokenLength = partialToken.length;
@@ -768,8 +821,11 @@ var getSuggestionsFromToken = function(cm, type, partialToken) {
 
 root.fetchFromLov = function(cm, partialToken, type, callback) {
 	var maxResults = 50;
-	
-	var args = {q:partialToken, page: 1};
+
+	var args = {
+		q : partialToken,
+		page : 1
+	};
 	if (type == "classes") {
 		args.type = "class";
 	} else {
@@ -778,40 +834,48 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 	var results = [];
 	var url = "";
 	var updateUrl = function() {
-    	url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
-    };
-    updateUrl();
-    var increasePage = function(){
-    	args.page++;
-    	updateUrl();
-    };
-    var doRequests = function() {
-    	$.get(url, function(data) {
-			for (var i = 0; i < data.results.length; i++) {
-				results.push(data.results[i].uri);
-		 	}
-			if (results.length < data.total_results && results.length < maxResults) {
-				increasePage();
-				doRequests();
-			} else {
-				callback(results);
-				//requests done! Don't call this function again
-			}
-		}).fail(function(jqXHR, textStatus, errorThrown) {
+		url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?"
+				+ $.param(args);
+	};
+	updateUrl();
+	var increasePage = function() {
+		args.page++;
+		updateUrl();
+	};
+	var doRequests = function() {
+		$.get(
+				url,
+				function(data) {
+					for (var i = 0; i < data.results.length; i++) {
+						results.push(data.results[i].uri);
+					}
+					if (results.length < data.total_results
+							&& results.length < maxResults) {
+						increasePage();
+						doRequests();
+					} else {
+						callback(results);
+						// requests done! Don't call this function again
+					}
+				}).fail(function(jqXHR, textStatus, errorThrown) {
 			console.log(errorThrown);
-		  });
-    };
-    doRequests();
+		});
+	};
+	doRequests();
 };
-
-
+var selectHint = function(cm, data, completion) {
+	if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
+		cm.replaceRange(completion.text, data.from, data.to);
+	}
+};
 var getHints = {};
-getHints.resourceHints = function(cm, type, callback, config) {
-	var getSuggestionsAsHintObject = function(suggestions){
+getHints.resourceHints = function(cm, type, callback) {
+	var getSuggestionsAsHintObject = function(suggestions) {
 		var hintList = [];
-		for ( var i = 0; i < suggestions.length; i++) {
+		for (var i = 0; i < suggestions.length; i++) {
 			var suggestedString = suggestions[i];
-			if (completionToken.tokenPrefix != null && completionToken.uri != null) {
+			if (completionToken.tokenPrefix != null
+					&& completionToken.uri != null) {
 				// we need to get the suggested string back to prefixed form
 				suggestedString = suggestedString
 						.substring(completionToken.tokenPrefixUri.length);
@@ -822,14 +886,13 @@ getHints.resourceHints = function(cm, type, callback, config) {
 			}
 			hintList.push({
 				text : suggestedString,
-				displayText: suggestedString,
-				hint : completionHint,
-				className: type + "Hint"
+				displayText : suggestedString,
+				hint : selectHint,
+				className : type + "Hint"
 			});
 		}
-		
 		var returnObj = {
-			completionToken: completionToken.uri,
+			completionToken : completionToken.uri,
 			list : hintList,
 			from : {
 				line : cur.line,
@@ -842,7 +905,8 @@ getHints.resourceHints = function(cm, type, callback, config) {
 		};
 		if (cm.options.autocompletions[type].handlers) {
 			for (var handler in cm.options.autocompletions[type].handlers) {
-				root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
+				if (cm.options.autocompletions[type].handlers[handler])
+					root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
 			}
 		}
 		return returnObj;
@@ -855,81 +919,90 @@ getHints.resourceHints = function(cm, type, callback, config) {
 		// completionhint is the same as the current token
 		// regular behaviour would keep changing the codemirror dom, hence
 		// constantly calling this callback
-		var completionHint = function(cm, data, completion) {
-			if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
-				cm.replaceRange(completion.text, data.from, data.to);
-			}
-		};
+		
 		if (cm.options.autocompletions[type].async) {
 			var wrappedCallback = function(suggestions) {
 				callback(getSuggestionsAsHintObject(suggestions));
 			};
-			cm.options.autocompletions[type].get(cm, completionToken.uri, wrappedCallback, type);
+			cm.options.autocompletions[type].get(cm, completionToken.uri, type, wrappedCallback);
 		} else {
-			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type, completionToken.uri));
-			
+			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type,	completionToken.uri));
+
 		}
 	}
 };
-getHints.properties = function(cm, callback, config) {
-	return getHints.resourceHints(cm, "properties", callback, config);
+getHints.properties = function(cm, callback) {
+	return getHints.resourceHints(cm, "properties", callback);
 };
 getHints.classes = function(cm, callback, config) {
-	return getHints.resourceHints(cm, "classes", callback, config);
+	return getHints.resourceHints(cm, "classes", callback);
 };
-getHints.prefixes = function(cm, callback, config) {
-	if (!tries["prefixes"]) return;//no prefix completions defined
+getHints.prefixes = function(cm, callback) {
+	var type = "prefixes";
 	var token = getCompleteToken(cm);
 	var cur = cm.getCursor();
-
-	// If this is a whitespace, and token is just after PREFIX, proceed
-	// using empty string as token
-	if (/\s*/.test(token.string) && cm.getTokenAt({
-		line : cur.line,
-		ch : token.start
-	}).string.toUpperCase() == "PREFIX") {
-		token = {
-			start : cur.ch,
-			end : cur.ch,
-			string : "",
-			state : token.state
-		};
-	} else {
-		// We know we are in a PREFIX line. Now check whether the string
-		// starts with a punct or keyword
-		// Good example is 'a', which is a valid punct in our grammar.
-		// This is parsed as separate token which messes up the token for
-		// autocompletion (the part after 'a' is used as separate token)
-		// If previous token is in keywords or keywords, prepend this token
-		// to current token
-		token = getCompleteToken(cm, token, cur);
-	}
-
-	var returnObj = {
-		completionToken: completionToken.uri,
-		list : tries["prefixes"].autoComplete(token.string),
-		from : {
+	var preprocessPrefixCompletion = function() {
+		// If this is a whitespace, and token is just after PREFIX, proceed
+		// using empty string as token
+		if (/\s*/.test(token.string) && cm.getTokenAt({
 			line : cur.line,
 			ch : token.start
-		},
-		to : {
-			line : cur.line,
-			ch : token.end
+		}).string.toUpperCase() == "PREFIX") {
+			token = {
+				start : cur.ch,
+				end : cur.ch,
+				string : "",
+				state : token.state
+			};
+		} else {
+			// We know we are in a PREFIX line. Now check whether the string
+			// starts with a punct or keyword
+			// Good example is 'a', which is a valid punct in our grammar.
+			// This is parsed as separate token which messes up the token for
+			// autocompletion (the part after 'a' is used as separate token)
+			// If previous token is in keywords or keywords, prepend this token
+			// to current token
+			token = getCompleteToken(cm, token, cur);
 		}
 	};
-	if (cm.options.autocompletions[type].handlers) {
-		for (var handler in cm.options.autocompletions.prefixes.handlers) {
-			root.on(returnObj, handler, cm.options.autocompletions.prefixes.handlers[handler]);
+	var getSuggestionsAsHintObject = function(suggestions) {
+		var returnObj = {
+			completionToken : token.uri,
+			list : suggestions,
+			from : {
+				line : cur.line,
+				ch : token.start
+			},
+			to : {
+				line : cur.line,
+				ch : token.end
+			}
+		};
+		if (cm.options.autocompletions[type].handlers) {
+			for ( var handler in cm.options.autocompletions[type].handlers) {
+				if (cm.options.autocompletions[type].handlers[handler]) 
+					root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
+			}
+		}
+		return returnObj;
+	};
+	preprocessPrefixCompletion();
+	if (token) {
+		if (cm.options.autocompletions[type].async) {
+			var wrappedCallback = function(suggestions) {
+				callback(getSuggestionsAsHintObject(suggestions));
+			};
+			cm.options.autocompletions[type].get(cm, token.uri, type, wrappedCallback);
+		} else {
+			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type,	token.string));
+
 		}
 	}
-	return returnObj;
 };
-
-
 
 var getPersistencyId = function(cm, persistentIdCreator) {
 	var persistencyId = null;
-	
+
 	if (persistentIdCreator) {
 		if (typeof persistentIdCreator == "string") {
 			persistencyId = persistentIdCreator;
@@ -940,35 +1013,35 @@ var getPersistencyId = function(cm, persistentIdCreator) {
 	return persistencyId;
 };
 
-var autoFormatRange = function (cm, from, to) {
-	  var absStart = cm.indexFromPos(from);
-	  var absEnd = cm.indexFromPos(to);
-	  // Insert additional line breaks where necessary according to the
-	  // mode's syntax
-	  var res = autoFormatLineBreaks(cm.getValue(), absStart, absEnd);
+var autoFormatRange = function(cm, from, to) {
+	var absStart = cm.indexFromPos(from);
+	var absEnd = cm.indexFromPos(to);
+	// Insert additional line breaks where necessary according to the
+	// mode's syntax
+	var res = autoFormatLineBreaks(cm.getValue(), absStart, absEnd);
 
-	  // Replace and auto-indent the range
-	  cm.operation(function () {
-	    cm.replaceRange(res, from, to);
-	    var startLine = cm.posFromIndex(absStart).line;
-	    var endLine = cm.posFromIndex(absStart + res.length).line;
-	    for (var i = startLine; i <= endLine; i++) {
-	      cm.indentLine(i, "smart");
-	    }
-  });
+	// Replace and auto-indent the range
+	cm.operation(function() {
+		cm.replaceRange(res, from, to);
+		var startLine = cm.posFromIndex(absStart).line;
+		var endLine = cm.posFromIndex(absStart + res.length).line;
+		for (var i = startLine; i <= endLine; i++) {
+			cm.indentLine(i, "smart");
+		}
+	});
 };
 
-var autoFormatLineBreaks = function (text, start, end) {
+var autoFormatLineBreaks = function(text, start, end) {
 	text = text.substring(start, end);
-	var breakAfterArray = [
-	    ["keyword", "ws", "prefixed", "ws", "uri"], //i.e. prefix declaration
-	    ["keyword", "ws", "uri"]//i.e. base
+	var breakAfterArray = [ [ "keyword", "ws", "prefixed", "ws", "uri" ], // i.e. prefix declaration
+	[ "keyword", "ws", "uri" ] // i.e. base
 	];
-	var breakAfterCharacters = ["{", ".", ";"];
-	var breakBeforeCharacters = ["}"];
+	var breakAfterCharacters = [ "{", ".", ";" ];
+	var breakBeforeCharacters = [ "}" ];
 	var getBreakType = function(stringVal, type) {
 		for (var i = 0; i < breakAfterArray.length; i++) {
-			if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf().toString()) {
+			if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf()
+					.toString()) {
 				return 1;
 			}
 		}
@@ -978,8 +1051,10 @@ var autoFormatLineBreaks = function (text, start, end) {
 			}
 		}
 		for (var i = 0; i < breakBeforeCharacters.length; i++) {
-			//don't want to issue 'breakbefore' AND 'breakafter', so check current line
-			if ($.trim(currentLine) != '' && stringVal == breakBeforeCharacters[i]) {
+			// don't want to issue 'breakbefore' AND 'breakafter', so check
+			// current line
+			if ($.trim(currentLine) != ''
+					&& stringVal == breakBeforeCharacters[i]) {
 				return -1;
 			}
 		}
@@ -995,7 +1070,7 @@ var autoFormatLineBreaks = function (text, start, end) {
 			if (breakType == 1) {
 				formattedQuery += stringVal + "\n";
 				currentLine = "";
-			} else {//(-1)
+			} else {// (-1)
 				formattedQuery += "\n" + stringVal;
 				currentLine = stringVal;
 			}
@@ -1004,16 +1079,18 @@ var autoFormatLineBreaks = function (text, start, end) {
 			currentLine += stringVal;
 			formattedQuery += stringVal;
 		}
-		if (stackTrace.length == 1 && stackTrace[0] == "sp-ws") stackTrace = [];
+		if (stackTrace.length == 1 && stackTrace[0] == "sp-ws")
+			stackTrace = [];
 	});
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 
-
 /**
- * The default options of YASQE (check the CodeMirror documentation for even more options, such as disabling line numbers, or changing keyboard shortcut keys). 
- * Either change the default options by setting YASQE.defaults, or by passing your own options as second argument to the YASQE constructor
- *
+ * The default options of YASQE (check the CodeMirror documentation for even
+ * more options, such as disabling line numbers, or changing keyboard shortcut
+ * keys). Either change the default options by setting YASQE.defaults, or by
+ * passing your own options as second argument to the YASQE constructor
+ * 
  * @attribute
  * @attribute YasguiQuery.defaults
  */
@@ -1021,7 +1098,7 @@ root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
 	/**
 	 * Query string
-	 *
+	 * 
 	 * @property value
 	 * @type String
 	 * @default "SELECT * {?x ?y ?z} \nLIMIT 10"
@@ -1035,10 +1112,10 @@ root.defaults = $.extend(root.defaults, {
 	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
 	matchBrackets : true,
 	fixedGutter : true,
-	
+
 	/**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
-	 *
+	 * 
 	 * @property extraKeys
 	 * @type object
 	 */
@@ -1057,107 +1134,141 @@ root.defaults = $.extend(root.defaults, {
 		"Cmd-Alt-Up" : root.copyLineUp,
 		"Shift-Ctrl-F" : root.doAutoFormat,
 		"Shift-Cmd-F" : root.doAutoFormat,
-		"Ctrl-]": root.indentMore,
-		"Cmd-]": root.indentMore,
-		"Ctrl-[": root.indentLess,
-		"Cmd-[": root.indentLess,
-		"Ctrl-S": root.storeQuery,
-		"Cmd-S": root.storeQuery,
-		"Ctrl-Enter": root.executeQuery,
-		"Cmd-Enter": root.executeQuery
+		"Ctrl-]" : root.indentMore,
+		"Cmd-]" : root.indentMore,
+		"Ctrl-[" : root.indentLess,
+		"Cmd-[" : root.indentLess,
+		"Ctrl-S" : root.storeQuery,
+		"Cmd-S" : root.storeQuery,
+		"Ctrl-Enter" : root.executeQuery,
+		"Cmd-Enter" : root.executeQuery
 	},
-	cursorHeight: 0.9,
-	
-	//non CodeMirror options
-	
-	
+	cursorHeight : 0.9,
+
+	// non CodeMirror options
+
 	/**
-	 * Change persistency settings for the YASQE query value. Setting the values to null, will disable persistancy: nothing is stored between browser sessions
-	 * Setting the values to a string (or a function which returns a string), will store the query in localstorage using the specified string.
-	 * By default, the ID is dynamically generated using the determineID function, to avoid collissions when using multiple YASQE items on one page
+	 * Change persistency settings for the YASQE query value. Setting the values
+	 * to null, will disable persistancy: nothing is stored between browser
+	 * sessions Setting the values to a string (or a function which returns a
+	 * string), will store the query in localstorage using the specified string.
+	 * By default, the ID is dynamically generated using the determineID
+	 * function, to avoid collissions when using multiple YASQE items on one
+	 * page
 	 * 
 	 * @property persistent
 	 * @type function|string
 	 */
-	persistent: function(cm){return "queryVal_" + root.determineId(cm);},
+	persistent : function(cm) {
+		return "queryVal_" + root.determineId(cm);
+	},
 
 	/**
-	 * Types of completions. Setting the value to null, will disable autocompletion for this particular type. 
-	 * Set the values to an array (or a function which returns an array), and you'll be able to use the specified prefixes. 
-	 * An asynchronous function is possible. Just make sure you call doc.storeBulkCompletions() in your callback
-	 * By default, only prefix autocompletions are fetched (from prefix.cc)
-	 *
+	 * Types of completions. Setting the value to null, will disable
+	 * autocompletion for this particular type. By default, only prefix
+	 * autocompletions are fetched from prefix.cc, and property and class
+	 * autocompletions are fetched from the Linked Open Vocabularies API
+	 * 
 	 * @property autocompletions
 	 * @type object
 	 */
-	autocompletions: {
+	autocompletions : {
 		/**
 		 * Prefix autocompletion settings
 		 * 
 		 * @property autocompletions.prefixes
 		 * @type object
 		 */
-		prefixes: {
+		prefixes : {
 			/**
-			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * Get the autocompletions. Either a function which returns an
+			 * array, or an actual array. The array should be in the form ["rdf: <http://....>"]
 			 * 
-			 * @property autocompletions.prefixes.autoShow
+			 * @property autocompletions.prefixes.get
 			 * @type function|array
+			 * @param doc {YASQE}
+			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
+			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromPrefixCc)
 			 */
-			get: root.fetchFromPrefixCc,
+			get : root.getFromPrefixCc,
 			/**
-			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
-			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
+			 * The get function is asynchronous
+			 * 
+			 * @property autocompletions.prefixes.async
+			 * @type boolean
+			 * @default false
+			 */
+			async : false,
+			/**
+			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad
+			 * using the get() function. Alternatively, disable bulk loading, to
+			 * call the get() function whenever a token needs autocompletion (in
+			 * this case, the completion token is passed on to the get()
+			 * function) Whenever you have an autocompletion list that easily
+			 * fits in memory, we advice you to enable bulk for performance
+			 * reasons (especially as we store the autocompletions in a trie)
 			 * 
 			 * @property autocompletions.prefixes.bulk
 			 * @type boolean
 			 * @default true
 			 */
-			bulk: true,
+			bulk : true,
 			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
-			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * Auto-show the autocompletion dialog. Disabling this requires the
+			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
+			 * only works when completions are loaded in memory (i.e. bulk:
+			 * true)
 			 * 
 			 * @property autocompletions.prefixes.autoShow
 			 * @type boolean
 			 * @default true
 			 */
-			autoShow: true,
+			autoShow : true,
 			/**
-			 * Auto-add prefix declaration: when prefixes are loaded in memory (bulk: true), and the user types e.g. 'rdf:' in a triple pattern, the editor automatically add this particular PREFIX definition to the query
+			 * Auto-add prefix declaration: when prefixes are loaded in memory
+			 * (bulk: true), and the user types e.g. 'rdf:' in a triple pattern,
+			 * the editor automatically add this particular PREFIX definition to
+			 * the query
 			 * 
 			 * @property autocompletions.prefixes.autoAddDeclaration
 			 * @type boolean
 			 * @default true
 			 */
-			autoAddDeclaration: true,
+			autoAddDeclaration : true,
 			/**
-			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
-			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
-			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * Automatically store autocompletions in localstorage. This is
+			 * particularly useful when the get() function is an expensive ajax
+			 * call. Autocompletions are stored for a period of a month. Set
+			 * this property to null (or remove it), to disable the use of
+			 * localstorage. Otherwise, set a string value (or a function
+			 * returning a string val), returning the key in which to store the
+			 * data Note: this feature only works combined with completions
+			 * loaded in memory (i.e. bulk: true)
 			 * 
 			 * @property autocompletions.prefixes.persistent
 			 * @type string|function
 			 * @default "prefixes"
 			 */
-			persistent: "prefixes",
+			persistent : "prefixes",
 			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * A set of handlers. Most, taken from the CodeMirror showhint
+			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
 			 * 
 			 * @property autocompletions.prefixes.handlers
 			 * @type object
 			 */
-			handlers: {
+			handlers : {
 				/**
-				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * Fires when a codemirror change occurs in a position where we
+				 * can show this particular type of autocompletion
 				 * 
 				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
 				 * @default null
 				 */
-				validPosition: null,
+				validPosition : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1165,7 +1276,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				showHint: null,
+				showHint : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1173,7 +1284,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				shown: null,
+				shown : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1181,7 +1292,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				select: null,
+				select : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1189,7 +1300,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				pick: null,
+				pick : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1197,7 +1308,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				close: null,
+				close : null,
 			}
 		},
 		/**
@@ -1206,67 +1317,86 @@ root.defaults = $.extend(root.defaults, {
 		 * @property autocompletions.properties
 		 * @type object
 		 */
-		properties: {
+		properties : {
 			/**
-			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * Get the autocompletions. Either a function which returns an
+			 * array, or an actual array. The array should be in the form ["http://...",....]
 			 * 
-			 * @property autocompletions.properties.autoShow
+			 * @property autocompletions.properties.get
 			 * @type function|array
-			 * @default function (YASQE.fetchFromPrefixCc)
+			 * @param doc {YASQE}
+			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
+			 * @param callback {function} In case async is enabled, use this callback
+			 * @default function (YASQE.fetchFromLov)
 			 */
-			get: root.fetchFromLov,
+			get : root.fetchFromLov,
 			/**
 			 * The get function is asynchronous
 			 * 
-			 * @property async
+			 * @property autocompletions.properties.async
 			 * @type boolean
 			 * @default true
 			 */
-			async: true,
+			async : true,
 			/**
-			 * Use bulk loading of properties: all properties are retrieved onLoad using the get() function. 
-			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
+			 * Use bulk loading of properties: all properties are retrieved
+			 * onLoad using the get() function. Alternatively, disable bulk
+			 * loading, to call the get() function whenever a token needs
+			 * autocompletion (in this case, the completion token is passed on
+			 * to the get() function) Whenever you have an autocompletion list
+			 * that easily fits in memory, we advice you to enable bulk for
+			 * performance reasons (especially as we store the autocompletions
+			 * in a trie)
 			 * 
 			 * @property autocompletions.properties.bulk
 			 * @type boolean
 			 * @default false
 			 */
-			bulk: false,
+			bulk : false,
 			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
-			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * Auto-show the autocompletion dialog. Disabling this requires the
+			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
+			 * only works when completions are loaded in memory (i.e. bulk:
+			 * true)
 			 * 
 			 * @property autocompletions.properties.autoShow
 			 * @type boolean
 			 * @default false
 			 */
-			autoShow: false,
+			autoShow : false,
 			/**
-			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
-			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
-			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * Automatically store autocompletions in localstorage. This is
+			 * particularly useful when the get() function is an expensive ajax
+			 * call. Autocompletions are stored for a period of a month. Set
+			 * this property to null (or remove it), to disable the use of
+			 * localstorage. Otherwise, set a string value (or a function
+			 * returning a string val), returning the key in which to store the
+			 * data Note: this feature only works combined with completions
+			 * loaded in memory (i.e. bulk: true)
 			 * 
 			 * @property autocompletions.properties.persistent
 			 * @type string|function
 			 * @default "properties"
 			 */
-			persistent: "properties",
+			persistent : "properties",
 			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * A set of handlers. Most, taken from the CodeMirror showhint
+			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
 			 * 
 			 * @property autocompletions.properties.handlers
 			 * @type object
 			 */
-			handlers: {
+			handlers : {
 				/**
-				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * Fires when a codemirror change occurs in a position where we
+				 * can show this particular type of autocompletion
 				 * 
 				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
 				 * @default null
 				 */
-				validPosition: null,
+				validPosition : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1274,7 +1404,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				showHint: function(){console.log("showhint");},
+				showHint : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1282,7 +1412,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				shown: function(){console.log("shown");},
+				shown : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1290,7 +1420,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				select: function(){console.log("select");},
+				select : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1298,7 +1428,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				pick: function(){console.log("pick");},
+				pick : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1306,7 +1436,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				close: function(){console.log("close");},
+				close : null,
 			}
 		},
 		/**
@@ -1315,63 +1445,85 @@ root.defaults = $.extend(root.defaults, {
 		 * @property autocompletions.classes
 		 * @type object
 		 */
-		classes: {
+		classes : {
 			/**
-			 * Get the autocompletions. Either a function which returns an array, or an actual array.
+			 * Get the autocompletions. Either a function which returns an
+			 * array, or an actual array. The array should be in the form ["http://...",....]
 			 * 
 			 * @property autocompletions.classes.get
 			 * @type function|array
-			 * @param doc {YASQE} 
+			 * @param doc {YASQE}
 			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
-			 * @param callback {function} In case async is enabled, use this callback 
+			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromLov)
 			 */
-			get: root.fetchFromLov,
+			get : root.fetchFromLov,
 			/**
-			 * Use bulk loading of classes: all classes are retrieved onLoad using the get() function. 
-			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
+			 * The get function is asynchronous
+			 * 
+			 * @property autocompletions.classes.async
+			 * @type boolean
+			 * @default true
+			 */
+			async : true,
+			/**
+			 * Use bulk loading of classes: all classes are retrieved onLoad
+			 * using the get() function. Alternatively, disable bulk loading, to
+			 * call the get() function whenever a token needs autocompletion (in
+			 * this case, the completion token is passed on to the get()
+			 * function) Whenever you have an autocompletion list that easily
+			 * fits in memory, we advice you to enable bulk for performance
+			 * reasons (especially as we store the autocompletions in a trie)
 			 * 
 			 * @property autocompletions.classes.bulk
 			 * @type boolean
 			 * @default false
 			 */
-			bulk: false,
+			bulk : false,
 			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the user to press [ctrl|cmd]-space to summon the dialog.
-			 * Note: this only works when completions are loaded in memory (i.e. bulk: true)
+			 * Auto-show the autocompletion dialog. Disabling this requires the
+			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
+			 * only works when completions are loaded in memory (i.e. bulk:
+			 * true)
 			 * 
 			 * @property autocompletions.classes.autoShow
 			 * @type boolean
 			 * @default false
 			 */
-			autoShow: false,
+			autoShow : false,
 			/**
-			 * Automatically store autocompletions in localstorage. This is particularly useful when the get() function is an expensive ajax call. Autocompletions are stored for a period of a month. 
-			 * Set this property to null (or remove it), to disable the use of localstorage. Otherwise, set a string value (or a function returning a string val), returning the key in which to store the data
-			 * Note: this feature only works combined with completions loaded in memory (i.e. bulk: true)
+			 * Automatically store autocompletions in localstorage. This is
+			 * particularly useful when the get() function is an expensive ajax
+			 * call. Autocompletions are stored for a period of a month. Set
+			 * this property to null (or remove it), to disable the use of
+			 * localstorage. Otherwise, set a string value (or a function
+			 * returning a string val), returning the key in which to store the
+			 * data Note: this feature only works combined with completions
+			 * loaded in memory (i.e. bulk: true)
 			 * 
 			 * @property autocompletions.classes.persistent
 			 * @type string|function
 			 * @default "classes"
 			 */
-			persistent: "classes",
+			persistent : "classes",
 			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * A set of handlers. Most, taken from the CodeMirror showhint
+			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
 			 * 
 			 * @property autocompletions.classes.handlers
 			 * @type object
 			 */
-			handlers: {
+			handlers : {
 				/**
-				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
+				 * Fires when a codemirror change occurs in a position where we
+				 * can show this particular type of autocompletion
 				 * 
 				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
 				 * @default null
 				 */
-				validPosition: null,
+				validPosition : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1379,7 +1531,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				showHint: null,
+				showHint : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1387,7 +1539,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				shown: null,
+				shown : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1395,7 +1547,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				select: null,
+				select : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1403,7 +1555,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				pick: null,
+				pick : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1411,21 +1563,18 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				close: null,
+				close : null,
 			}
 		}
 	},
-	
-	
-	
-	
+
 	/**
 	 * Settings for querying sparql endpoints
-	 *
+	 * 
 	 * @property query
 	 * @type object
 	 */
-	query: {
+	query : {
 		/**
 		 * Endpoint to query
 		 * 
@@ -1433,7 +1582,7 @@ root.defaults = $.extend(root.defaults, {
 		 * @type String
 		 * @default "http://dbpedia.org/sparql"
 		 */
-		endpoint: "http://dbpedia.org/sparql",
+		endpoint : "http://dbpedia.org/sparql",
 		/**
 		 * Request method via which to access SPARQL endpoint
 		 * 
@@ -1441,7 +1590,7 @@ root.defaults = $.extend(root.defaults, {
 		 * @type String
 		 * @default "GET"
 		 */
-		requestMethod: "GET",
+		requestMethod : "GET",
 		/**
 		 * Query accept header
 		 * 
@@ -1449,8 +1598,8 @@ root.defaults = $.extend(root.defaults, {
 		 * @type String
 		 * @default application/sparql-results+json
 		 */
-		acceptHeader: "application/sparql-results+json",
-		
+		acceptHeader : "application/sparql-results+json",
+
 		/**
 		 * Named graphs to query.
 		 * 
@@ -1458,7 +1607,7 @@ root.defaults = $.extend(root.defaults, {
 		 * @type array
 		 * @default []
 		 */
-		namedGraphs: [],
+		namedGraphs : [],
 		/**
 		 * Default graphs to query.
 		 * 
@@ -1466,17 +1615,18 @@ root.defaults = $.extend(root.defaults, {
 		 * @type array
 		 * @default []
 		 */
-		defaultGraphs: [],
-		
+		defaultGraphs : [],
+
 		/**
-		 * Additional request arguments. Add them in the form: {name: "name", value: "value"}
+		 * Additional request arguments. Add them in the form: {name: "name",
+		 * value: "value"}
 		 * 
 		 * @property query.args
 		 * @type array
 		 * @default []
 		 */
-		args: [],
-		
+		args : [],
+
 		/**
 		 * Additional request headers
 		 * 
@@ -1484,76 +1634,85 @@ root.defaults = $.extend(root.defaults, {
 		 * @type array
 		 * @default {}
 		 */
-		headers: {},
-		
-		
+		headers : {},
+
 		/**
 		 * Set of ajax handlers
 		 * 
 		 * @property query.handlers
 		 * @type object
 		 */
-		handlers: {
+		handlers : {
 			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
 			 * 
 			 * @property query.handlers.beforeSend
 			 * @type function
 			 * @default null
 			 */
-			beforeSend: null,
+			beforeSend : null,
 			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
 			 * 
 			 * @property query.handlers.complete
 			 * @type function
 			 * @default null
 			 */
-			complete: null,
+			complete : null,
 			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
 			 * 
 			 * @property query.handlers.error
 			 * @type function
 			 * @default null
 			 */
-			error: null,
+			error : null,
 			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on these handlers, and their arguments.
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
 			 * 
 			 * @property query.handlers.success
 			 * @type function
 			 * @default null
 			 */
-			success: null
+			success : null
 		}
 	}
 });
 root.version = {
-	"CodeMirror": CodeMirror.version,
-	"YASQE": require("../package.json").version
+	"CodeMirror" : CodeMirror.version,
+	"YASQE" : require("../package.json").version
 };
 
-
-//end with some documentation stuff we'd like to include in the documentation (yes, ugly, but easier than messing about and adding it manually to the generated html ;))
+// end with some documentation stuff we'd like to include in the documentation
+// (yes, ugly, but easier than messing about and adding it manually to the
+// generated html ;))
 /**
  * Set query (CodeMirror)
  * 
  * @method doc.setValue
- * @param query {string} 
+ * @param query
+ *            {string}
  */
 
 /**
  * Get value (CodeMirror)
  * 
  * @method doc.getValue
- * @return query {string} 
+ * @return query {string}
  */
 
 /**
- * Set size (CodeMirror). Use null value to leave width or height unchanged. To resize the editor to fit its content, check out http://codemirror.net/demo/resize.html
+ * Set size (CodeMirror). Use null value to leave width or height unchanged. To
+ * resize the editor to fit its content, see
+ * http://codemirror.net/demo/resize.html
  * 
- * @param width {number|string}
- * @param height: {number|string}
+ * @param width
+ *            {number|string}
+ * @param height:
+ *            {number|string}
  * @method doc.setSize
  */
