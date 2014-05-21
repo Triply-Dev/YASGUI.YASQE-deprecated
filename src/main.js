@@ -6,6 +6,9 @@ require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
+
+//console = console || {"log":function(){}};//make sure any console statements we use do not break the app in ie
+
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
 
@@ -95,6 +98,30 @@ var postProcessCmElement = function(cm) {
 		root.appendPrefixIfNeeded(cm);
 		
 	});
+	
+//	if (cm.options.autocompletions) {
+//		var handlers = {};
+//		for (var type in cm.options.autocompletions) {
+//			
+//			if (cm.options.autocompletions[type].handlers) {
+//				for (var handlerType in cm.options.autocompletions[type].handlers) {
+//					if (cm.options.autocompletions[type].handlers[handlerType]) {
+//						handlers[handlerType] = handlers[handlerType] || {};
+//						handlers[handlerType][type] = cm.options.autocompletions[type].handlers[handlerType];
+//					}
+//				}
+//			}
+//		}
+//		for (var handler in handlers) {
+//			var combinedHandlers = function() {
+//				console.log(arguments);
+//			};
+//			console.log("bla");
+//			cm.on(root.showHint, handler, combinedHandlers);
+//		}
+//	}
+	
+	
 	checkSyntax(cm, true);//on first load, check as well (our stored or default query might be incorrect as well)
 	
 	
@@ -340,10 +367,6 @@ root.fetchFromPrefixCc = function(cm) {
 };
 
 
-root.fetchFromLov = function(cm, type, term) {
-	var args = {q:term, page: 1, type: type};
-	var url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
-};
 /**
  * Determine unique ID of the YASQE object. Useful when several objects are loaded on the same page, and all have 'persistency' enabled.
  * Currently, the ID is determined by selecting the nearest parent in the DOM with an ID set
@@ -567,32 +590,41 @@ root.autoComplete = function(cm, fromAutoShow) {
 	if (!cm.options.autocompletions) return;
 	var tryHintType = function(type) {
 		if (fromAutoShow //from autoShow, i.e. this gets called each time the editor content changes 
-				&& (!keyExists(cm.options.autocompletions[type], "autoShow") || !cm.options.autocompletions[type].autoShow) //autoshow for this particular type of autocompletion is -not- enabled
-				&& (cm.options.autocompletions[type].bulk)//bulk loading should be enabled (don't want to re-do ajax-like request for every editor change)
+				&& (!cm.options.autocompletions[type].autoShow //autoshow for this particular type of autocompletion is -not- enabled
+						|| cm.options.autocompletions[type].async) //async is enabled (don't want to re-do ajax-like request for every editor change)
 			) {
 			return false;
 		}
-		var hints = getHints[type](cm);
-		if (hints && hints.list.length > 0) {
-			
-			if (cm.options.autocompletions[type].handlers) {
-				hints['_handlers'] = {};
-				if (cm.options.autocompletions[type].handlers.close) hints['_handlers'].close = [cm.options.autocompletions[type].handlers.close];
-				if (cm.options.autocompletions[type].handlers.select) hints['_handlers'].select = [cm.options.autocompletions[type].handlers.select];
-				if (cm.options.autocompletions[type].handlers.shown) hints['_handlers'].shown = [cm.options.autocompletions[type].handlers.shown];
-				if (cm.options.autocompletions[type].handlers.pick) hints['_handlers'].pick = [cm.options.autocompletions[type].handlers.pick];
+		
+//		var hints = getHints[type](cm);
+		
+//		if (hints) {
+//			if (cm.options.autocompletions[type].handlers) {
+//				for (var handler in cm.options.autocompletions[type].handlers) {
+//					root.on(hints, handler, cm.options.autocompletions[type].handlers[handler]);
+//				}
+//			}
+			var hintConfig = {closeCharacters: /(?=a)b/, type: type};
+//			var hintFunc = function(){return hints;};
+			if (cm.options.autocompletions[type].async) {
+				hintConfig.async = true;
+//				hintConfig.completionToken = hints.completionToken;
+//				hintFunc = cm.options.autocompletions[type].get;
 			}
-			
-			root.showHint(cm, function(){return hints;}, {closeCharacters: /(?=a)b/, shown: function(){console.log("shownnn");}});
+			var result = root.showHint(cm, getHints[type], hintConfig);
+			console.log("showhint result", result);
 			return true;
-		}
+//		}
 		return false;
 	};
 	for (var type in cm.options.autocompletions) {
 		if (!validCompletionPosition[type](cm)) continue;
+		
+		//run valid position handler, if there is one (if it returns false, stop the autocompletion!)
 		if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.validPosition) {
 			if (cm.options.autocompletions[type].handlers.validPosition(cm) === false) continue;
 		}
+		
 		var success = tryHintType(type);
 		if (success) break;
 	}
@@ -715,24 +747,67 @@ var preprocessCompletionToken = function(cm, token) {
 	return completionToken;
 };
 
-var getHints = {};
-getHints.resourceHints = function(cm, type) {
-	var token = getCompleteToken(cm);
-	var cur = cm.getCursor();
-	var completionToken = preprocessCompletionToken(cm, token);
-	if (completionToken) {
-		// use custom completionhint function, to avoid reaching a loop when the
-		// completionhint is the same as the current token
-		// regular behaviour would keep changing the codemirror dom, hence
-		// constantly calling this callback
-		var completionHint = function(cm, data, completion) {
-			if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
-				cm.replaceRange(completion.text, data.from, data.to);
+var getSuggestionsFromToken = function(cm, type, partialToken) {
+	
+	var suggestions = [];
+	if (tries[type]) {
+		suggestions = tries[type].autoComplete(partialToken);
+	} else if(typeof cm.options.autocompletions[type].get == "function" && cm.options.autocompletions[type].async == false) {
+		suggestions = cm.options.autocompletions[type].get(cm, partialToken, type);
+	} else if (typeof cm.options.autocompletions[type].get == "object") {
+		var partialTokenLength = partialToken.length;
+		for (var i = 0; i < cm.options.autocompletions[type].get.length; i++) {
+			var completion = cm.options.autocompletions[type].get[i];
+			if (completion.slice(0, partialTokenLength) == partialToken) {
+				suggestions.push(completion);
 			}
-		};
-		if (!tries[type]) return;
-		var suggestions = tries[type].autoComplete(completionToken.uri);
-		
+		}
+	}
+	return suggestions;
+};
+
+root.fetchFromLov = function(cm, partialToken, type, callback) {
+	var maxResults = 50;
+	
+	var args = {q:partialToken, page: 1};
+	if (type == "classes") {
+		args.type = "class";
+	} else {
+		args.type = "property";
+	}
+	var results = [];
+	var url = "";
+	var updateUrl = function() {
+    	url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
+    };
+    updateUrl();
+    var increasePage = function(){
+    	args.page++;
+    	updateUrl();
+    };
+    var doRequests = function() {
+    	$.get(url, function(data) {
+			for (var i = 0; i < data.results.length; i++) {
+				results.push(data.results[i].uri);
+		 	}
+			if (results.length < data.total_results && results.length < maxResults) {
+				increasePage();
+				doRequests();
+			} else {
+				callback(results);
+				//requests done! Don't call this function again
+			}
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			console.log(errorThrown);
+		  });
+    };
+    doRequests();
+};
+
+
+var getHints = {};
+getHints.resourceHints = function(cm, type, callback, config) {
+	var getSuggestionsAsHintObject = function(suggestions){
 		var hintList = [];
 		for ( var i = 0; i < suggestions.length; i++) {
 			var suggestedString = suggestions[i];
@@ -753,8 +828,8 @@ getHints.resourceHints = function(cm, type) {
 			});
 		}
 		
-		return {
-		
+		var returnObj = {
+			completionToken: completionToken.uri,
 			list : hintList,
 			from : {
 				line : cur.line,
@@ -765,16 +840,44 @@ getHints.resourceHints = function(cm, type) {
 				ch : token.end
 			}
 		};
-		
+		if (cm.options.autocompletions[type].handlers) {
+			for (var handler in cm.options.autocompletions[type].handlers) {
+				root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
+			}
+		}
+		return returnObj;
+	};
+	var token = getCompleteToken(cm);
+	var cur = cm.getCursor();
+	var completionToken = preprocessCompletionToken(cm, token);
+	if (completionToken) {
+		// use custom completionhint function, to avoid reaching a loop when the
+		// completionhint is the same as the current token
+		// regular behaviour would keep changing the codemirror dom, hence
+		// constantly calling this callback
+		var completionHint = function(cm, data, completion) {
+			if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
+				cm.replaceRange(completion.text, data.from, data.to);
+			}
+		};
+		if (cm.options.autocompletions[type].async) {
+			var wrappedCallback = function(suggestions) {
+				callback(getSuggestionsAsHintObject(suggestions));
+			};
+			cm.options.autocompletions[type].get(cm, completionToken.uri, wrappedCallback, type);
+		} else {
+			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type, completionToken.uri));
+			
+		}
 	}
 };
-getHints.properties = function(cm) {
-	return getHints.resourceHints(cm, "properties");
+getHints.properties = function(cm, callback, config) {
+	return getHints.resourceHints(cm, "properties", callback, config);
 };
-getHints.classes = function(cm) {
-	return getHints.resourceHints(cm, "classes");
+getHints.classes = function(cm, callback, config) {
+	return getHints.resourceHints(cm, "classes", callback, config);
 };
-getHints.prefixes = function(cm) {
+getHints.prefixes = function(cm, callback, config) {
 	if (!tries["prefixes"]) return;//no prefix completions defined
 	var token = getCompleteToken(cm);
 	var cur = cm.getCursor();
@@ -802,7 +905,8 @@ getHints.prefixes = function(cm) {
 		token = getCompleteToken(cm, token, cur);
 	}
 
-	return {
+	var returnObj = {
+		completionToken: completionToken.uri,
 		list : tries["prefixes"].autoComplete(token.string),
 		from : {
 			line : cur.line,
@@ -813,6 +917,12 @@ getHints.prefixes = function(cm) {
 			ch : token.end
 		}
 	};
+	if (cm.options.autocompletions[type].handlers) {
+		for (var handler in cm.options.autocompletions.prefixes.handlers) {
+			root.on(returnObj, handler, cm.options.autocompletions.prefixes.handlers[handler]);
+		}
+	}
+	return returnObj;
 };
 
 
@@ -999,7 +1109,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
 			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
 			 * 
 			 * @property autocompletions.prefixes.bulk
 			 * @type boolean
@@ -1043,7 +1153,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.prefixes.handlers.validPosition
+				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
 				 * @default null
 				 */
@@ -1051,7 +1161,15 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.prefixes.handlers.shown
+				 * @property autocompletions.classes.handlers.showHint
+				 * @type function
+				 * @default null
+				 */
+				showHint: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.shown
 				 * @type function
 				 * @default null
 				 */
@@ -1059,7 +1177,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.prefixes.handlers.select
+				 * @property autocompletions.classes.handlers.select
 				 * @type function
 				 * @default null
 				 */
@@ -1067,7 +1185,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.prefixes.handlers.pick
+				 * @property autocompletions.classes.handlers.pick
 				 * @type function
 				 * @default null
 				 */
@@ -1075,7 +1193,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.prefixes.handlers.close
+				 * @property autocompletions.classes.handlers.close
 				 * @type function
 				 * @default null
 				 */
@@ -1096,11 +1214,19 @@ root.defaults = $.extend(root.defaults, {
 			 * @type function|array
 			 * @default function (YASQE.fetchFromPrefixCc)
 			 */
-			get: ["http://blaaat1", "http://blaaaat2", "http://blaaat3"],
+			get: root.fetchFromLov,
 			/**
-			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
+			 * The get function is asynchronous
+			 * 
+			 * @property async
+			 * @type boolean
+			 * @default true
+			 */
+			async: true,
+			/**
+			 * Use bulk loading of properties: all properties are retrieved onLoad using the get() function. 
 			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
 			 * 
 			 * @property autocompletions.properties.bulk
 			 * @type boolean
@@ -1136,7 +1262,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * Fires when a codemirror change occurs in a position where we can show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.properties.handlers.validPosition
+				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
 				 * @default null
 				 */
@@ -1144,35 +1270,43 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.properties.handlers.shown
+				 * @property autocompletions.classes.handlers.showHint
 				 * @type function
 				 * @default null
 				 */
-				shown: null,
+				showHint: function(){console.log("showhint");},
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.properties.handlers.select
+				 * @property autocompletions.classes.handlers.shown
 				 * @type function
 				 * @default null
 				 */
-				select: null,
+				shown: function(){console.log("shown");},
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.properties.handlers.pick
+				 * @property autocompletions.classes.handlers.select
 				 * @type function
 				 * @default null
 				 */
-				pick: null,
+				select: function(){console.log("select");},
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.properties.handlers.close
+				 * @property autocompletions.classes.handlers.pick
 				 * @type function
 				 * @default null
 				 */
-				close: null,
+				pick: function(){console.log("pick");},
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.close
+				 * @type function
+				 * @default null
+				 */
+				close: function(){console.log("close");},
 			}
 		},
 		/**
@@ -1185,15 +1319,19 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Get the autocompletions. Either a function which returns an array, or an actual array.
 			 * 
-			 * @property autocompletions.classes.autoShow
+			 * @property autocompletions.classes.get
 			 * @type function|array
-			 * @default function (YASQE.fetchFromPrefixCc)
+			 * @param doc {YASQE} 
+			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
+			 * @param callback {function} In case async is enabled, use this callback 
+			 * @default function (YASQE.fetchFromLov)
 			 */
-			get: ["http://blaaat1class", "http://blaaaat2class", "http://blaaat3class"],
+			get: root.fetchFromLov,
 			/**
-			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad using the get() function. 
+			 * Use bulk loading of classes: all classes are retrieved onLoad using the get() function. 
 			 * Alternatively, disable bulk loading, to call the get() function whenever a token needs autocompletion (in this case, the completion token is passed on to the get() function)
-			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons
+			 * Whenever you have an autocompletion list that easily fits in memory, we advice you to enable bulk for performance reasons (especially as we store the autocompletions in a trie)
 			 * 
 			 * @property autocompletions.classes.bulk
 			 * @type boolean
@@ -1234,6 +1372,14 @@ root.defaults = $.extend(root.defaults, {
 				 * @default null
 				 */
 				validPosition: null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.classes.handlers.showHint
+				 * @type function
+				 * @default null
+				 */
+				showHint: null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
