@@ -1,7 +1,7 @@
 var paths = {
 	style: [
-		'bower_components/codemirror/lib/codemirror.css', 
-		'bower_components/codemirror/addon/hint/show-hint.css',
+		'node_modules/codemirror/lib/codemirror.css', 
+		'node_modules/codemirror/addon/hint/show-hint.css',
 		'src/**/*.css',
 	]
 };

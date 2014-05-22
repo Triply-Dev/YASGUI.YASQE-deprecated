@@ -1,6 +1,6 @@
 {
-  "name": "YASGUI-QueryEditor",
-  "description": "TODO",
+  "name": "YASQE",
+  "description": "Yet Another SPARQL Query Editor",
   "version": "1.0.0",
   "main": "build/yasqe.js",
   "licenses": [
@@ -33,9 +33,10 @@
     "gulp-debug": "^0.3.0",
     "amplify": "0.0.11",
     "twitter-bootstrap-3.0.0": "^3.0.0",
-    "gulp-yuidoc": "^0.1.2"
+    "gulp-yuidoc": "^0.1.2",
+    "gulp-jsvalidate": "^0.2.0"
   },
-  "bugs": "https://github.com/LaurensRietveld/yasgui/issues/",
+  "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
     "JavaScript",
     "SPARQL",
@@ -43,7 +44,7 @@
     "Semantic Web",
     "Linked Data"
   ],
-  "homepage": "http://laurensrietveld.nl/yasgui",
+  "homepage": "http://yasgui.github.io/YASQE",
   "maintainers": [
     {
       "name": "Laurens Rietveld",

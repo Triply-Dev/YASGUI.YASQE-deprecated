@@ -11,7 +11,7 @@
   </head>
   <body>
   
-  <a href="https://github.com/LaurensRietveld/yasgui" target="_blank"><img style="z-index: 11111; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  <a href="https://github.com/YASGUI/YASQE" target="_blank"><img style="z-index: 11111; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
    <!-- Fixed navbar -->
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
@@ -28,7 +28,7 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">About</a></li>
             <li><a href="doc/doc.html">Documentation</a></li>
-            <li><a href="http://laurensrietveld.nl">About me</a></li>
+            <li><a target="_blank" href="http://laurensrietveld.nl">About me</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -55,7 +55,8 @@
       	<h1>About YASQE</h1>
       	YASQE is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASQE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
       	<div id="showcase"></div>
-      	<code>var yasqe = YASQE(document.getElementById("showcase"));</code>
+      	<code>var yasqe = YASQE(document.getElementById("showcase"));</code> <br>
+      	(or, if you would like to instantiate YASQE from an existing text area, use <code>var yasqe = YASQE.fromTextArea(document.getElementById('textAreaItem'));</code>
       	</div>
       
       	<div id="features">
@@ -90,6 +91,7 @@
       	<li><code>[CTRL|CMD] - ALT - down</code>: Copy line(s) down</li>
       	<li><code>[CTRL|CMD] - ALT - up</code>: Copy line(s) up</li>
       	<li><code>[CTRL|CMD] - Enter</code>: Execute query (if you have defined handlers in the configuration)</li>
+      	<li><code>[CTRL|CMD] - S</code>: Store the editor contents in local storage (if this is enabled)</li>
       	</ul>
       	</div>
       	
@@ -99,17 +101,14 @@
       	<ul>
       	<li>The people behind the <a href="http://openuplabs.tso.co.uk/demos/sparqleditor" target="_blank">Flint SPARQL editor</a> for publishing the javascript SPARQL grammar</li>
       	<li>Marijn Haverbeke for his great work on the <a href="http://codemirror.net" target="_blank">CodeMirror library</a> syntax highlighting library</li>
+      	<li>Pierre-Yves Vandenbussche and Bernard Vatant for their useful <a href='http://lov.okfn.org/' target="_blank">Linked Open Vocabularies service</a>, of which I use the <a target="_blank" href="lov.okfn.org/dataset/lov/apidoc/">API</a> to autocomplete properties and classes
+      	<li>Richard Cyganiak for his simple but effective <a href='http://prefix.cc' target="_blank">Prefix.cc</a> service, which I use for autocompleting prefixes.
       	</ul>
       	</div>
       	
       
      
     </div> <!-- /container -->
-
-
-
-<!-- 	<div id="yWrapper"></div> -->
-
 
 
 

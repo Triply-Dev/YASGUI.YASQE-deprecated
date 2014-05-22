@@ -43,7 +43,6 @@ var drawDocs = function(data) {
 				if (description) codeBit += description + ": ";
 				if (type) codeBit += type;
 			}
-//			 @return {String} Unique clientId.			
 			$("<code></code>").html(codeBit).appendTo(docWrapper);
 			if (classInfo.description) $("<p></p>").text(classInfo.description).appendTo(docWrapper);
 			docs.append(docWrapper);
@@ -64,6 +63,7 @@ var drawDocs = function(data) {
 		 * parse method
 		 */
 		if (method.itemtype && method.name) {
+			console.log(method.name);
 			var docWrapper = $("<div></div>").addClass("doc");
 			var codeBit = method.name + "(";
 			//add parameters
@@ -87,7 +87,6 @@ var drawDocs = function(data) {
 				if (description) codeBit += description + ": ";
 				if (type) codeBit += type;
 			}
-//			 @return {String} Unique clientId.			
 			$("<code></code>").html(codeBit).appendTo(docWrapper);
 			if (method.description) $("<p></p>").text(method.description).appendTo(docWrapper);
 	     	docsToInsert[method.name] = docWrapper;
@@ -100,10 +99,16 @@ var drawDocs = function(data) {
 	var keys = [];
 	for (methodName in docsToInsert) {
 	    if (docsToInsert.hasOwnProperty(methodName)) {
-	        keys.push(methodName);
+	    	if(methodName.indexOf("fromTextArea") > -1) {
+	    		docs.append(docsToInsert[methodName]);
+	    	} else {
+	    		keys.push(methodName);
+	    	}
+	        
 	    }
 	}
-	keys.reverse();
+	keys.sort();
+	
 	//draw functions
 	for (var i = 0; i < keys.length; i++) {
 		docs.append(docsToInsert[keys[i]]);
@@ -130,6 +135,5 @@ var drawDocs = function(data) {
 		$("<code></code>").text(codeText).appendTo(prop);
 		$("<p></p>").text(attrOrProp.description).appendTo(prop);
 		docs.append(prop);
-		console.log(attrOrProp);
 	}
 };

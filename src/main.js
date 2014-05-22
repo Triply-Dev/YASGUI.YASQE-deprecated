@@ -7,8 +7,7 @@ require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 
-// console = console || {"log":function(){}};//make sure any console statements
-// we use do not break the app in ie
+console = console || {"log":function(){}};//make sure any console statements
 
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
@@ -66,11 +65,11 @@ var extendCmInstance = function(cm) {
 	};
 
 	/**
-	 * Store bulk completions
+	 * Store bulk completions in memory as trie, and store these in localstorage as well (if enabled)
 	 * 
 	 * @method doc.storeBulkCompletions
-	 * @param type {string} Type of completions: ["prefixes", "properties", "classes"]
-	 * @param completions {array} Array containing a set of strings
+	 * @param type {"prefixes", "properties", "classes"}
+	 * @param completions {array}
 	 */
 	cm.storeBulkCompletions = function(type, completions) {
 		// store array as trie
@@ -109,31 +108,7 @@ var postProcessCmElement = function(cm) {
 
 	});
 
-	// if (cm.options.autocompletions) {
-	// var handlers = {};
-	// for (var type in cm.options.autocompletions) {
-	//			
-	// if (cm.options.autocompletions[type].handlers) {
-	// for (var handlerType in cm.options.autocompletions[type].handlers) {
-	// if (cm.options.autocompletions[type].handlers[handlerType]) {
-	// handlers[handlerType] = handlers[handlerType] || {};
-	// handlers[handlerType][type] =
-	// cm.options.autocompletions[type].handlers[handlerType];
-	// }
-	// }
-	// }
-	// }
-	// for (var handler in handlers) {
-	// var combinedHandlers = function() {
-	// console.log(arguments);
-	// };
-	// console.log("bla");
-	// cm.on(root.showHint, handler, combinedHandlers);
-	// }
-	// }
-
-	checkSyntax(cm, true);// on first load, check as well (our stored or
-							// default query might be incorrect as well)
+	checkSyntax(cm, true);// on first load, check as well (our stored or default query might be incorrect as well)
 
 	/**
 	 * load bulk completions
@@ -370,11 +345,25 @@ var checkSyntax = function(cm, deepcheck) {
 $.extend(root, CodeMirror);
 
 /**
+ * Initialize YASQE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)
+ * 
+ * @method YASQE.fromTextArea
+ * @param textArea {DOM element}
+ * @param config {object}
+ * @returns {doc} YASQE document
+ */
+root.fromTextArea = function(textAreaEl, config) {
+	config = extendConfig(config);
+	var cm = extendCmInstance(CodeMirror.fromTextArea(textAreaEl, config));
+	postProcessCmElement(cm);
+	return cm;
+};
+
+/**
  * Fetch prefixes from prefix.cc, and store in the YASQE object
  * 
- * @param doc
- *            {YASQE}
- * @method YasguiQuery.fetchFromPrefixCc
+ * @param doc {YASQE}
+ * @method YASQE.fetchFromPrefixCc
  */
 root.fetchFromPrefixCc = function(cm) {
 	$.get("http://prefix.cc/popular/all.file.json", function(data) {
@@ -395,9 +384,8 @@ root.fetchFromPrefixCc = function(cm) {
  * loaded on the same page, and all have 'persistency' enabled. Currently, the
  * ID is determined by selecting the nearest parent in the DOM with an ID set
  * 
- * @param doc
- *            {YASQE}
- * @method YasguiQuery.fetchFromPrefixCc
+ * @param doc {YASQE}
+ * @method YASQE.determineId
  */
 root.determineId = function(cm) {
 	return $(cm.getWrapperElement()).closest('[id]').attr('id');
@@ -819,6 +807,16 @@ var getSuggestionsFromToken = function(cm, type, partialToken) {
 	return suggestions;
 };
 
+/**
+ * Fetch property and class autocompletions the Linked Open Vocabulary services. Issues an async autocompletion call
+ * 
+ * @param doc {YASQE}
+ * @param partialToken {string}
+ * @param type {"properties" | "classes"}
+ * @param callback {function} 
+ * 
+ * @method YASQE.fetchFromLov
+ */
 root.fetchFromLov = function(cm, partialToken, type, callback) {
 	var maxResults = 50;
 
@@ -1092,7 +1090,7 @@ var autoFormatLineBreaks = function(text, start, end) {
  * passing your own options as second argument to the YASQE constructor
  * 
  * @attribute
- * @attribute YasguiQuery.defaults
+ * @attribute YASQE.defaults
  */
 root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
@@ -1101,9 +1099,9 @@ root.defaults = $.extend(root.defaults, {
 	 * 
 	 * @property value
 	 * @type String
-	 * @default "SELECT * {?x ?y ?z} \nLIMIT 10"
+	 * @default "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10"
 	 */
-	value : "SELECT * {?x ?y ?z} \nLIMIT 10",
+	value : "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10",
 	highlightSelectionMatches : {
 		showToken : /\w/
 	},
@@ -1691,28 +1689,23 @@ root.version = {
 // (yes, ugly, but easier than messing about and adding it manually to the
 // generated html ;))
 /**
- * Set query (CodeMirror)
+ * Set query value in editor (see http://codemirror.net/doc/manual.html#setValue)
  * 
  * @method doc.setValue
- * @param query
- *            {string}
+ * @param query {string}
  */
 
 /**
- * Get value (CodeMirror)
+ * Get query value from editor (see http://codemirror.net/doc/manual.html#getValue)
  * 
  * @method doc.getValue
  * @return query {string}
  */
 
 /**
- * Set size (CodeMirror). Use null value to leave width or height unchanged. To
- * resize the editor to fit its content, see
- * http://codemirror.net/demo/resize.html
+ * Set size. Use null value to leave width or height unchanged. To resize the editor to fit its content, see http://codemirror.net/demo/resize.html
  * 
- * @param width
- *            {number|string}
- * @param height:
- *            {number|string}
+ * @param width {number|string}
+ * @param height {number|string}
  * @method doc.setSize
  */
