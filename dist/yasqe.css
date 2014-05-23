@@ -338,3 +338,11 @@ div.CodeMirror-cursors {
 span.cm-error {
 	border-bottom: 2px dotted red;
 }
+
+.yasqe_queryButton {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	cursor: pointer;
+	z-index: 5;
+}

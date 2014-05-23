@@ -87,13 +87,18 @@ var extendCmInstance = function(cm) {
 };
 
 var postProcessCmElement = function(cm) {
-
+	
+	/**
+	 * Set doc value
+	 */
 	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
 		var valueFromStorage = require("./storage.js").get(storageId);
 		if (valueFromStorage)
 			cm.setValue(valueFromStorage);
 	}
+	
+	if (cm.options.showQueryButton) root.drawQueryButton(cm);
 
 	/**
 	 * Add event handlers
@@ -127,8 +132,7 @@ var postProcessCmElement = function(cm) {
  */
 // used to store bulk autocompletions in
 var tries = {};
-// this is a mapping from the class names (generic ones, for compatability with
-// codemirror themes), to what they -actually- represent
+// this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
 };
@@ -142,6 +146,8 @@ var keyExists = function(objectToTest, key) {
 	}
 	return exists;
 };
+
+
 var loadBulkCompletions = function(cm, type) {
 	var completions = null;
 	if (keyExists(cm.options.autocompletions[type], "get"))
@@ -344,6 +350,30 @@ var checkSyntax = function(cm, deepcheck) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
+/**
+ * Draw query button
+ * 
+ * @method YASQE.drawQueryButton
+ * @param {doc} YASQE document
+ */
+root.drawQueryButton = function(cm) {
+	var height = 40;
+	var width = 40;
+	var svgString = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="' + width + 'px" height="' + height + 'px" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g id="Layer_1"></g><g id="Layer_2">	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>';
+	var queryButton = $("<div class='yasqe_queryButton'></div>")
+	 	.click(function(){
+	 		cm.query();
+	 	})
+	 	.height(height)
+	 	.width(width)
+	 	.appendTo($(cm.getWrapperElement())).get()[0];
+	 var parser = new DOMParser();
+	 var dom = parser.parseFromString(svgString, "text/xml");
+	 queryButton.appendChild(dom.documentElement);
+	 
+	 //set the min height in such a way, that we don't lose the query button. takes care of position offset as well
+	 $(cm.getWrapperElement()).css("min-height", height + 5);
+};
 /**
  * Initialize YASQE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)
  * 
@@ -1144,7 +1174,15 @@ root.defaults = $.extend(root.defaults, {
 	cursorHeight : 0.9,
 
 	// non CodeMirror options
-
+	/**
+	 * Show a query button. You don't like it? Then disable this setting, and create your button which calls the query() function of the yasqe document
+	 * 
+	 * @property showQueryButton
+	 * @type boolean
+	 * @default false
+	 */
+	showQueryButton: false,
+	
 	/**
 	 * Change persistency settings for the YASQE query value. Setting the values
 	 * to null, will disable persistancy: nothing is stored between browser
