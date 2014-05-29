@@ -34,3 +34,16 @@ span.cm-error {
 	cursor: pointer;
 	z-index: 5;
 }
+.completionNotification {
+	color: #999;
+	background-color: #f7f7f7;
+	position: absolute;
+	padding: 0px 5px;
+	right: 0px;
+	bottom: 0px;
+	z-index: 6;
+	font-size: 90%;
+}
+.svgContainer {
+	display:inline-block;
+}

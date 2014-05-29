@@ -1,11 +1,11 @@
-.CodeMirror-scroll {
-	overflow-x: auto;
-	overflow-y: hidden;
-}
-.CodeMirror {
-	height: auto;
-	width: 100%;
-}
+/* .CodeMirror-scroll { */
+/* 	overflow-x: auto; */
+/* 	overflow-y: hidden; */
+/* } */
+/* .CodeMirror { */
+/* 	height: auto; */
+/* 	width: 100%; */
+/* } */
 
 .affix-top {
 	top: 100px;

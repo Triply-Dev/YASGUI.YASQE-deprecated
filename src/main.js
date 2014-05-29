@@ -81,7 +81,7 @@ var extendCmInstance = function(cm) {
 		var storageId = getPersistencyId(cm,
 				cm.options.autocompletions[type].persistent);
 		if (storageId)
-			require("./storage.js").set(storageId, completions, "month");
+			require("yasgui-utils").storage.set(storageId, completions, "month");
 	};
 	return cm;
 };
@@ -93,7 +93,7 @@ var postProcessCmElement = function(cm) {
 	 */
 	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
-		var valueFromStorage = require("./storage.js").get(storageId);
+		var valueFromStorage = require("yasgui-utils").storage.get(storageId);
 		if (valueFromStorage)
 			cm.setValue(valueFromStorage);
 	}
@@ -107,12 +107,17 @@ var postProcessCmElement = function(cm) {
 		root.storeQuery(cm);
 	});
 	cm.on('change', function(cm, eventInfo) {
-		checkSyntax(cm, true);
-		root.autoComplete(cm, true);
+//		checkSyntax(cm, true);
+		checkSyntax(cm);
 		root.appendPrefixIfNeeded(cm);
+		root.updateQueryButton(cm);
 
 	});
-
+	
+	cm.on('cursorActivity', function(cm, eventInfo) {
+		root.autoComplete(cm, true);
+	});
+	cm.prevQueryValid = false;
 	checkSyntax(cm, true);// on first load, check as well (our stored or default query might be incorrect as well)
 
 	/**
@@ -135,6 +140,7 @@ var tries = {};
 // this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
+	"atom": "var"
 };
 var keyExists = function(objectToTest, key) {
 	var exists = false;
@@ -161,7 +167,7 @@ var loadBulkCompletions = function(cm, type) {
 		// function may come with overhead (e.g. async calls))
 		var completionsFromStorage = null;
 		if (getPersistencyId(cm, cm.options.autocompletions[type].persistent))
-			completionsFromStorage = require("./storage.js").get(
+			completionsFromStorage = require("yasgui-utils").storage.get(
 					getPersistencyId(cm,
 							cm.options.autocompletions[type].persistent));
 		if (completionsFromStorage && completionsFromStorage instanceof Array
@@ -285,10 +291,9 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	return token;
 };
 
-var prevQueryValid = false;
 var clearError = null;
 var checkSyntax = function(cm, deepcheck) {
-	var queryValid = true;
+	cm.queryValid = true;
 
 	if (clearError) {
 		clearError();
@@ -298,7 +303,7 @@ var checkSyntax = function(cm, deepcheck) {
 	var state = null;
 	for (var l = 0; l < cm.lineCount(); ++l) {
 		var precise = false;
-		if (!prevQueryValid) {
+		if (!cm.prevQueryValid) {
 			// we don't want cached information in this case, otherwise the
 			// previous error sign might still show up,
 			// even though the syntax error might be gone already
@@ -322,11 +327,12 @@ var checkSyntax = function(cm, deepcheck) {
 					ch : state.errorEndPos
 				}, "sp-error");
 			};
-			queryValid = false;
+			cm.queryValid = false;
+			
 			break;
 		}
 	}
-	prevQueryValid = queryValid;
+	cm.prevQueryValid = cm.queryValid;
 	if (deepcheck) {
 		if (state != null && state.stack != undefined) {
 			var stack = state.stack, len = state.stack.length;
@@ -334,12 +340,12 @@ var checkSyntax = function(cm, deepcheck) {
 			// it can't clear stack, so we have to check that whatever
 			// is left on the stack is nillable
 			if (len > 1)
-				queryValid = false;
+				cm.queryValid = false;
 			else if (len == 1) {
 				if (stack[0] != "solutionModifier"
 						&& stack[0] != "?limitOffsetClauses"
 						&& stack[0] != "?offsetClause")
-					queryValid = false;
+					cm.queryValid = false;
 			}
 		}
 	}
@@ -359,20 +365,56 @@ $.extend(root, CodeMirror);
 root.drawQueryButton = function(cm) {
 	var height = 40;
 	var width = 40;
-	var svgString = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="' + width + 'px" height="' + height + 'px" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g id="Layer_1"></g><g id="Layer_2">	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>';
-	var queryButton = $("<div class='yasqe_queryButton'></div>")
+	$("<div class='yasqe_queryButton'></div>")
 	 	.click(function(){
-	 		cm.query();
+	 		if ($(this).hasClass("query_busy")) {
+	 			if (cm.xhr) cm.xhr.abort();
+	 			root.updateQueryButton(cm);
+	 		} else {
+	 			cm.query();
+	 		}
 	 	})
 	 	.height(height)
 	 	.width(width)
-	 	.appendTo($(cm.getWrapperElement())).get()[0];
-	 var parser = new DOMParser();
-	 var dom = parser.parseFromString(svgString, "text/xml");
-	 queryButton.appendChild(dom.documentElement);
-	 
-	 //set the min height in such a way, that we don't lose the query button. takes care of position offset as well
-	 $(cm.getWrapperElement()).css("min-height", height + 5);
+	 	.appendTo($(cm.getWrapperElement()));
+	root.updateQueryButton(cm);
+};
+
+
+var queryButtonIds = {
+	"busy": "loader",
+	"valid": "query",
+	"error": "queryInvalid"
+};
+
+/**
+ * Update the query button depending on current query status. If no query status is passed via the parameter, it auto-detects the current query status
+ * 
+ * @param {doc} YASQE document
+ * @param status {string|null, "busy"|"valid"|"error"}
+ */
+root.updateQueryButton = function(cm, status) {
+	var queryButton = $(cm.getWrapperElement()).find(".yasqe_queryButton");
+	if (queryButton.length == 0) return;//no query button drawn
+	
+	//detect status
+	if (!status) {
+		status = "valid";
+		if (cm.queryValid === false) status = "error";
+	}
+	if (status != cm.queryStatus && (status == "busy" || status=="valid" || status == "error")) {
+		queryButton
+			.empty()
+			.removeClass (function (index, classNames) {
+				return classNames.split(" ").filter(function(c) {
+					//remove classname from previous status
+				    return c.indexOf("query_") == 0;
+				}).join(" ");
+			})
+			.addClass("query_" + status)
+			.append(require("yasgui-utils").imgs.getElement({id: queryButtonIds[status]}));
+		cm.queryStatus = status;
+	}
 };
 /**
  * Initialize YASQE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)
@@ -424,7 +466,7 @@ root.determineId = function(cm) {
 root.storeQuery = function(cm) {
 	var storageId = getPersistencyId(cm, cm.options.persistent);
 	if (storageId) {
-		require("./storage.js").set(storageId, cm.getValue(), "month");
+		require("yasgui-utils").storage.set(storageId, cm.getValue(), "month");
 	}
 };
 root.commentLines = function(cm) {
@@ -432,7 +474,7 @@ root.commentLines = function(cm) {
 	var endLine = cm.getCursor(false).line;
 	var min = Math.min(startLine, endLine);
 	var max = Math.max(startLine, endLine);
-
+	
 	// if all lines start with #, remove this char. Otherwise add this char
 	var linesAreCommented = true;
 	for (var i = min; i <= max; i++) {
@@ -512,8 +554,7 @@ root.doAutoFormat = function(cm) {
 };
 
 root.executeQuery = function(cm, callbackOrConfig) {
-	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig
-			: null);
+	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
 	if (cm.options.query)
 		config = $.extend({}, cm.options.query, config);
@@ -583,16 +624,48 @@ root.executeQuery = function(cm, callbackOrConfig) {
 	/**
 	 * add additional request args
 	 */
-	if (config.args && config.args.length > 0)
-		$.merge(ajaxConfig.data, config.args);
-	$.ajax(ajaxConfig);
+	if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
+	root.updateQueryButton(cm, "busy");
+	cm.xhr = $.ajax(ajaxConfig);
+};
+var completionNotifications = {};
+
+/**
+ * Show notification
+ * 
+ * @param doc {YASQE}
+ * @param autocompletionType {string}
+ * @method YASQE.showCompletionNotification
+ */
+root.showCompletionNotification = function(cm, type) {
+	//only draw when the user needs to use a keypress to summon autocompletions
+	if (!cm.options.autocompletions[type].autoshow) {
+		if (!completionNotifications[type]) completionNotifications[type] = $("<div class='completionNotification'></div>");
+		completionNotifications[type]
+			.show()
+			.text("Press " + (navigator.userAgent.indexOf('Mac OS X') != -1? "CMD": "CTRL") + " - <spacebar> to autocomplete")
+			.appendTo($(cm.getWrapperElement()));
+	}
+};
+
+/**
+ * Hide notification
+ * 
+ * @param doc {YASQE}
+ * @param autocompletionType {string}
+ * @method YASQE.hideCompletionNotification
+ */
+root.hideCompletionNotification = function(cm, type) {
+	if (completionNotifications[type]) {
+		completionNotifications[type].hide();
+	}
 };
 
 var validCompletionPosition = {
 	properties : function(cm) {
 		var token = getCompleteToken(cm);
 
-		if (token.type == "var")
+		if (token.string.indexOf("?") == 0)
 			return false; // we are typing a var
 		if ($.inArray("a", token.state.possibleCurrent) >= 0)
 			return true;// predicate pos
@@ -610,7 +683,7 @@ var validCompletionPosition = {
 	},
 	classes : function(cm) {
 		var token = getCompleteToken(cm);
-		if (token.type == "var")
+		if (token.string.indexOf("?") == 0)
 			return false;
 		var cur = cm.getCursor();
 		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
@@ -662,8 +735,7 @@ root.autoComplete = function(cm, fromAutoShow) {
 	if (!cm.options.autocompletions)
 		return;
 	var tryHintType = function(type) {
-		if (fromAutoShow // from autoShow, i.e. this gets called each time
-							// the editor content changes
+		if (fromAutoShow // from autoShow, i.e. this gets called each time the editor content changes
 				&& (!cm.options.autocompletions[type].autoShow // autoshow for  this particular type of autocompletion is -not- enabled
 				|| cm.options.autocompletions[type].async) // async is enabled (don't want to re-do ajax-like request for every editor change)
 		) {
@@ -680,17 +752,18 @@ root.autoComplete = function(cm, fromAutoShow) {
 		}
 		var result = root.showHint(cm, getHints[type], hintConfig);
 		return true;
-		return false;
 	};
 	for ( var type in cm.options.autocompletions) {
-		if (!validCompletionPosition[type](cm))
+		if (!validCompletionPosition[type](cm)) {
+			if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.invalidPosition) {
+				cm.options.autocompletions[type].handlers.invalidPosition(cm, type);
+			}
 			continue;
-
+		}
 		// run valid position handler, if there is one (if it returns false,
 		// stop the autocompletion!)
-		if (cm.options.autocompletions[type].handlers
-				&& cm.options.autocompletions[type].handlers.validPosition) {
-			if (cm.options.autocompletions[type].handlers.validPosition(cm) === false)
+		if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.validPosition) {
+			if (cm.options.autocompletions[type].handlers.validPosition(cm, type) === false)
 				continue;
 		}
 
@@ -882,6 +955,14 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 						increasePage();
 						doRequests();
 					} else {
+						//if notification bar is there, show feedback, or close
+						if (completionNotifications[type]) {
+							if (results.length > 0) {
+								completionNotifications[type].hide();
+							} else {
+								completionNotifications[type].text("0 matches found...");
+							}
+						}
 						callback(results);
 						// requests done! Don't call this function again
 					}
@@ -889,6 +970,13 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 			console.log(errorThrown);
 		});
 	};
+	//if notification bar is there, show a loader
+	if (completionNotifications[type]) {
+		completionNotifications[type]
+		.empty()
+		.append($("<span>Fetchting autocompletions &nbsp;</span>"))
+		.append(require("yasgui-utils").imgs.getElement({id: "loader", width: "18px", height: "18px"}).css("vertical-align", "middle"));
+	}
 	doRequests();
 };
 var selectHint = function(cm, data, completion) {
@@ -1181,7 +1269,7 @@ root.defaults = $.extend(root.defaults, {
 	 * @type boolean
 	 * @default false
 	 */
-	showQueryButton: false,
+	showQueryButton: true,
 	
 	/**
 	 * Change persistency settings for the YASQE query value. Setting the values
@@ -1228,7 +1316,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromPrefixCc)
 			 */
-			get : root.getFromPrefixCc,
+			get : root.fetchFromPrefixCc,
 			/**
 			 * The get function is asynchronous
 			 * 
@@ -1296,6 +1384,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @type object
 			 */
 			handlers : {
+				
 				/**
 				 * Fires when a codemirror change occurs in a position where we
 				 * can show this particular type of autocompletion
@@ -1306,17 +1395,18 @@ root.defaults = $.extend(root.defaults, {
 				 */
 				validPosition : null,
 				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * Fires when a codemirror change occurs in a position where we
+				 * can -not- show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.classes.handlers.showHint
+				 * @property autocompletions.classes.handlers.invalidPosition
 				 * @type function
 				 * @default null
 				 */
-				showHint : null,
+				invalidPosition : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.classes.handlers.shown
+				 * @property autocompletions.classes.handlers.showHint
 				 * @type function
 				 * @default null
 				 */
@@ -1430,17 +1520,18 @@ root.defaults = $.extend(root.defaults, {
 				 * 
 				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
-				 * @default null
+				 * @default YASQE.showCompletionNotification
 				 */
-				validPosition : null,
+				validPosition : root.showCompletionNotification,
 				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * Fires when a codemirror change occurs in a position where we
+				 * can -not- show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.classes.handlers.showHint
+				 * @property autocompletions.classes.handlers.invalidPosition
 				 * @type function
-				 * @default null
+				 * @default YASQE.hideCompletionNotification
 				 */
-				showHint : null,
+				invalidPosition : root.hideCompletionNotification,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1448,7 +1539,7 @@ root.defaults = $.extend(root.defaults, {
 				 * @type function
 				 * @default null
 				 */
-				shown : null,
+				shown : function() {console.log("shown");},
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1557,17 +1648,18 @@ root.defaults = $.extend(root.defaults, {
 				 * 
 				 * @property autocompletions.classes.handlers.validPosition
 				 * @type function
-				 * @default null
+				 * @default YASQE.showCompletionNotification
 				 */
-				validPosition : null,
+				validPosition : root.showCompletionNotification,
 				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * Fires when a codemirror change occurs in a position where we
+				 * can -not- show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.classes.handlers.showHint
+				 * @property autocompletions.classes.handlers.invalidPosition
 				 * @type function
-				 * @default null
+				 * @default YASQE.hideCompletionNotification
 				 */
-				showHint : null,
+				invalidPosition : root.hideCompletionNotification,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
