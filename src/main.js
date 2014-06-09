@@ -78,10 +78,12 @@ var extendCmInstance = function(cm) {
 			tries[type].insert(completions[i]);
 		}
 		// store in localstorage as well
-		var storageId = getPersistencyId(cm,
-				cm.options.autocompletions[type].persistent);
-		if (storageId)
-			require("yasgui-utils").storage.set(storageId, completions, "month");
+		var storageId = getPersistencyId(cm, cm.options.autocompletions[type].persistent);
+		if (storageId) require("yasgui-utils").storage.set(storageId, completions, "month");
+	};
+	cm.setCheckSyntaxErrors = function(isEnabled) {
+		cm.options.syntaxErrorCheck = isEnabled;
+		checkSyntax(cm);
 	};
 	return cm;
 };
@@ -98,7 +100,7 @@ var postProcessCmElement = function(cm) {
 			cm.setValue(valueFromStorage);
 	}
 	
-	if (cm.options.showQueryButton) root.drawQueryButton(cm);
+	root.drawButtons(cm);
 
 	/**
 	 * Add event handlers
@@ -294,12 +296,12 @@ var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 var clearError = null;
 var checkSyntax = function(cm, deepcheck) {
 	cm.queryValid = true;
-
 	if (clearError) {
 		clearError();
 		clearError = null;
 	}
 	cm.clearGutter("gutterErrorBar");
+	
 	var state = null;
 	for (var l = 0; l < cm.lineCount(); ++l) {
 		var precise = false;
@@ -314,6 +316,12 @@ var checkSyntax = function(cm, deepcheck) {
 			ch : cm.getLine(l).length
 		}, precise).state;
 		if (state.OK == false) {
+			if (!cm.options.syntaxErrorCheck) {
+				//the library we use already marks everything as being an error. Overwrite this class attribute.
+				$(cm.getWrapperElement).find(".sp-error").css("color", "black");
+				//we don't want to gutter error, so return
+				return;
+			}
 			var error = document.createElement('span');
 			error.innerHTML = "&rarr;";
 			error.className = "gutterError";
@@ -328,7 +336,6 @@ var checkSyntax = function(cm, deepcheck) {
 				}, "sp-error");
 			};
 			cm.queryValid = false;
-			
 			break;
 		}
 	}
@@ -356,28 +363,63 @@ var checkSyntax = function(cm, deepcheck) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
-/**
- * Draw query button
- * 
- * @method YASQE.drawQueryButton
- * @param {doc} YASQE document
- */
-root.drawQueryButton = function(cm) {
-	var height = 40;
-	var width = 40;
-	$("<div class='yasqe_queryButton'></div>")
-	 	.click(function(){
-	 		if ($(this).hasClass("query_busy")) {
-	 			if (cm.xhr) cm.xhr.abort();
-	 			root.updateQueryButton(cm);
-	 		} else {
-	 			cm.query();
-	 		}
-	 	})
-	 	.height(height)
-	 	.width(width)
-	 	.appendTo($(cm.getWrapperElement()));
-	root.updateQueryButton(cm);
+
+
+root.createShareLink = function(cm) {
+	return {query: cm.getValue()};
+};
+
+root.drawButtons = function(cm) {
+	var header = $("<div class='yasqe_buttons'></div>").appendTo($(cm.getWrapperElement()));
+	
+	if (cm.options.createShareLink) {
+		
+		var svgShare = require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"});
+		svgShare.click(function(){
+				var popup = $(cm.getWrapperElement()).find(".yasqe_sharePopup");
+				if (popup.length == 0) popup = $("<div class='yasqe_sharePopup'></div>").appendTo(header);
+				var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + $.param(cm.options.createShareLink(cm)));
+				
+				textAreaLink.focus(function() {
+				    var $this = $(this);
+				    $this.select();
+
+				    // Work around Chrome's little problem
+				    $this.mouseup(function() {
+				        // Prevent further mouseup intervention
+				        $this.unbind("mouseup");
+				        return false;
+				    });
+				});
+				
+				popup.empty().append(textAreaLink);
+				var positions = svgShare.position();
+				popup.css("top", (positions.top + svgShare.outerHeight()) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+			})
+			.addClass("yasqe_share")
+			.attr("title", "Share your query")
+			.appendTo(header);
+		
+	}
+
+	if (cm.options.showQueryButton) {
+		var height = 40;
+		var width = 40;
+		$("<div class='yasqe_queryButton'></div>")
+		 	.click(function(){
+		 		if ($(this).hasClass("query_busy")) {
+		 			if (cm.xhr) cm.xhr.abort();
+		 			root.updateQueryButton(cm);
+		 		} else {
+		 			cm.query();
+		 		}
+		 	})
+		 	.height(height)
+		 	.width(width)
+		 	.appendTo(header);
+		root.updateQueryButton(cm);
+	}
+	
 };
 
 
@@ -1228,7 +1270,7 @@ root.defaults = $.extend(root.defaults, {
 	gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
 	matchBrackets : true,
 	fixedGutter : true,
-
+	syntaxErrorCheck: true,
 	/**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
 	 * 
@@ -1269,7 +1311,32 @@ root.defaults = $.extend(root.defaults, {
 	 * @type boolean
 	 * @default false
 	 */
-	showQueryButton: true,
+	showQueryButton: false,
+	
+
+	
+	/**
+	 * Show a button with which users can create a link to this query. Set this value to null to disable this functionality.
+	 * By default, this feature is enabled, and the only the query value is appended to the link.
+	 * ps. This function should return an object which is parseable by jQuery.param (http://api.jquery.com/jQuery.param/)
+	 * 
+	 * @property createShareLink
+	 * @type function
+	 * @default YASQE.createShareLink
+	 */
+	createShareLink: root.createShareLink,
+	
+	/**
+	 * Consume links shared by others, by checking the url for arguments coming from a query link. Set to true to enable. 
+	 * 
+	 * @property consumeShareLink
+	 * @type boolean
+	 * @default true
+	 */
+	consumeShareLink: true,
+	
+	
+	
 	
 	/**
 	 * Change persistency settings for the YASQE query value. Setting the values
