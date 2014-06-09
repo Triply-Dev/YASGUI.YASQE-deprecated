@@ -132,6 +132,13 @@ var postProcessCmElement = function(cm) {
 			}
 		}
 	}
+	
+	/**
+	 * check url args and modify yasqe settings if needed
+	 */
+	if (cm.options.consumeShareLink) {
+		cm.options.consumeShareLink(cm);
+	}
 };
 
 /**
@@ -365,8 +372,30 @@ $.extend(root, CodeMirror);
 
 
 
+/**
+ * Create a share link
+ * 
+ * @method YASQE.createShareLink
+ * @param {doc} YASQE document
+ * @default {query: doc.getValue()}
+ * @return object
+ */
 root.createShareLink = function(cm) {
 	return {query: cm.getValue()};
+};
+
+/**
+ * Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASQE doc
+ * 
+ * @method YASQE.consumeShareLink
+ * @param {doc} YASQE document
+ */
+root.consumeShareLink = function(cm) {
+	require("../lib/deparam.js");
+	var urlParams = $.deparam(window.location.search.substring(1));
+	if (urlParams.query) {
+		cm.setValue(urlParams.query);
+	}
 };
 
 root.drawButtons = function(cm) {
@@ -1327,13 +1356,13 @@ root.defaults = $.extend(root.defaults, {
 	createShareLink: root.createShareLink,
 	
 	/**
-	 * Consume links shared by others, by checking the url for arguments coming from a query link. Set to true to enable. 
+	 * Consume links shared by others, by checking the url for arguments coming from a query link. Defaults by only checking the 'query=' argument in the url
 	 * 
 	 * @property consumeShareLink
-	 * @type boolean
-	 * @default true
+	 * @type function
+	 * @default YASQE.consumeShareLink
 	 */
-	consumeShareLink: true,
+	consumeShareLink: root.consumeShareLink,
 	
 	
 	
