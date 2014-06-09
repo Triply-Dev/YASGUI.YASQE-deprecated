@@ -404,30 +404,37 @@ root.drawButtons = function(cm) {
 	if (cm.options.createShareLink) {
 		
 		var svgShare = require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"});
-		svgShare.click(function(){
-				var popup = $(cm.getWrapperElement()).find(".yasqe_sharePopup");
-				if (popup.length == 0) popup = $("<div class='yasqe_sharePopup'></div>").appendTo(header);
-				var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + $.param(cm.options.createShareLink(cm)));
-				
-				textAreaLink.focus(function() {
-				    var $this = $(this);
-				    $this.select();
+		svgShare.click(function(event){
+			event.stopPropagation();
+			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(header);
+			$('html').click(function() {
+				if (popup) popup.remove();
+			});
 
-				    // Work around Chrome's little problem
-				    $this.mouseup(function() {
-				        // Prevent further mouseup intervention
-				        $this.unbind("mouseup");
-				        return false;
-				    });
-				});
-				
-				popup.empty().append(textAreaLink);
-				var positions = svgShare.position();
-				popup.css("top", (positions.top + svgShare.outerHeight()) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
-			})
-			.addClass("yasqe_share")
-			.attr("title", "Share your query")
-			.appendTo(header);
+			popup.click(function(event) {
+				event.stopPropagation();
+			});
+			var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + $.param(cm.options.createShareLink(cm)));
+			
+			textAreaLink.focus(function() {
+			    var $this = $(this);
+			    $this.select();
+
+			    // Work around Chrome's little problem
+			    $this.mouseup(function() {
+			        // Prevent further mouseup intervention
+			        $this.unbind("mouseup");
+			        return false;
+			    });
+			});
+			
+			popup.empty().append(textAreaLink);
+			var positions = svgShare.position();
+			popup.css("top", (positions.top + svgShare.outerHeight()) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+		})
+		.addClass("yasqe_share")
+		.attr("title", "Share your query")
+		.appendTo(header);
 		
 	}
 
