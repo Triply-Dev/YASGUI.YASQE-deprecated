@@ -7,7 +7,7 @@ require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 
-console = console || {"log":function(){}};//make sure any console statements
+window.console = window.console || {"log":function(){}};//make sure any console statements
 
 require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
