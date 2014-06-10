@@ -113,15 +113,15 @@ var postProcessCmElement = function(cm) {
 		checkSyntax(cm);
 		root.appendPrefixIfNeeded(cm);
 		root.updateQueryButton(cm);
-
+		root.positionAbsoluteItems(cm);
 	});
 	
 	cm.on('cursorActivity', function(cm, eventInfo) {
 		root.autoComplete(cm, true);
 	});
 	cm.prevQueryValid = false;
-	checkSyntax(cm, true);// on first load, check as well (our stored or default query might be incorrect as well)
-
+	checkSyntax(cm);// on first load, check as well (our stored or default query might be incorrect as well)
+	root.positionAbsoluteItems(cm);
 	/**
 	 * load bulk completions
 	 */
@@ -371,6 +371,17 @@ var checkSyntax = function(cm, deepcheck) {
 $.extend(root, CodeMirror);
 
 
+root.positionAbsoluteItems = function(cm) {
+	var scrollBar = $(cm.getWrapperElement()).find(".CodeMirror-vscrollbar");
+	var offset = 0;
+	if (scrollBar.is(":visible")) {
+		offset = scrollBar.outerWidth();
+	}
+	var completionNotification = $(cm.getWrapperElement()).find(".completionNotification");
+	if (completionNotification.is(":visible")) completionNotification.css("right", offset);
+	var buttons = $(cm.getWrapperElement()).find(".yasqe_buttons");
+	if (buttons.is(":visible")) buttons.css("right", offset);
+};
 
 /**
  * Create a share link
@@ -414,7 +425,7 @@ root.drawButtons = function(cm) {
 			popup.click(function(event) {
 				event.stopPropagation();
 			});
-			var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + $.param(cm.options.createShareLink(cm)));
+			var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + "?" + $.param(cm.options.createShareLink(cm)));
 			
 			textAreaLink.focus(function() {
 			    var $this = $(this);
@@ -438,7 +449,7 @@ root.drawButtons = function(cm) {
 		
 	}
 
-	if (cm.options.showQueryButton) {
+	if (cm.options.sparql.showQueryButton) {
 		var height = 40;
 		var width = 40;
 		$("<div class='yasqe_queryButton'></div>")
@@ -490,7 +501,7 @@ root.updateQueryButton = function(cm, status) {
 				}).join(" ");
 			})
 			.addClass("query_" + status)
-			.append(require("yasgui-utils").imgs.getElement({id: queryButtonIds[status]}));
+			.append(require("yasgui-utils").imgs.getElement({id: queryButtonIds[status], width: "100%", height: "100%"}));
 		cm.queryStatus = status;
 	}
 };
@@ -634,8 +645,8 @@ root.doAutoFormat = function(cm) {
 root.executeQuery = function(cm, callbackOrConfig) {
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
-	if (cm.options.query)
-		config = $.extend({}, cm.options.query, config);
+	if (cm.options.sparql)
+		config = $.extend({}, cm.options.sparql, config);
 
 	if (!config.endpoint || config.endpoint.length == 0)
 		return;// nothing to query!
@@ -669,6 +680,7 @@ root.executeQuery = function(cm, callbackOrConfig) {
 	}
 	if (!handlerDefined && !callback)
 		return; // ok, we can query, but have no callbacks. just stop now
+	
 	// if only callback is passed as arg, add that on as 'onComplete' callback
 	if (callback)
 		ajaxConfig.complete = callback;
@@ -704,6 +716,20 @@ root.executeQuery = function(cm, callbackOrConfig) {
 	 */
 	if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
 	root.updateQueryButton(cm, "busy");
+	
+	var updateQueryButton = function() {
+		root.updateQueryButton(cm);
+	};
+	//Make sure the query button is updated again on complete
+	if (ajaxConfig.complete) {
+		var customComplete = ajaxConfig.complete;
+		ajaxConfig.complete = function(arg1, arg2) {
+			customComplete(arg1, arg2);
+			updateQueryButton();
+		};
+	} else {
+		ajaxConfig.complete = updateQueryButton();
+	}
 	cm.xhr = $.ajax(ajaxConfig);
 };
 var completionNotifications = {};
@@ -1340,15 +1366,6 @@ root.defaults = $.extend(root.defaults, {
 	cursorHeight : 0.9,
 
 	// non CodeMirror options
-	/**
-	 * Show a query button. You don't like it? Then disable this setting, and create your button which calls the query() function of the yasqe document
-	 * 
-	 * @property showQueryButton
-	 * @type boolean
-	 * @default false
-	 */
-	showQueryButton: false,
-	
 
 	
 	/**
@@ -1390,6 +1407,129 @@ root.defaults = $.extend(root.defaults, {
 		return "queryVal_" + root.determineId(cm);
 	},
 
+	
+	/**
+	 * Settings for querying sparql endpoints
+	 * 
+	 * @property query
+	 * @type object
+	 */
+	sparql : {
+		/**
+		 * Show a query button. You don't like it? Then disable this setting, and create your button which calls the query() function of the yasqe document
+		 * 
+		 * @property sparql.showQueryButton
+		 * @type boolean
+		 * @default false
+		 */
+		showQueryButton: false,
+		
+		/**
+		 * Endpoint to query
+		 * 
+		 * @property sparql.endpoint
+		 * @type String
+		 * @default "http://dbpedia.org/sparql"
+		 */
+		endpoint : "http://dbpedia.org/sparql",
+		/**
+		 * Request method via which to access SPARQL endpoint
+		 * 
+		 * @property sparql.requestMethod
+		 * @type String
+		 * @default "GET"
+		 */
+		requestMethod : "GET",
+		/**
+		 * Query accept header
+		 * 
+		 * @property sparql.acceptHeader
+		 * @type String
+		 * @default application/sparql-results+json
+		 */
+		acceptHeader : "application/sparql-results+json",
+
+		/**
+		 * Named graphs to query.
+		 * 
+		 * @property sparql.namedGraphs
+		 * @type array
+		 * @default []
+		 */
+		namedGraphs : [],
+		/**
+		 * Default graphs to query.
+		 * 
+		 * @property sparql.defaultGraphs
+		 * @type array
+		 * @default []
+		 */
+		defaultGraphs : [],
+
+		/**
+		 * Additional request arguments. Add them in the form: {name: "name",
+		 * value: "value"}
+		 * 
+		 * @property sparql.args
+		 * @type array
+		 * @default []
+		 */
+		args : [],
+
+		/**
+		 * Additional request headers
+		 * 
+		 * @property sparql.headers
+		 * @type array
+		 * @default {}
+		 */
+		headers : {},
+
+		/**
+		 * Set of ajax handlers
+		 * 
+		 * @property sparql.handlers
+		 * @type object
+		 */
+		handlers : {
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
+			 * 
+			 * @property sparql.handlers.beforeSend
+			 * @type function
+			 * @default null
+			 */
+			beforeSend : null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
+			 * 
+			 * @property sparql.handlers.complete
+			 * @type function
+			 * @default null
+			 */
+			complete : null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
+			 * 
+			 * @property sparql.handlers.error
+			 * @type function
+			 * @default null
+			 */
+			error : null,
+			/**
+			 * See https://api.jquery.com/jQuery.ajax/ for more information on
+			 * these handlers, and their arguments.
+			 * 
+			 * @property sparql.handlers.success
+			 * @type function
+			 * @default null
+			 */
+			success : null
+		}
+	},
 	/**
 	 * Types of completions. Setting the value to null, will disable
 	 * autocompletion for this particular type. By default, only prefix
@@ -1796,120 +1936,6 @@ root.defaults = $.extend(root.defaults, {
 				 */
 				close : null,
 			}
-		}
-	},
-
-	/**
-	 * Settings for querying sparql endpoints
-	 * 
-	 * @property query
-	 * @type object
-	 */
-	query : {
-		/**
-		 * Endpoint to query
-		 * 
-		 * @property query.endpoint
-		 * @type String
-		 * @default "http://dbpedia.org/sparql"
-		 */
-		endpoint : "http://dbpedia.org/sparql",
-		/**
-		 * Request method via which to access SPARQL endpoint
-		 * 
-		 * @property query.requestMethod
-		 * @type String
-		 * @default "GET"
-		 */
-		requestMethod : "GET",
-		/**
-		 * Query accept header
-		 * 
-		 * @property query.acceptHeader
-		 * @type String
-		 * @default application/sparql-results+json
-		 */
-		acceptHeader : "application/sparql-results+json",
-
-		/**
-		 * Named graphs to query.
-		 * 
-		 * @property query.namedGraphs
-		 * @type array
-		 * @default []
-		 */
-		namedGraphs : [],
-		/**
-		 * Default graphs to query.
-		 * 
-		 * @property query.defaultGraphs
-		 * @type array
-		 * @default []
-		 */
-		defaultGraphs : [],
-
-		/**
-		 * Additional request arguments. Add them in the form: {name: "name",
-		 * value: "value"}
-		 * 
-		 * @property query.args
-		 * @type array
-		 * @default []
-		 */
-		args : [],
-
-		/**
-		 * Additional request headers
-		 * 
-		 * @property query.headers
-		 * @type array
-		 * @default {}
-		 */
-		headers : {},
-
-		/**
-		 * Set of ajax handlers
-		 * 
-		 * @property query.handlers
-		 * @type object
-		 */
-		handlers : {
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property query.handlers.beforeSend
-			 * @type function
-			 * @default null
-			 */
-			beforeSend : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property query.handlers.complete
-			 * @type function
-			 * @default null
-			 */
-			complete : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property query.handlers.error
-			 * @type function
-			 * @default null
-			 */
-			error : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property query.handlers.success
-			 * @type function
-			 * @default null
-			 */
-			success : null
 		}
 	}
 });

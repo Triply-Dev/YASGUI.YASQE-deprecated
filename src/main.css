@@ -32,11 +32,16 @@ span.cm-error {
 	right: 5px;
 	z-index: 5;
 }
+.yasqe_buttons div {
+	vertical-align: middle;
+}
 .yasqe_queryButton {
+	display:inline-block;
 	cursor: pointer;
 }
 .yasqe_share {
 	cursor:pointer;
+	margin-right: 5px;
 }
 .yasqe_sharePopup {
 	position:absolute;
