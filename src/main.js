@@ -63,7 +63,16 @@ var extendCmInstance = function(cm) {
 	cm.query = function(callbackOrConfig) {
 		root.executeQuery(cm, callbackOrConfig);
 	};
-
+	
+	/**
+	 * Fetch defined prefixes from query string
+	 * 
+	 * @method doc.getPrefixesFromQuery
+	 * @return object
+	 */
+	cm.getPrefixesFromQuery = function() {
+		return getPrefixesFromQuery(cm);
+	};
 	/**
 	 * Store bulk completions in memory as trie, and store these in localstorage as well (if enabled)
 	 * 
@@ -369,7 +378,6 @@ var checkSyntax = function(cm, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
-
 
 root.positionAbsoluteItems = function(cm) {
 	var scrollBar = $(cm.getWrapperElement()).find(".CodeMirror-vscrollbar");
