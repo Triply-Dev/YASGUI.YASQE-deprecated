@@ -916,8 +916,7 @@ root.appendPrefixIfNeeded = function(cm) {
 				var queryPrefixes = getPrefixesFromQuery(cm);
 				if (queryPrefixes[currentPrefix] == null) {
 					// ok, so it isnt added yet!
-					var completions = tries["prefixes"]
-							.autoComplete(currentPrefix);
+					var completions = tries["prefixes"].autoComplete(currentPrefix);
 					if (completions.length > 0) {
 						appendToPrefixes(cm, completions[0]);
 					}
