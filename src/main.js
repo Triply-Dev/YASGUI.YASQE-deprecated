@@ -945,7 +945,10 @@ var getCompleteToken = function(cm, token, cur) {
 		ch : token.start
 	});
 	// not start of line, and not whitespace
-	if (prevToken.type != null && prevToken.type != "ws") {
+	if (
+			prevToken.type != null && prevToken.type != "ws"
+			&& token.type != null && token.type != "ws"
+		) {
 		token.start = prevToken.start;
 		token.string = prevToken.string + token.string;
 		return getCompleteToken(cm, token, {
@@ -969,10 +972,10 @@ function getPreviousNonWsToken(cm, line, token) {
 }
 
 var preprocessCompletionToken = function(cm, token) {
-	var completionToken = null;
-	if (token.string.indexOf(":") > -1 || token.string.indexOf("<") == 0) {
-		completionToken = {};
-		token = getCompleteToken(cm, token);
+	var completionToken = {};
+	token = getCompleteToken(cm, token);
+//	if (token.string.indexOf(":") > -1 || token.string.indexOf("<") == 0) {
+		
 		var queryPrefixes = getPrefixesFromQuery(cm);
 		if (!token.string.indexOf("<") == 0) {
 			completionToken.tokenPrefix = token.string.substring(0,
@@ -983,7 +986,7 @@ var preprocessCompletionToken = function(cm, token) {
 			}
 		}
 
-		completionToken.uri = token.string;
+		completionToken.uri = token.string.trim();
 		if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
 			// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
 			for ( var prefix in queryPrefixes) {
@@ -999,7 +1002,7 @@ var preprocessCompletionToken = function(cm, token) {
 
 		if (completionToken.uri.indexOf("<") == 0)	completionToken.uri = completionToken.uri.substring(1);
 		if (completionToken.uri.indexOf(">", completionToken.length - 1) !== -1) completionToken.uri = completionToken.uri.substring(0,	completionToken.uri.length - 1);
-	}
+//	}
 	return completionToken;
 };
 
@@ -1033,6 +1036,14 @@ var getSuggestionsFromToken = function(cm, type, partialToken) {
  * @method YASQE.fetchFromLov
  */
 root.fetchFromLov = function(cm, partialToken, type, callback) {
+	if (!partialToken || partialToken.trim().length == 0) {
+		if (completionNotifications[type]) {
+			completionNotifications[type]
+				.empty()
+				.append("Nothing to autocomplete yet!");
+		}
+		return false;
+	}
 	var maxResults = 50;
 
 	var args = {
@@ -1079,7 +1090,12 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 						// requests done! Don't call this function again
 					}
 				}).fail(function(jqXHR, textStatus, errorThrown) {
-			console.log(errorThrown);
+					if (completionNotifications[type]) {
+						completionNotifications[type]
+							.empty()
+							.append("Failed fetching suggestions..");
+					}
+					
 		});
 	};
 	//if notification bar is there, show a loader
@@ -1102,8 +1118,7 @@ getHints.resourceHints = function(cm, type, callback) {
 		var hintList = [];
 		for (var i = 0; i < suggestions.length; i++) {
 			var suggestedString = suggestions[i];
-			if (completionToken.tokenPrefix != null
-					&& completionToken.uri != null) {
+			if (completionToken.tokenPrefix	&& completionToken.uri && completionToken.tokenPrefixUri) {
 				// we need to get the suggested string back to prefixed form
 				suggestedString = suggestedString
 						.substring(completionToken.tokenPrefixUri.length);
@@ -1871,8 +1886,8 @@ root.defaults = $.extend(root.defaults, {
 			 */
 			autoShow : false,
 			/**
-			 * Automatically store autocompletions in localstorage. This is
-			 * particularly useful when the get() function is an expensive ajax
+			 * Automatically store autocompletions in localstorage (only works when 'bulk' is set to true)
+			 * This is particularly useful when the get() function is an expensive ajax
 			 * call. Autocompletions are stored for a period of a month. Set
 			 * this property to null (or remove it), to disable the use of
 			 * localstorage. Otherwise, set a string value (or a function
