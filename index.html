@@ -49,36 +49,61 @@
 
 		
       
-
+		
 	
-      	<div id="aboutYQuery">
+      	<div class="row" id="aboutYQuery">
+      	<div class="col-md-12">
       	<h1>About YASQE</h1>
       	YASQE is part of the regular <a target="_blank" href='http://laurensrietveld.nl/yasgui'>YASGUI</a> web application. YASQE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
       	<div id="showcase"></div>
       	<code>var yasqe = YASQE(document.getElementById("showcase"));</code> <br>
       	(or, if you would like to instantiate YASQE from an existing text area, use <code>var yasqe = YASQE.fromTextArea(document.getElementById('textAreaItem'));</code>
       	</div>
-      
-      	<div id="features">
+      	</div>
+      	
+      	
+      	
+      	<div class="row" id="features">
+      	<div class="col-md-12">
       	<h1>Features</h1>
       	YASQE features:
       	<ul>
       	<li>SPARQL syntax highlighting and error checking </li>
-      	<li>Extremely customizable: All functions and handlers from <a href="http://codemirror.net" target="_blank">CodeMirror library</a> are accessible</li>
+      	<li>Extremely customizable: All functions and handlers from the <a href="http://codemirror.net" target="_blank">CodeMirror library</a> are accessible</li>
       	<li>Persistent values (optional): your query is stored for easier reuse between browser sessions
       	<li>Prefix autocompletion (using <a href="http://prefix.cc" target="_blank">prefix.cc</a>)</li>
       	<li>Property and class autocompletion (using the <a href="http://lov.okfn.org/" target="_blank">Linked Open Vocabularies API</a>)</li>
-      	<li>Handlers to easily add your own property and class autocompletion</li>
+      	<li>Easily add your own property and class autocompletions if you have them</li>
       	<li>Handy <a href="#keyboardShortcuts">keyboard shortcuts</a></li>
       	<li>Possible to execute the query directly</li>
       	</ul>
       	</div>
-      	<div id="releases">
-      	<h1>Download</h1>
-		<a class="btn btn-primary" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release</a>
       	</div>
       	
-      	<div id="keyboardShortcuts">
+      	
+      	
+      	<div class="row" id="releases">
+      	<div class="col-md-12">
+      	<h1>Download the latest release</h1>
+<!--       		<a class="btn btn-primary" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release</a> -->
+		
+      	</div>
+      	</div>
+      	<div class="row" id="downloads">
+      		<div class="col-md-6">
+      		<h3>GitHub</h3>
+      		Visit the GitHub page to download the YASQE .css and .js files (find them in the <code>dist</code> directory). 
+      		<br><a class="btn btn-large btn-info" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release from GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png"></a>
+      		</div>
+      		<div class="col-md-6">
+      		<h3><img style="height: 26px;" src="doc/imgs/npm.png"></h3>
+      		YASQE is registered as a node package as well, so you'll be able to use the node package manager to keep your version of YASQE up to date.
+      		<br><a class="btn btn-large btn-info" href="https://www.npmjs.org/package/yasgui-yasqe" target="_blank">Show NPM Package</a>
+      		</div>
+      	</div>
+      	
+      	<div class="row" id="keyboardShortcuts">
+      	<div class="col-md-12">
       	<h1>Keyboard shortcuts</h1>
       	YASQE comes with some useful keyboard shortcuts. And even better, take a look at the <a href="doc/doc.html">documentation</a> on how to add your own.
       	Some examples:
@@ -95,8 +120,10 @@
       	<li><code>[CTRL|CMD] - S</code>: Store the editor contents in local storage (if this is enabled)</li>
       	</ul>
       	</div>
+      	</div>
       	
-      	<div id="thanks">
+      	<div class="row" id="thanks">
+      	<div class="col-md-12">
       	<h1>Thanks!</h1>
       	A big thanks goes out to: 
       	<ul>
@@ -105,6 +132,7 @@
       	<li>Pierre-Yves Vandenbussche and Bernard Vatant for their useful <a href='http://lov.okfn.org/' target="_blank">Linked Open Vocabularies service</a>, of which I use the <a target="_blank" href="lov.okfn.org/dataset/lov/apidoc/">API</a> to autocomplete properties and classes
       	<li>Richard Cyganiak for his simple but effective <a href='http://prefix.cc' target="_blank">Prefix.cc</a> service, which I use for autocompleting prefixes.
       	</ul>
+      	</div>
       	</div>
       	
       
