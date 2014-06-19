@@ -56,7 +56,6 @@
     "type": "git",
     "url": "https://github.com/YASGUI/YASQE.git"
   },
-  "readme": "README.md",
   "dependencies": {
     "jquery": "~ 1.11.0",
     "codemirror": "~4.2.0",
