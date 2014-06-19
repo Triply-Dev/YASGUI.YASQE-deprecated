@@ -1968,7 +1968,8 @@ root.defaults = $.extend(root.defaults, {
 root.version = {
 	"CodeMirror" : CodeMirror.version,
 	"YASQE" : require("../package.json").version,
-	"jquery": $.fn.jquery
+	"jquery": $.fn.jquery,
+	"yasgui-utils": require("yasgui-utils").version
 };
 
 // end with some documentation stuff we'd like to include in the documentation
