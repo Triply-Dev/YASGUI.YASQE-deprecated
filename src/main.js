@@ -13,7 +13,7 @@ require('../lib/flint.js');
 var Trie = require('../lib/trie.js');
 
 /**
- * Main YASQE constructor
+ * Main YASQE constructor. Pass a DOM element as argument to append the editor to, and (optionally) pass along config settings (see the YASQE.defaults object below, as well as the regular CodeMirror documentation, for more information on configurability)
  * 
  * @constructor
  * @param {DOM-Element} parent element to append editor to.
@@ -1967,7 +1967,8 @@ root.defaults = $.extend(root.defaults, {
 });
 root.version = {
 	"CodeMirror" : CodeMirror.version,
-	"YASQE" : require("../package.json").version
+	"YASQE" : require("../package.json").version,
+	"jquery": $.fn.jquery
 };
 
 // end with some documentation stuff we'd like to include in the documentation
