@@ -6,7 +6,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://yasgui.github.io/license.txt"
+      "url": "http://yasgui.org/license.txt"
     }
   ],
   "devDependencies": {
@@ -33,7 +33,7 @@
     "Semantic Web",
     "Linked Data"
   ],
-  "homepage": "http://yasgui.github.io/YASQE",
+  "homepage": "http://yasqe.yasgui.org",
   "maintainers": [
     {
       "name": "Laurens Rietveld",
