@@ -1437,7 +1437,7 @@ root.defaults = $.extend(root.defaults, {
 	/**
 	 * Settings for querying sparql endpoints
 	 * 
-	 * @property query
+	 * @property sparql
 	 * @type object
 	 */
 	sparql : {
