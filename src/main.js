@@ -762,7 +762,7 @@ root.showCompletionNotification = function(cm, type) {
 };
 
 /**
- * Hide notification
+ * Hide completion notification
  * 
  * @param doc {YASQE}
  * @param autocompletionType {string}
@@ -774,73 +774,7 @@ root.hideCompletionNotification = function(cm, type) {
 	}
 };
 
-var validCompletionPosition = {
-	properties : function(cm) {
-		var token = getCompleteToken(cm);
 
-		if (token.string.indexOf("?") == 0)
-			return false; // we are typing a var
-		if ($.inArray("a", token.state.possibleCurrent) >= 0)
-			return true;// predicate pos
-		var cur = cm.getCursor();
-		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
-		if (previousToken.string == "rdfs:subPropertyOf")
-			return true;
-
-		// hmm, we would like -better- checks here, e.g. checking whether we are
-		// in a subject, and whether next item is a rdfs:subpropertyof.
-		// difficult though... the grammar we use is unreliable when the query
-		// is invalid (i.e. during typing), and often the predicate is not typed
-		// yet, when we are busy writing the subject...
-		return false;
-	},
-	classes : function(cm) {
-		var token = getCompleteToken(cm);
-		if (token.string.indexOf("?") == 0)
-			return false;
-		var cur = cm.getCursor();
-		var previousToken = getPreviousNonWsToken(cm, cur.line, token);
-		if (previousToken.string == "a")
-			return true;
-		if (previousToken.string == "rdf:type")
-			return true;
-		if (previousToken.string == "rdfs:domain")
-			return true;
-		if (previousToken.string == "rdfs:range")
-			return true;
-		return false;
-	},
-	prefixes : function(cm) {
-		var cur = cm.getCursor(), token = cm.getTokenAt(cur);
-
-		// not at end of line
-		if (cm.getLine(cur.line).length > cur.ch)
-			return false;
-
-		if (token.type != "ws") {
-			// we want to complete token, e.g. when the prefix starts with an a
-			// (treated as a token in itself..)
-			// but we to avoid including the PREFIX tag. So when we have just
-			// typed a space after the prefix tag, don't get the complete token
-			token = getCompleteToken(cm);
-		}
-
-		// we shouldnt be at the uri part the prefix declaration
-		// also check whether current token isnt 'a' (that makes codemirror
-		// thing a namespace is a possiblecurrent
-		if (!token.string.indexOf("a") == 0
-				&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
-			return false;
-
-		// First token of line needs to be PREFIX,
-		// there should be no trailing text (otherwise, text is wrongly inserted
-		// in between)
-		var firstToken = getNextNonWsToken(cm, cur.line);
-		if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
-			return false;
-		return true;
-	}
-};
 
 root.autoComplete = function(cm, fromAutoShow) {
 	if (cm.somethingSelected())
@@ -863,18 +797,24 @@ root.autoComplete = function(cm, fromAutoShow) {
 		if (cm.options.autocompletions[type].async) {
 			hintConfig.async = true;
 		}
-		var result = root.showHint(cm, getHints[type], hintConfig);
+		var wrappedHintCallback = function(cm, callback) {
+			return getCompletionHintsObject(cm, type, callback);
+		};
+		var result = root.showHint(cm, wrappedHintCallback, hintConfig);
 		return true;
 	};
 	for ( var type in cm.options.autocompletions) {
-		if (!validCompletionPosition[type](cm)) {
+		if (!cm.options.autocompletions[type].isValidCompletionPosition) continue; //no way to check whether we are in a valid position
+		
+		if (!cm.options.autocompletions[type].isValidCompletionPosition(cm)) {
+			//if needed, fire handler for when we are -not- in valid completion position
 			if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.invalidPosition) {
 				cm.options.autocompletions[type].handlers.invalidPosition(cm, type);
 			}
+			//not in a valid position, so continue to next completion candidate type
 			continue;
 		}
-		// run valid position handler, if there is one (if it returns false,
-		// stop the autocompletion!)
+		// run valid position handler, if there is one (if it returns false, stop the autocompletion!)
 		if (cm.options.autocompletions[type].handlers && cm.options.autocompletions[type].handlers.validPosition) {
 			if (cm.options.autocompletions[type].handlers.validPosition(cm, type) === false)
 				continue;
@@ -975,72 +915,20 @@ function getPreviousNonWsToken(cm, line, token) {
 	return previousToken;
 }
 
-var preprocessCompletionToken = function(cm, token) {
-	var completionToken = {};
-	token = getCompleteToken(cm, token);
-//	if (token.string.indexOf(":") > -1 || token.string.indexOf("<") == 0) {
-		
-		var queryPrefixes = getPrefixesFromQuery(cm);
-		if (!token.string.indexOf("<") == 0) {
-			completionToken.tokenPrefix = token.string.substring(0,
-					token.string.indexOf(":") + 1);
-
-			if (queryPrefixes[completionToken.tokenPrefix] != null) {
-				completionToken.tokenPrefixUri = queryPrefixes[completionToken.tokenPrefix];
-			}
-		}
-
-		completionToken.uri = token.string.trim();
-		if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
-			// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
-			for ( var prefix in queryPrefixes) {
-				if (queryPrefixes.hasOwnProperty(prefix)) {
-					if (token.string.indexOf(prefix) == 0) {
-						completionToken.uri = queryPrefixes[prefix];
-						completionToken.uri += token.string.substring(prefix.length);
-						break;
-					}
-				}
-			}
-		}
-
-		if (completionToken.uri.indexOf("<") == 0)	completionToken.uri = completionToken.uri.substring(1);
-		if (completionToken.uri.indexOf(">", completionToken.length - 1) !== -1) completionToken.uri = completionToken.uri.substring(0,	completionToken.uri.length - 1);
-//	}
-	return completionToken;
-};
-
-var getSuggestionsFromToken = function(cm, type, partialToken) {
-
-	var suggestions = [];
-	if (tries[type]) {
-		suggestions = tries[type].autoComplete(partialToken);
-	} else if (typeof cm.options.autocompletions[type].get == "function" && cm.options.autocompletions[type].async == false) {
-		suggestions = cm.options.autocompletions[type].get(cm, partialToken, type);
-	} else if (typeof cm.options.autocompletions[type].get == "object") {
-		var partialTokenLength = partialToken.length;
-		for (var i = 0; i < cm.options.autocompletions[type].get.length; i++) {
-			var completion = cm.options.autocompletions[type].get[i];
-			if (completion.slice(0, partialTokenLength) == partialToken) {
-				suggestions.push(completion);
-			}
-		}
-	}
-	return suggestions;
-};
 
 /**
  * Fetch property and class autocompletions the Linked Open Vocabulary services. Issues an async autocompletion call
  * 
  * @param doc {YASQE}
- * @param partialToken {string}
+ * @param partialToken {object}
  * @param type {"properties" | "classes"}
  * @param callback {function} 
  * 
  * @method YASQE.fetchFromLov
  */
 root.fetchFromLov = function(cm, partialToken, type, callback) {
-	if (!partialToken || partialToken.trim().length == 0) {
+	
+	if (!partialToken || !partialToken.string || partialToken.string.trim().length == 0) {
 		if (completionNotifications[type]) {
 			completionNotifications[type]
 				.empty()
@@ -1051,7 +939,7 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 	var maxResults = 50;
 
 	var args = {
-		q : partialToken,
+		q : partialToken.uri,
 		page : 1
 	};
 	if (type == "classes") {
@@ -1111,137 +999,152 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 	}
 	doRequests();
 };
+/**
+ * function which fires after the user selects a completion. this function checks whether we actually need to store this one (if completion is same as current token, don't do anything)
+ */
 var selectHint = function(cm, data, completion) {
 	if (completion.text != cm.getTokenAt(cm.getCursor()).string) {
 		cm.replaceRange(completion.text, data.from, data.to);
 	}
 };
-var getHints = {};
-getHints.resourceHints = function(cm, type, callback) {
-	var getSuggestionsAsHintObject = function(suggestions) {
-		var hintList = [];
-		for (var i = 0; i < suggestions.length; i++) {
-			var suggestedString = suggestions[i];
-			if (completionToken.tokenPrefix	&& completionToken.uri && completionToken.tokenPrefixUri) {
-				// we need to get the suggested string back to prefixed form
-				suggestedString = suggestedString
-						.substring(completionToken.tokenPrefixUri.length);
-				suggestedString = completionToken.tokenPrefix + suggestedString;
-			} else {
-				// it is a regular uri. add '<' and '>' to string
-				suggestedString = "<" + suggestedString + ">";
-			}
-			hintList.push({
-				text : suggestedString,
-				displayText : suggestedString,
-				hint : selectHint,
-				className : type + "Hint"
-			});
+
+/**
+ * Converts rdf:type to http://.../type and converts <http://...> to http://...
+ * Stores additional info such as the used namespace and prefix in the token object
+ */
+var preprocessResourceTokenForCompletion = function(cm, token) {
+	var queryPrefixes = getPrefixesFromQuery(cm);
+	if (!token.string.indexOf("<") == 0) {
+		token.tokenPrefix = token.string.substring(0,	token.string.indexOf(":") + 1);
+
+		if (queryPrefixes[token.tokenPrefix] != null) {
+			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix];
 		}
-		var returnObj = {
-			completionToken : completionToken.uri,
-			list : hintList,
-			from : {
-				line : cur.line,
-				ch : token.start
-			},
-			to : {
-				line : cur.line,
-				ch : token.end
+	}
+
+	token.uri = token.string.trim();
+	if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
+		// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
+		for (var prefix in queryPrefixes) {
+			if (queryPrefixes.hasOwnProperty(prefix)) {
+				if (token.string.indexOf(prefix) == 0) {
+					token.uri = queryPrefixes[prefix];
+					token.uri += token.string.substring(prefix.length);
+					break;
+				}
 			}
+		}
+	}
+
+	if (token.uri.indexOf("<") == 0)	token.uri = token.uri.substring(1);
+	if (token.uri.indexOf(">", token.length - 1) !== -1) token.uri = token.uri.substring(0,	token.uri.length - 1);
+	return token;
+};
+
+var postprocessResourceTokenForCompletion = function(cm, token, suggestedString) {
+	if (token.tokenPrefix && token.uri && token.tokenPrefixUri) {
+		// we need to get the suggested string back to prefixed form
+		suggestedString = suggestedString.substring(token.tokenPrefixUri.length);
+		suggestedString = token.tokenPrefix + suggestedString;
+	} else {
+		// it is a regular uri. add '<' and '>' to string
+		suggestedString = "<" + suggestedString + ">";
+	}
+	return suggestedString;
+};
+var preprocessPrefixTokenForCompletion = function(cm, token) {
+	var previousToken = getPreviousNonWsToken(cm, cm.getCursor().line, token);
+	if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
+		//combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
+		//we want the token to be "bla: <", en not "<"
+		token = {
+			start: previousToken.start,
+			end: token.end,
+			string: previousToken.string + " " + token.string,
+			state: token.state
 		};
-		if (cm.options.autocompletions[type].handlers) {
-			for (var handler in cm.options.autocompletions[type].handlers) {
-				if (cm.options.autocompletions[type].handlers[handler])
-					root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
+	}
+	return token;
+};
+var getSuggestionsFromToken = function(cm, type, partialToken) {
+	var suggestions = [];
+	if (tries[type]) {
+		suggestions = tries[type].autoComplete(partialToken.string);
+	} else if (typeof cm.options.autocompletions[type].get == "function" && cm.options.autocompletions[type].async == false) {
+		suggestions = cm.options.autocompletions[type].get(cm, partialToken.string, type);
+	} else if (typeof cm.options.autocompletions[type].get == "object") {
+		var partialTokenLength = partialToken.string.length;
+		for (var i = 0; i < cm.options.autocompletions[type].get.length; i++) {
+			var completion = cm.options.autocompletions[type].get[i];
+			if (completion.slice(0, partialTokenLength) == partialToken.string) {
+				suggestions.push(completion);
 			}
 		}
-		return returnObj;
-	};
-	var token = getCompleteToken(cm);
+	}
+	return getSuggestionsAsHintObject(cm, suggestions, type, partialToken);
+	
+};
+
+/**
+ *  get our array of suggestions (strings) in the codemirror hint format
+ */
+var getSuggestionsAsHintObject = function(cm, suggestions, type, token) {
+	var hintList = [];
+	for (var i = 0; i < suggestions.length; i++) {
+		var suggestedString = suggestions[i];
+		if (cm.options.autocompletions[type].postProcessToken) {
+			suggestedString = cm.options.autocompletions[type].postProcessToken(cm, token, suggestedString);
+		}
+		hintList.push({
+			text : suggestedString,
+			displayText : suggestedString,
+			hint : selectHint,
+			className : type + "Hint"
+		});
+	}
+	
 	var cur = cm.getCursor();
-	var completionToken = preprocessCompletionToken(cm, token);
-	if (completionToken) {
+	var returnObj = {
+		completionToken : token.string,
+		list : hintList,
+		from : {
+			line : cur.line,
+			ch : token.start
+		},
+		to : {
+			line : cur.line,
+			ch : token.end
+		}
+	};
+	//if we have some autocompletion handlers specified, add these these to the object. Codemirror will take care of firing these
+	if (cm.options.autocompletions[type].handlers) {
+		for ( var handler in cm.options.autocompletions[type].handlers) {
+			if (cm.options.autocompletions[type].handlers[handler]) 
+				root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
+		}
+	}
+	return returnObj;
+};
+
+
+var getCompletionHintsObject = function(cm, type, callback) {
+	var token = getCompleteToken(cm);
+	if (cm.options.autocompletions[type].preProcessToken) {
+		token = cm.options.autocompletions[type].preProcessToken(cm, token, type);
+	}
+	
+	if (token) {
 		// use custom completionhint function, to avoid reaching a loop when the
 		// completionhint is the same as the current token
 		// regular behaviour would keep changing the codemirror dom, hence
 		// constantly calling this callback
-		
 		if (cm.options.autocompletions[type].async) {
 			var wrappedCallback = function(suggestions) {
-				callback(getSuggestionsAsHintObject(suggestions));
+				callback(getSuggestionsAsHintObject(cm, suggestions, type, token));
 			};
-			cm.options.autocompletions[type].get(cm, completionToken.uri, type, wrappedCallback);
+			cm.options.autocompletions[type].get(cm, token, type, wrappedCallback);
 		} else {
-			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type,	completionToken.uri));
-
-		}
-	}
-};
-getHints.properties = function(cm, callback) {
-	return getHints.resourceHints(cm, "properties", callback);
-};
-getHints.classes = function(cm, callback, config) {
-	return getHints.resourceHints(cm, "classes", callback);
-};
-getHints.prefixes = function(cm, callback) {
-	var type = "prefixes";
-	var token = getCompleteToken(cm);
-	var cur = cm.getCursor();
-	var preprocessPrefixCompletion = function() {
-		// If this is a whitespace, and token is just after PREFIX, proceed
-		// using empty string as token
-		if (/\s*/.test(token.string) && cm.getTokenAt({
-			line : cur.line,
-			ch : token.start
-		}).string.toUpperCase() == "PREFIX") {
-			token = {
-				start : cur.ch,
-				end : cur.ch,
-				string : "",
-				state : token.state
-			};
-		} else {
-			// We know we are in a PREFIX line. Now check whether the string
-			// starts with a punct or keyword
-			// Good example is 'a', which is a valid punct in our grammar.
-			// This is parsed as separate token which messes up the token for
-			// autocompletion (the part after 'a' is used as separate token)
-			// If previous token is in keywords or keywords, prepend this token
-			// to current token
-			token = getCompleteToken(cm, token, cur);
-		}
-	};
-	var getSuggestionsAsHintObject = function(suggestions) {
-		var returnObj = {
-			completionToken : token.uri,
-			list : suggestions,
-			from : {
-				line : cur.line,
-				ch : token.start
-			},
-			to : {
-				line : cur.line,
-				ch : token.end
-			}
-		};
-		if (cm.options.autocompletions[type].handlers) {
-			for ( var handler in cm.options.autocompletions[type].handlers) {
-				if (cm.options.autocompletions[type].handlers[handler]) 
-					root.on(returnObj, handler, cm.options.autocompletions[type].handlers[handler]);
-			}
-		}
-		return returnObj;
-	};
-	preprocessPrefixCompletion();
-	if (token) {
-		if (cm.options.autocompletions[type].async) {
-			var wrappedCallback = function(suggestions) {
-				callback(getSuggestionsAsHintObject(suggestions));
-			};
-			cm.options.autocompletions[type].get(cm, token.uri, type, wrappedCallback);
-		} else {
-			return getSuggestionsAsHintObject(getSuggestionsFromToken(cm, type,	token.string));
+			return getSuggestionsFromToken(cm, type, token);
 
 		}
 	}
@@ -1575,18 +1478,85 @@ root.defaults = $.extend(root.defaults, {
 		 */
 		prefixes : {
 			/**
+			 * Check whether the cursor is in a proper position for this autocompletion.
+			 * 
+			 * @type function
+			 * @param yasqe doc
+			 * @return boolean
+			 */
+			isValidCompletionPosition : function(cm) {
+				var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+
+				// not at end of line
+				if (cm.getLine(cur.line).length > cur.ch)
+					return false;
+
+				if (token.type != "ws") {
+					// we want to complete token, e.g. when the prefix starts with an a
+					// (treated as a token in itself..)
+					// but we to avoid including the PREFIX tag. So when we have just
+					// typed a space after the prefix tag, don't get the complete token
+					token = getCompleteToken(cm);
+				}
+
+				// we shouldnt be at the uri part the prefix declaration
+				// also check whether current token isnt 'a' (that makes codemirror
+				// thing a namespace is a possiblecurrent
+				if (!token.string.indexOf("a") == 0
+						&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
+					return false;
+
+				// First token of line needs to be PREFIX,
+				// there should be no trailing text (otherwise, text is wrongly inserted
+				// in between)
+				var firstToken = getNextNonWsToken(cm, cur.line);
+				if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
+					return false;
+				return true;
+			},
+			    
+			/**
 			 * Get the autocompletions. Either a function which returns an
 			 * array, or an actual array. The array should be in the form ["rdf: <http://....>"]
 			 * 
 			 * @property autocompletions.prefixes.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param token {object} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromPrefixCc)
 			 */
 			get : root.fetchFromPrefixCc,
+			
+			/**
+			 * Preprocesses the codemirror token before matching it with our autocompletions list.
+			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
+			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
+			 * 
+			 * @property autocompletions.properties.preProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
+			 * @default function
+			 */
+			preProcessToken: preprocessPrefixTokenForCompletion,
+			/**
+			 * Postprocesses the autocompletion suggestion.
+			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
+			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
+			 * 
+			 * @property autocompletions.properties.postProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @param suggestion {string} The suggestion which you are post processing
+			 * @return post-processed suggestion {string}
+			 * @default null
+			 */
+			postProcessToken: null,
+			
 			/**
 			 * The get function is asynchronous
 			 * 
@@ -1600,7 +1570,7 @@ root.defaults = $.extend(root.defaults, {
 			 * using the get() function. Alternatively, disable bulk loading, to
 			 * call the get() function whenever a token needs autocompletion (in
 			 * this case, the completion token is passed on to the get()
-			 * function) Whenever you have an autocompletion list that easily
+			 * function) whenever you have an autocompletion list that is static, and that easily
 			 * fits in memory, we advice you to enable bulk for performance
 			 * reasons (especially as we store the autocompletions in a trie)
 			 * 
@@ -1715,18 +1685,72 @@ root.defaults = $.extend(root.defaults, {
 		 */
 		properties : {
 			/**
+			 * Check whether the cursor is in a proper position for this autocompletion.
+			 * 
+			 * @type function
+			 * @param yasqe doc
+			 * @return boolean
+			 */
+			isValidCompletionPosition : function(cm) {
+				var token = getCompleteToken(cm);
+
+				if (token.string.indexOf("?") == 0)
+					return false; // we are typing a var
+				if ($.inArray("a", token.state.possibleCurrent) >= 0)
+					return true;// predicate pos
+				var cur = cm.getCursor();
+				var previousToken = getPreviousNonWsToken(cm, cur.line, token);
+				if (previousToken.string == "rdfs:subPropertyOf")
+					return true;
+
+				// hmm, we would like -better- checks here, e.g. checking whether we are
+				// in a subject, and whether next item is a rdfs:subpropertyof.
+				// difficult though... the grammar we use is unreliable when the query
+				// is invalid (i.e. during typing), and often the predicate is not typed
+				// yet, when we are busy writing the subject...
+				return false;
+			},
+			/**
 			 * Get the autocompletions. Either a function which returns an
 			 * array, or an actual array. The array should be in the form ["http://...",....]
 			 * 
 			 * @property autocompletions.properties.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param token {object} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromLov)
 			 */
 			get : root.fetchFromLov,
+			/**
+			 * Preprocesses the codemirror token before matching it with our autocompletions list.
+			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
+			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
+			 * 
+			 * @property autocompletions.properties.preProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
+			 * @default function
+			 */
+			preProcessToken: preprocessResourceTokenForCompletion,
+			/**
+			 * Postprocesses the autocompletion suggestion.
+			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
+			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
+			 * 
+			 * @property autocompletions.properties.postProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @param suggestion {string} The suggestion which you are post processing
+			 * @return post-processed suggestion {string}
+			 * @default function
+			 */
+			postProcessToken: postprocessResourceTokenForCompletion,
+
 			/**
 			 * The get function is asynchronous
 			 * 
@@ -1740,7 +1764,7 @@ root.defaults = $.extend(root.defaults, {
 			 * onLoad using the get() function. Alternatively, disable bulk
 			 * loading, to call the get() function whenever a token needs
 			 * autocompletion (in this case, the completion token is passed on
-			 * to the get() function) Whenever you have an autocompletion list
+			 * to the get() function) whenever you have an autocompletion list that is static, and 
 			 * that easily fits in memory, we advice you to enable bulk for
 			 * performance reasons (especially as we store the autocompletions
 			 * in a trie)
@@ -1788,7 +1812,7 @@ root.defaults = $.extend(root.defaults, {
 				 * Fires when a codemirror change occurs in a position where we
 				 * can show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.classes.handlers.validPosition
+				 * @property autocompletions.properties.handlers.validPosition
 				 * @type function
 				 * @default YASQE.showCompletionNotification
 				 */
@@ -1797,7 +1821,7 @@ root.defaults = $.extend(root.defaults, {
 				 * Fires when a codemirror change occurs in a position where we
 				 * can -not- show this particular type of autocompletion
 				 * 
-				 * @property autocompletions.classes.handlers.invalidPosition
+				 * @property autocompletions.properties.handlers.invalidPosition
 				 * @type function
 				 * @default YASQE.hideCompletionNotification
 				 */
@@ -1805,11 +1829,11 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.classes.handlers.shown
+				 * @property autocompletions.properties.handlers.shown
 				 * @type function
 				 * @default null
 				 */
-				shown : function() {console.log("shown");},
+				shown : null,
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
@@ -1821,7 +1845,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.classes.handlers.pick
+				 * @property autocompletions.properties.handlers.pick
 				 * @type function
 				 * @default null
 				 */
@@ -1829,7 +1853,7 @@ root.defaults = $.extend(root.defaults, {
 				/**
 				 * See http://codemirror.net/doc/manual.html#addon_show-hint
 				 * 
-				 * @property autocompletions.classes.handlers.close
+				 * @property autocompletions.properties.handlers.close
 				 * @type function
 				 * @default null
 				 */
@@ -1844,18 +1868,69 @@ root.defaults = $.extend(root.defaults, {
 		 */
 		classes : {
 			/**
+			 * Check whether the cursor is in a proper position for this autocompletion.
+			 * 
+			 * @type function
+			 * @param yasqe doc
+			 * @return boolean
+			 */
+			isValidCompletionPosition : function(cm) {
+				var token = getCompleteToken(cm);
+				if (token.string.indexOf("?") == 0)
+					return false;
+				var cur = cm.getCursor();
+				var previousToken = getPreviousNonWsToken(cm, cur.line, token);
+				if (previousToken.string == "a")
+					return true;
+				if (previousToken.string == "rdf:type")
+					return true;
+				if (previousToken.string == "rdfs:domain")
+					return true;
+				if (previousToken.string == "rdfs:range")
+					return true;
+				return false;
+			},
+			/**
 			 * Get the autocompletions. Either a function which returns an
 			 * array, or an actual array. The array should be in the form ["http://...",....]
 			 * 
 			 * @property autocompletions.classes.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param partialToken {string} When bulk is disabled, use this partialtoken to autocomplete
+			 * @param token {object} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromLov)
 			 */
 			get : root.fetchFromLov,
+			
+			/**
+			 * Preprocesses the codemirror token before matching it with our autocompletions list.
+			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
+			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
+			 * 
+			 * @property autocompletions.properties.preProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
+			 * @default function
+			 */
+			preProcessToken: preprocessResourceTokenForCompletion,
+			/**
+			 * Postprocesses the autocompletion suggestion.
+			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
+			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
+			 * 
+			 * @property autocompletions.properties.postProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @param suggestion {string} The suggestion which you are post processing
+			 * @return post-processed suggestion {string}
+			 * @default function
+			 */
+			postProcessToken: postprocessResourceTokenForCompletion,
 			/**
 			 * The get function is asynchronous
 			 * 
@@ -1869,7 +1944,7 @@ root.defaults = $.extend(root.defaults, {
 			 * using the get() function. Alternatively, disable bulk loading, to
 			 * call the get() function whenever a token needs autocompletion (in
 			 * this case, the completion token is passed on to the get()
-			 * function) Whenever you have an autocompletion list that easily
+			 * function) whenever you have an autocompletion list that is static, and that easily
 			 * fits in memory, we advice you to enable bulk for performance
 			 * reasons (especially as we store the autocompletions in a trie)
 			 * 
