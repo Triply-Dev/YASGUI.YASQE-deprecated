@@ -536,7 +536,7 @@ root.fromTextArea = function(textAreaEl, config) {
  * @returns variableNames {array}
  */
 
-root.getAllVariableNames = function(cm, token) {
+root.autocompleteVariables = function(cm, token) {
 	if (token.trim().length == 0) return [];//nothing to autocomplete
 	var distinctVars = {};
 	//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
@@ -549,8 +549,20 @@ root.getAllVariableNames = function(cm, token) {
 			if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
 				variable += nextEl.text();			
 			}
-			//store in map so we have a unique list (do not get only the questionmarks, so length greater than 1)
-			if (variable.length > 1) distinctVars[variable] = true;
+			
+			//skip single questionmarks
+			if (variable.length <= 1) return;
+			
+			//it should match our token ofcourse
+			if (variable.indexOf(token) !== 0) return;
+			
+			//skip exact matches
+			if (variable == token) return;
+			
+			//store in map so we have a unique list 
+			distinctVars[variable] = true;
+			
+			
 		}
 	});
 	var variables = [];
@@ -2108,9 +2120,9 @@ root.defaults = $.extend(root.defaults, {
 			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
-			 * @default function (YASQE.getAllVariableNames)
+			 * @default function (YASQE.autocompleteVariables)
 			 */
-			get : root.getAllVariableNames,
+			get : root.autocompleteVariables,
 						
 			/**
 			 * Preprocesses the codemirror token before matching it with our autocompletions list.
