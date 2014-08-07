@@ -541,9 +541,10 @@ root.fetchFromPrefixCc = function(cm) {
 			if (prefix == "bif")
 				continue;// skip this one! see #231
 			var completeString = prefix + ": <" + data[prefix] + ">";
-			prefixArray.push(completeString);// the array we want to store in
-												// localstorage
+			prefixArray.push(completeString);// the array we want to store in localstorage
 		}
+		
+		prefixArray.sort();
 		cm.storeBulkCompletions("prefixes", prefixArray);
 	});
 };
