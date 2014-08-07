@@ -1480,6 +1480,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Check whether the cursor is in a proper position for this autocompletion.
 			 * 
+			 * @property autocompletions.prefixes.isValidCompletionPosition
 			 * @type function
 			 * @param yasqe doc
 			 * @return boolean
@@ -1687,6 +1688,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Check whether the cursor is in a proper position for this autocompletion.
 			 * 
+			 * @property autocompletions.properties.isValidCompletionPosition
 			 * @type function
 			 * @param yasqe doc
 			 * @return boolean
@@ -1870,6 +1872,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Check whether the cursor is in a proper position for this autocompletion.
 			 * 
+			 * @property autocompletions.classes.isValidCompletionPosition
 			 * @type function
 			 * @param yasqe doc
 			 * @return boolean
