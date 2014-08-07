@@ -916,8 +916,14 @@ root.appendPrefixIfNeeded = function(cm) {
  * the current tokens to be incorrect This causes problem for autocompletion.
  * http://bla might result in two tokens: http:// and bla. We'll want to combine
  * these
+ * 
+ * @param yasqe {doc}
+ * @param token {object}
+ * @param cursor {object}
+ * @return token {object}
+ * @method YASQE.getCompleteToken
  */
-var getCompleteToken = function(cm, token, cur) {
+root.getCompleteToken = function(cm, token, cur) {
 	if (!cur) {
 		cur = cm.getCursor();
 	}
@@ -935,7 +941,7 @@ var getCompleteToken = function(cm, token, cur) {
 		) {
 		token.start = prevToken.start;
 		token.string = prevToken.string + token.string;
-		return getCompleteToken(cm, token, {
+		return root.getCompleteToken(cm, token, {
 			line : cur.line,
 			ch : prevToken.start
 		});// recursively, might have multiple tokens which it should include
@@ -1172,7 +1178,7 @@ var getSuggestionsAsHintObject = function(cm, suggestions, type, token) {
 
 
 var getCompletionHintsObject = function(cm, type, callback) {
-	var token = getCompleteToken(cm);
+	var token = root.getCompleteToken(cm);
 	if (cm.options.autocompletions[type].preProcessToken) {
 		token = cm.options.autocompletions[type].preProcessToken(cm, token, type);
 	}
@@ -1541,7 +1547,7 @@ root.defaults = $.extend(root.defaults, {
 					// (treated as a token in itself..)
 					// but we to avoid including the PREFIX tag. So when we have just
 					// typed a space after the prefix tag, don't get the complete token
-					token = getCompleteToken(cm);
+					token = root.getCompleteToken(cm);
 				}
 
 				// we shouldnt be at the uri part the prefix declaration
@@ -1738,7 +1744,7 @@ root.defaults = $.extend(root.defaults, {
 			 */
 			isValidCompletionPosition : function(cm) {
 				
-				var token = getCompleteToken(cm);
+				var token = root.getCompleteToken(cm);
 				if (token.string.length == 0) 
 					return false; //we want -something- to autocomplete
 				if (token.string.indexOf("?") == 0)
@@ -1922,7 +1928,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @return boolean
 			 */
 			isValidCompletionPosition : function(cm) {
-				var token = getCompleteToken(cm);
+				var token = root.getCompleteToken(cm);
 				if (token.string.indexOf("?") == 0)
 					return false;
 				var cur = cm.getCursor();
@@ -2103,7 +2109,7 @@ root.defaults = $.extend(root.defaults, {
 			isValidCompletionPosition : function(cm) {
 				var token = cm.getTokenAt(cm.getCursor());
 				if (token.type != "ws") {
-					token = getCompleteToken(cm, token);
+					token = root.getCompleteToken(cm, token);
 					if (token && token.string.indexOf("?") == 0) {
 						return true;
 					}
