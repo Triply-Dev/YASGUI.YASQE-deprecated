@@ -528,6 +528,39 @@ root.fromTextArea = function(textAreaEl, config) {
 };
 
 /**
+ * Fetch all the used variables names from this query
+ * 
+ * @method YASQE.getAllVariableNames
+ * @param {doc} YASQE document
+ * @param token {object}
+ * @returns variableNames {array}
+ */
+
+root.getAllVariableNames = function(cm, token) {
+	if (token.trim().length == 0) return [];//nothing to autocomplete
+	var distinctVars = {};
+	//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
+	$(cm.getWrapperElement()).find(".cm-atom").each(function() {
+		var variable = this.innerHTML;
+		if (variable.indexOf("?") == 0) {
+			//ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
+			var nextEl = $(this).next();
+			var nextElClass = nextEl.attr('class');
+			if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
+				variable += nextEl.text();			
+			}
+			//store in map so we have a unique list (do not get only the questionmarks, so length greater than 1)
+			if (variable.length > 1) distinctVars[variable] = true;
+		}
+	});
+	var variables = [];
+	for (var variable in distinctVars) {
+		variables.push(variable);
+	}
+	variables.sort();
+	return variables;
+};
+/**
  * Fetch prefixes from prefix.cc, and store in the YASQE object
  * 
  * @param doc {YASQE}
@@ -2039,7 +2072,181 @@ root.defaults = $.extend(root.defaults, {
 				 */
 				close : null,
 			}
-		}
+		},
+		/**
+		 * Variable names autocompletion settings
+		 * 
+		 * @property autocompletions.properties
+		 * @type object
+		 */
+		variableNames : {
+			/**
+			 * Check whether the cursor is in a proper position for this autocompletion.
+			 * 
+			 * @property autocompletions.variableNames.isValidCompletionPosition
+			 * @type function
+			 * @param yasqe {doc}
+			 * @return boolean
+			 */
+			isValidCompletionPosition : function(cm) {
+				var token = cm.getTokenAt(cm.getCursor());
+				if (token.type != "ws") {
+					token = getCompleteToken(cm, token);
+					if (token && token.string.indexOf("?") == 0) {
+						return true;
+					}
+				}
+				return false;
+			},
+			/**
+			 * Get the autocompletions. Either a function which returns an
+			 * array, or an actual array. The array should be in the form ["http://...",....]
+			 * 
+			 * @property autocompletions.variableNames.get
+			 * @type function|array
+			 * @param doc {YASQE}
+			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
+			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
+			 * @param callback {function} In case async is enabled, use this callback
+			 * @default function (YASQE.getAllVariableNames)
+			 */
+			get : root.getAllVariableNames,
+						
+			/**
+			 * Preprocesses the codemirror token before matching it with our autocompletions list.
+			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
+			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
+			 * 
+			 * @property autocompletions.variableNames.preProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
+			 * @default null
+			 */
+			preProcessToken: null,
+			/**
+			 * Postprocesses the autocompletion suggestion.
+			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
+			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
+			 * 
+			 * @property autocompletions.variableNames.postProcessToken
+			 * @type function
+			 * @param doc {YASQE}
+			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
+			 * @param suggestion {string} The suggestion which you are post processing
+			 * @return post-processed suggestion {string}
+			 * @default null
+			 */
+			postProcessToken: null,
+			/**
+			 * The get function is asynchronous
+			 * 
+			 * @property autocompletions.variableNames.async
+			 * @type boolean
+			 * @default false
+			 */
+			async : false,
+			/**
+			 * Use bulk loading of variableNames: all variable names are retrieved
+			 * onLoad using the get() function. Alternatively, disable bulk
+			 * loading, to call the get() function whenever a token needs
+			 * autocompletion (in this case, the completion token is passed on
+			 * to the get() function) whenever you have an autocompletion list that is static, and 
+			 * that easily fits in memory, we advice you to enable bulk for
+			 * performance reasons (especially as we store the autocompletions
+			 * in a trie)
+			 * 
+			 * @property autocompletions.variableNames.bulk
+			 * @type boolean
+			 * @default false
+			 */
+			bulk : false,
+			/**
+			 * Auto-show the autocompletion dialog. Disabling this requires the
+			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
+			 * only works when completions are not fetched asynchronously
+			 * 
+			 * @property autocompletions.variableNames.autoShow
+			 * @type boolean
+			 * @default false
+			 */
+			autoShow : true,
+			/**
+			 * Automatically store autocompletions in localstorage. This is
+			 * particularly useful when the get() function is an expensive ajax
+			 * call. Autocompletions are stored for a period of a month. Set
+			 * this property to null (or remove it), to disable the use of
+			 * localstorage. Otherwise, set a string value (or a function
+			 * returning a string val), returning the key in which to store the
+			 * data Note: this feature only works combined with completions
+			 * loaded in memory (i.e. bulk: true)
+			 * 
+			 * @property autocompletions.variableNames.persistent
+			 * @type string|function
+			 * @default null
+			 */
+			persistent : null,
+			/**
+			 * A set of handlers. Most, taken from the CodeMirror showhint
+			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
+			 * 
+			 * @property autocompletions.variableNames.handlers
+			 * @type object
+			 */
+			handlers : {
+				/**
+				 * Fires when a codemirror change occurs in a position where we
+				 * can show this particular type of autocompletion
+				 * 
+				 * @property autocompletions.variableNames.handlers.validPosition
+				 * @type function
+				 * @default null
+				 */
+				validPosition : null,
+				/**
+				 * Fires when a codemirror change occurs in a position where we
+				 * can -not- show this particular type of autocompletion
+				 * 
+				 * @property autocompletions.variableNames.handlers.invalidPosition
+				 * @type function
+				 * @default null
+				 */
+				invalidPosition : null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.variableNames.handlers.shown
+				 * @type function
+				 * @default null
+				 */
+				shown : null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.variableNames.handlers.select
+				 * @type function
+				 * @default null
+				 */
+				select : null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.variableNames.handlers.pick
+				 * @type function
+				 * @default null
+				 */
+				pick : null,
+				/**
+				 * See http://codemirror.net/doc/manual.html#addon_show-hint
+				 * 
+				 * @property autocompletions.variableNames.handlers.close
+				 * @type function
+				 * @default null
+				 */
+				close : null,
+			}
+		},
 	}
 });
 root.version = {
