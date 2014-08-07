@@ -118,7 +118,6 @@ var postProcessCmElement = function(cm) {
 		root.storeQuery(cm);
 	});
 	cm.on('change', function(cm, eventInfo) {
-//		checkSyntax(cm, true);
 		checkSyntax(cm);
 		root.appendPrefixIfNeeded(cm);
 		root.updateQueryButton(cm);
@@ -1523,7 +1522,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @property autocompletions.prefixes.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param token {object} When bulk is disabled, use this token to autocomplete
+			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromPrefixCc)
@@ -1583,8 +1582,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Auto-show the autocompletion dialog. Disabling this requires the
 			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are loaded in memory (i.e. bulk:
-			 * true)
+			 * only works when completions are not fetched asynchronously
 			 * 
 			 * @property autocompletions.prefixes.autoShow
 			 * @type boolean
@@ -1694,8 +1692,10 @@ root.defaults = $.extend(root.defaults, {
 			 * @return boolean
 			 */
 			isValidCompletionPosition : function(cm) {
+				
 				var token = getCompleteToken(cm);
-
+				if (token.string.length == 0) 
+					return false; //we want -something- to autocomplete
 				if (token.string.indexOf("?") == 0)
 					return false; // we are typing a var
 				if ($.inArray("a", token.state.possibleCurrent) >= 0)
@@ -1719,7 +1719,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @property autocompletions.properties.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param token {object} When bulk is disabled, use this token to autocomplete
+			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromLov)
@@ -1779,8 +1779,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Auto-show the autocompletion dialog. Disabling this requires the
 			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are loaded in memory (i.e. bulk:
-			 * true)
+			 * only works when completions are not fetched asynchronously
 			 * 
 			 * @property autocompletions.properties.autoShow
 			 * @type boolean
@@ -1900,7 +1899,7 @@ root.defaults = $.extend(root.defaults, {
 			 * @property autocompletions.classes.get
 			 * @type function|array
 			 * @param doc {YASQE}
-			 * @param token {object} When bulk is disabled, use this token to autocomplete
+			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
 			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
 			 * @param callback {function} In case async is enabled, use this callback
 			 * @default function (YASQE.fetchFromLov)
@@ -1959,8 +1958,7 @@ root.defaults = $.extend(root.defaults, {
 			/**
 			 * Auto-show the autocompletion dialog. Disabling this requires the
 			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are loaded in memory (i.e. bulk:
-			 * true)
+			 * only works when completions are not fetched asynchronously
 			 * 
 			 * @property autocompletions.classes.autoShow
 			 * @type boolean
