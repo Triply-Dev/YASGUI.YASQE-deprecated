@@ -1013,7 +1013,12 @@ root.fetchFromLov = function(cm, partialToken, type, callback) {
 				url,
 				function(data) {
 					for (var i = 0; i < data.results.length; i++) {
-						results.push(data.results[i].uri);
+						if ($.isArray(data.results[i].uri) && data.results[i].uri.length > 0) {
+							results.push(data.results[i].uri[0]);
+						} else {
+							results.push(data.results[i].uri);
+						}
+						
 					}
 					if (results.length < data.total_results
 							&& results.length < maxResults) {
