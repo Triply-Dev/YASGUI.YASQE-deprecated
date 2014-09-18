@@ -23,7 +23,8 @@
     "gulp-notify": "^1.2.5",
     "gulp-embedlr": "^0.5.2",
     "gulp-yuidoc": "^0.1.2",
-    "gulp-jsvalidate": "^0.2.0"
+    "gulp-jsvalidate": "^0.2.0",
+    "require-dir": "^0.1.0"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
