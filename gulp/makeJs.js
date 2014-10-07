@@ -1,5 +1,5 @@
 var gulp = require('gulp'),
-	concat = require('gulp-concat'),
+	// concat = require('gulp-concat'),
 	browserify = require('browserify'),
 	notify = require('gulp-notify'),
 	connect = require('gulp-connect'),
@@ -7,32 +7,36 @@ var gulp = require('gulp'),
 	jsValidate = require('gulp-jsvalidate'),
 	source = require('vinyl-source-stream'),
 	uglify = require("gulp-uglify"),
+	rename = require("gulp-rename"),
+	streamify = require('gulp-streamify'),
 	paths = require("./paths.js");
 
-
-
 gulp.task('browserify', function() {
-	return gulp.src("./src/*.js").pipe(jsValidate()).on('error', 
-		notify.onError({
-			message: "Error: <%= error.message %>",
-			title: "Failed running browserify"
-		})).on('finish', function(){
+	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
 			browserify("./src/main.js")
-			.bundle({standalone: "YASQE", debug: true}).on('error', notify.onError({
-		        message: "Error: <%= error.message %>",
-		        title: "Failed running browserify"
-		      })).on('prebundle', function(bundle) {
-		    	  console.log("prebundle!");
-		    	})
-		    .pipe(source(paths.bundleName + '.js'))
-		    .pipe(embedlr())
-		    .pipe(gulp.dest(paths.bundleDir))
-		    .pipe(connect.reload());
+			.bundle({standalone: "YASQE", debug: true})
+			.pipe(source(paths.bundleName + '.js'))
+			.pipe(embedlr())
+			.pipe(gulp.dest(paths.bundleDir))
+			.pipe(rename(paths.bundleName + '.min.js'))
+			.pipe(streamify(uglify()))
+			.pipe(gulp.dest(paths.bundleDir))
+			.pipe(connect.reload());
 		});
 });
-gulp.task('minifyJs', function() {
-	return gulp.src(paths.bundleDir + "/" + paths.bundleName + ".js")
-	.pipe(concat(paths.bundleName + '.min.js'))
-    .pipe(uglify())
-	.pipe(gulp.dest(paths.bundleDir));
+gulp.task('browserifyWithDeps', function() {
+	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
+			browserify("./src/main.js")
+			.require('jquery')
+			.require('codemirror')
+			// .require('yasgui-utils')
+			.bundle({standalone: "YASQE", debug: true})
+			.pipe(source(paths.bundleName + '.deps.js'))
+			.pipe(embedlr())
+			.pipe(gulp.dest(paths.bundleDir))
+			.pipe(rename(paths.bundleName + '.deps.min.js'))
+			.pipe(streamify(uglify()))
+			.pipe(gulp.dest(paths.bundleDir))
+			.pipe(connect.reload());
+		});
 });

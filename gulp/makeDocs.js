@@ -9,16 +9,9 @@ var gulp = require('gulp'),
 
 
 gulp.task('makeDocLib', function() {
-	return gulp.src("./doc/*.js").pipe(jsValidate()).on('error', 
-			notify.onError({
-				message: "Error: <%= error.message %>",
-				title: "Failed running browserify"
-			})).on('finish', function(){
+	return gulp.src("./doc/*.js").pipe(jsValidate()).on('finish', function(){
 				browserify("./doc/main.js")
-				.bundle({debug: true}).on('error', notify.onError({
-			        message: "Error: <%= error.message %>",
-			        title: "Failed running browserify"
-			      })).on('prebundle', function(bundle) {
+				.bundle({debug: true}).on('prebundle', function(bundle) {
 			    	  console.log("prebundle!");
 			    	})
 			    .pipe(source('doc.js'))
