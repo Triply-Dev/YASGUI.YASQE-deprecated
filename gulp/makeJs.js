@@ -3,33 +3,49 @@ var gulp = require('gulp'),
 	browserify = require('browserify'),
 	notify = require('gulp-notify'),
 	connect = require('gulp-connect'),
+	concat = require('gulp-concat'),
 	embedlr = require('gulp-embedlr'),
 	jsValidate = require('gulp-jsvalidate'),
 	source = require('vinyl-source-stream'),
 	uglify = require("gulp-uglify"),
 	rename = require("gulp-rename"),
+	merge = require('merge-stream'),
 	streamify = require('gulp-streamify'),
 	paths = require("./paths.js");
 
+var addOnFiles = [
+	"./node_modules/codemirror/addon/hint/show-hint.js",
+	"./node_modules/codemirror/addon/search/searchcursor.js",
+	"./node_modules/codemirror/addon/edit/matchbrackets.js",
+	"./node_modules/codemirror/addon/runmode/runmode.js"
+];
+
 gulp.task('browserify', function() {
-	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
-			browserify("./src/main.js")
-			.bundle({standalone: "YASQE", debug: true})
-			.pipe(source(paths.bundleName + '.js'))
-			.pipe(embedlr())
-			.pipe(gulp.dest(paths.bundleDir))
-			.pipe(rename(paths.bundleName + '.min.js'))
-			.pipe(streamify(uglify()))
-			.pipe(gulp.dest(paths.bundleDir))
-			.pipe(connect.reload());
-		});
+	var baseBundle = browserify("./src/main.js")
+		.bundle({standalone: "YASQE", debug: true})
+		.pipe(source(paths.bundleName + '.js'))
+		.pipe(streamify(jsValidate()));
+
+	var addOns = gulp.src(addOnFiles);
+
+	return merge(baseBundle, addOns)
+		.pipe(streamify(concat(paths.bundleName + '.js')))
+		.pipe(embedlr())
+		.pipe(gulp.dest(paths.bundleDir))
+		.pipe(rename(paths.bundleName + '.min.js'))
+		.pipe(streamify(uglify()))
+		.pipe(gulp.dest(paths.bundleDir))
+		.pipe(connect.reload());
 });
 gulp.task('browserifyWithDeps', function() {
 	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
 			browserify("./src/main.js")
 			.require('jquery')
 			.require('codemirror')
-			// .require('yasgui-utils')
+			.require('codemirror/addon/hint/show-hint.js')
+			.require('codemirror/addon/search/searchcursor.js')
+			.require('codemirror/addon/edit/matchbrackets.js')
+			.require('codemirror/addon/runmode/runmode.js')
 			.bundle({standalone: "YASQE", debug: true})
 			.pipe(source(paths.bundleName + '.deps.js'))
 			.pipe(embedlr())
