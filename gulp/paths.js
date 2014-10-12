@@ -5,5 +5,6 @@ module.exports =  {
 		'src/**/*.css',
 	],
 	bundleDir: "dist",
-	bundleName: "yasqe"
+	bundleName: "yasqe",
+	docDir: "doc"
 };
