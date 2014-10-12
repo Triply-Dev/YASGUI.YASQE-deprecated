@@ -30,7 +30,7 @@ gulp.task('browserify', function() {
 		    .pipe(connect.reload());
 		});
 });
-gulp.task('minifyJs', function() {
+gulp.task('minifyJs', ['browserify'], function() {
 	return gulp.src(paths.bundleDir + "/" + paths.bundleName + ".js")
 	.pipe(concat(paths.bundleName + '.min.js'))
     .pipe(uglify())

@@ -6,7 +6,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://yasgui.org/license.txt"
+      "url": "http://yasqe.yasgui.org/license.txt"
     }
   ],
   "devDependencies": {
@@ -24,7 +24,12 @@
     "gulp-embedlr": "^0.5.2",
     "gulp-yuidoc": "^0.1.2",
     "gulp-jsvalidate": "^0.2.0",
-    "require-dir": "^0.1.0"
+    "require-dir": "^0.1.0",
+    "gulp-bump": "^0.1.11",
+    "run-sequence": "^1.0.1",
+    "gulp-git": "^0.5.2",
+    "gulp-filter": "^1.0.2",
+    "gulp-tag-version": "^1.1.0"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [

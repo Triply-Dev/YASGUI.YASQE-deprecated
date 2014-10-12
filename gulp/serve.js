@@ -4,7 +4,7 @@ var gulp = require('gulp'),
 	livereload = require('gulp-livereload');
 
 gulp.task('watch', function() {
-	gulp.watch(["./src/main.js", './lib/*.js'], [ 'browserify' ]);
+	gulp.watch(["./src/*", './lib/*.js'], [ 'browserify' ]);
 	gulp.watch(paths.style, [ 'minifyCss' ]);
 	  gulp.watch(
 		'./*.html'
@@ -15,6 +15,7 @@ gulp.task('watch', function() {
 
 gulp.task('connect', function() {
 	connect.server({
+		root: "./",
 		port : 4000,
 		livereload: true
 	});
