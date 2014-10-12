@@ -2,7 +2,8 @@ var gulp = require('gulp'),
     git = require('gulp-git'),
     bump = require('gulp-bump'),
     filter = require('gulp-filter'),
-    tag_version = require('gulp-tag-version');
+    tag_version = require('gulp-tag-version'),
+	runSequence = require('run-sequence').use(gulp);
 	
 
 
@@ -27,6 +28,8 @@ gulp.task('bumpPatch', function() { return inc('patch'); })
 gulp.task('bumpMinor', function() { return inc('minor'); })
 gulp.task('bumpMajor', function() { return inc('major'); })
 
-gulp.task('patch', ['bumpPatch', 'default', 'tag']);
+gulp.task('patch', function() {
+	runSequence('bumpPatch', 'default', 'tag');
+});
 gulp.task('minor', ['bumpMinor', 'default', 'tag']);
 gulp.task('major', ['bumpMajor', 'default', 'tag']);
