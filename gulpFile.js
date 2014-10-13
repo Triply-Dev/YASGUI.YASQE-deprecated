@@ -1,6 +1,6 @@
 require('require-dir')('./gulp');
 var gulp = require('gulp');
-gulp.task('default', ['browserify', 'minifyJs', 'minifyCss', 'makedoc']);
-gulp.task('serve', ['default', 'watch', 'connect']);
 
+gulp.task('default', ['browserify', 'browserifyWithDeps', 'minifyCss', 'makedoc']);
+gulp.task('serve', ['default', 'minifyCss', 'watch', 'connect']);
 
