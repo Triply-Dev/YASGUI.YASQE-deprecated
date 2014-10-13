@@ -2,6 +2,7 @@ var gulp = require('gulp'),
 	browserify = require('browserify'),
 	connect = require('gulp-connect'),
 	concat = require('gulp-concat'),
+	browserifyShim = require('browserify-shim'),
 	embedlr = require('gulp-embedlr'),
 	jsValidate = require('gulp-jsvalidate'),
 	source = require('vinyl-source-stream'),
@@ -21,12 +22,14 @@ var addOnFiles = [
 
 gulp.task('browserify', function() {
 	var baseBundle = browserify("./src/main.js", {bundleExternal: false})
+		.transform(browserifyShim)
 		// Workarounds for yasgui-utils requiring dependencies and browserify-shim not being able to remove
 		.require('yasgui-utils')
 		.bundle({standalone: "YASQE", debug: true})
 		.pipe(source(paths.bundleName + '.js'))
 		.pipe(streamify(jsValidate()));
 
+	// We need to include the addOns separately because they are treated as external modules.
 	var addOns = gulp.src(addOnFiles);
 
 	return merge(baseBundle, addOns)
@@ -45,12 +48,6 @@ gulp.task('browserify', function() {
 gulp.task('browserifyWithDeps', function() {
 	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
 			browserify("./src/main.js")
-			.require('jquery')
-			.require('codemirror')
-			.require('codemirror/addon/hint/show-hint.js')
-			.require('codemirror/addon/search/searchcursor.js')
-			.require('codemirror/addon/edit/matchbrackets.js')
-			.require('codemirror/addon/runmode/runmode.js')
 			.bundle({standalone: "YASQE", debug: true})
 			.pipe(source(paths.bundleName + '.deps.js'))
 			.pipe(embedlr())

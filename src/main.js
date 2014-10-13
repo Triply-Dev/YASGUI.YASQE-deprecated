@@ -2,10 +2,10 @@
 var $ = require("jquery");
 var CodeMirror = require("codemirror");
 
-// require('codemirror/addon/hint/show-hint.js');
-// require('codemirror/addon/search/searchcursor.js');
-// require('codemirror/addon/edit/matchbrackets.js');
-// require('codemirror/addon/runmode/runmode.js');
+require('codemirror/addon/hint/show-hint.js');
+require('codemirror/addon/search/searchcursor.js');
+require('codemirror/addon/edit/matchbrackets.js');
+require('codemirror/addon/runmode/runmode.js');
 
 window.console = window.console || {"log":function(){}};//make sure any console statements
 
