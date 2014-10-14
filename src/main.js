@@ -153,6 +153,7 @@ var postProcessCmElement = function(cm) {
 	
 	cm.on('cursorActivity', function(cm, eventInfo) {
 		root.autoComplete(cm, true);
+		updateButtonsTransparency(cm);
 	});
 	cm.prevQueryValid = false;
 	checkSyntax(cm);// on first load, check as well (our stored or default query might be incorrect as well)
@@ -295,6 +296,45 @@ var appendToPrefixes = function(cm, prefix) {
 		});
 	}
 };
+/**
+ * Update transparency of buttons. Increase transparency when cursor is below buttons
+ */
+
+var updateButtonsTransparency = function(cm) {
+	cm.cursor = $(".CodeMirror-cursor");
+	if (cm.buttons && cm.buttons.is(":visible") && cm.cursor.length > 0) {
+		if (elementsOverlap(cm.cursor, cm.buttons)) {
+			cm.buttons.find("svg").attr("opacity", "0.2");
+		} else {
+			cm.buttons.find("svg").attr("opacity", "1.0");
+		}
+	}
+};
+
+
+var elementsOverlap = (function () {
+    function getPositions( elem ) {
+        var pos, width, height;
+        pos = $( elem ).offset();
+        width = $( elem ).width();
+        height = $( elem ).height();
+        return [ [ pos.left, pos.left + width ], [ pos.top, pos.top + height ] ];
+    }
+
+    function comparePositions( p1, p2 ) {
+        var r1, r2;
+        r1 = p1[0] < p2[0] ? p1 : p2;
+        r2 = p1[0] < p2[0] ? p2 : p1;
+        return r1[1] > r2[0] || r1[0] === r2[0];
+    }
+
+    return function ( a, b ) {
+        var pos1 = getPositions( a ),
+            pos2 = getPositions( b );
+        return comparePositions( pos1[0], pos2[0] ) && comparePositions( pos1[1], pos2[1] );
+    };
+})();
+
 
 /**
  * Get the used indentation for a certain line
@@ -318,6 +358,7 @@ var getIndentFromLine = function(cm, line, charNumber) {
 	}
 	;
 };
+
 
 var getNextNonWsToken = function(cm, lineNumber, charNumber) {
 	if (charNumber == undefined)
@@ -416,8 +457,7 @@ root.positionAbsoluteItems = function(cm) {
 	}
 	var completionNotification = $(cm.getWrapperElement()).find(".completionNotification");
 	if (completionNotification.is(":visible")) completionNotification.css("right", offset);
-	var buttons = $(cm.getWrapperElement()).find(".yasqe_buttons");
-	if (buttons.is(":visible")) buttons.css("right", offset);
+	if (cm.buttons.is(":visible")) cm.buttons.css("right", offset);
 };
 
 /**
@@ -445,16 +485,15 @@ root.consumeShareLink = function(cm) {
 		cm.setValue(urlParams.query);
 	}
 };
-
 root.drawButtons = function(cm) {
-	var header = $("<div class='yasqe_buttons'></div>").appendTo($(cm.getWrapperElement()));
+	cm.buttons = $("<div class='yasqe_buttons'></div>").appendTo($(cm.getWrapperElement()));
 	
 	if (cm.options.createShareLink) {
 		
 		var svgShare = $(require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"}));
 		svgShare.click(function(event){
 			event.stopPropagation();
-			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(header);
+			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(cm.buttons);
 			$('html').click(function() {
 				if (popup) popup.remove();
 			});
@@ -482,7 +521,7 @@ root.drawButtons = function(cm) {
 		})
 		.addClass("yasqe_share")
 		.attr("title", "Share your query")
-		.appendTo(header);
+		.appendTo(cm.buttons);
 		
 	}
 
@@ -500,7 +539,7 @@ root.drawButtons = function(cm) {
 		 	})
 		 	.height(height)
 		 	.width(width)
-		 	.appendTo(header);
+		 	.appendTo(cm.buttons);
 		root.updateQueryButton(cm);
 	}
 	
