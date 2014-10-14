@@ -826,7 +826,7 @@ root.executeQuery = function(cm, callbackOrConfig) {
 			updateQueryButton();
 		};
 	} else {
-		ajaxConfig.complete = updateQueryButton();
+		ajaxConfig.complete = updateQueryButton;
 	}
 	cm.xhr = $.ajax(ajaxConfig);
 };
