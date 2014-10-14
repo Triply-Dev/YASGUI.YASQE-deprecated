@@ -451,7 +451,7 @@ root.drawButtons = function(cm) {
 	
 	if (cm.options.createShareLink) {
 		
-		var svgShare = require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"});
+		var svgShare = $(require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"}));
 		svgShare.click(function(event){
 			event.stopPropagation();
 			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(header);
