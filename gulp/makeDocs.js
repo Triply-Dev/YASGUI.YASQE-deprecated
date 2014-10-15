@@ -10,8 +10,8 @@ var gulp = require('gulp'),
 
 gulp.task('makeDocLib', function() {
 	return gulp.src("./doc/*.js").pipe(jsValidate()).on('finish', function(){
-				browserify("./doc/main.js")
-				.bundle({debug: true}).on('prebundle', function(bundle) {
+				browserify({entries: ["./doc/main.js"],debug: true})
+				.bundle().on('prebundle', function(bundle) {
 			    	  console.log("prebundle!");
 			    	})
 			    .pipe(source('doc.js'))

@@ -8,14 +8,17 @@ var gulp = require('gulp'),
 	uglify = require("gulp-uglify"),
 	rename = require("gulp-rename"),
 	streamify = require('gulp-streamify'),
+	shim = require('browserify-shim'),
 	paths = require("./paths.js");
 
 
 gulp.task('browserify', function() {
-	var baseBundle = browserify("./src/main.js", {bundleExternal: true})
+	var baseBundle = browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true, global:true})
+		.transform({global:true},shim)
 		.exclude('jquery')
 		.exclude('codemirror')
-		.bundle({standalone: "YASQE", debug: true})
+		.exclude('../../lib/codemirror') 
+		.bundle()
 		.pipe(source(paths.bundleName + '.js'))
 		.pipe(streamify(jsValidate()))
 		.pipe(gulp.dest(paths.bundleDir))
@@ -29,8 +32,8 @@ gulp.task('browserify', function() {
 
 gulp.task('browserifyWithDeps', function() {
 	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
-			browserify("./src/main.js")
-			.bundle({standalone: "YASQE", debug: true})
+			browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
+			.bundle()
 			.pipe(source(paths.bundleName + '.deps.js'))
 			.pipe(embedlr())
 			.pipe(gulp.dest(paths.bundleDir))
