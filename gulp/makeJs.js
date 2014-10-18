@@ -34,10 +34,10 @@ gulp.task('browserifyWithDeps', function() {
 	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
 			browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
 			.bundle()
-			.pipe(source(paths.bundleName + '.deps.js'))
+			.pipe(source(paths.bundleName + '.bundled.js'))
 			.pipe(embedlr())
 			.pipe(gulp.dest(paths.bundleDir))
-			.pipe(rename(paths.bundleName + '.deps.min.js'))
+			.pipe(rename(paths.bundleName + '.bundled.min.js'))
 			.pipe(streamify(uglify()))
 			.pipe(gulp.dest(paths.bundleDir))
 			.pipe(connect.reload());
