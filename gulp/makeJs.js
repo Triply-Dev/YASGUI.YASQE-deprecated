@@ -13,7 +13,7 @@ var gulp = require('gulp'),
 
 
 gulp.task('browserify', function() {
-	var baseBundle = browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true, global:true})
+	browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true, global:true})
 		.transform({global:true},shim)
 		.exclude('jquery')
 		.exclude('codemirror')
@@ -31,16 +31,13 @@ gulp.task('browserify', function() {
 
 
 gulp.task('browserifyWithDeps', function() {
-	return gulp.src("./src/*.js").pipe(jsValidate()).on('finish', function(){
-			browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
-			.bundle()
-			.pipe(source(paths.bundleName + '.bundled.js'))
-			.pipe(embedlr())
-			.pipe(gulp.dest(paths.bundleDir))
-			.pipe(rename(paths.bundleName + '.bundled.min.js'))
-			.pipe(streamify(uglify()))
-			.pipe(gulp.dest(paths.bundleDir))
-			.pipe(connect.reload());
-		});
-
+	browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
+		.bundle()
+		.pipe(source(paths.bundleName + '.bundled.js'))
+		.pipe(embedlr())
+		.pipe(gulp.dest(paths.bundleDir))
+		.pipe(rename(paths.bundleName + '.bundled.min.js'))
+		.pipe(streamify(uglify()))
+		.pipe(gulp.dest(paths.bundleDir))
+		.pipe(connect.reload());
 });
