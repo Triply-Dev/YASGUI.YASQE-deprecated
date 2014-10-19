@@ -1,5 +1,6 @@
 'use strict';
 var $ = require("jquery");
+require("../lib/deparam.js");
 var CodeMirror = require("codemirror");
 
 require('codemirror/addon/hint/show-hint.js');
@@ -173,6 +174,7 @@ var postProcessCmElement = function(cm) {
 	 * check url args and modify yasqe settings if needed
 	 */
 	if (cm.options.consumeShareLink) {
+		var urlParams = $.deparam(window.location.search.substring(1));
 		cm.options.consumeShareLink(cm);
 	}
 };
@@ -478,9 +480,7 @@ root.createShareLink = function(cm) {
  * @method YASQE.consumeShareLink
  * @param {doc} YASQE document
  */
-root.consumeShareLink = function(cm) {
-	require("../lib/deparam.js");
-	var urlParams = $.deparam(window.location.search.substring(1));
+root.consumeShareLink = function(cm, urlParams) {
 	if (urlParams.query) {
 		cm.setValue(urlParams.query);
 	}
