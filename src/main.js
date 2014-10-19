@@ -175,7 +175,7 @@ var postProcessCmElement = function(cm) {
 	 */
 	if (cm.options.consumeShareLink) {
 		var urlParams = $.deparam(window.location.search.substring(1));
-		cm.options.consumeShareLink(cm);
+		cm.options.consumeShareLink(cm, urlParams);
 	}
 };
 
