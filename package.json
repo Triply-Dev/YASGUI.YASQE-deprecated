@@ -1,7 +1,7 @@
 {
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "main": "src/main.js",
   "licenses": [
     {
@@ -10,7 +10,7 @@
     }
   ],
   "author": "Laurens Rietveld",
-  "homepage": "http://yasr.yasgui.org",
+  "homepage": "http://yasqe.yasgui.org",
   "devDependencies": {
     "browserify": "^6.1.0",
     "gulp": "~3.6.0",
@@ -43,7 +43,6 @@
     "Semantic Web",
     "Linked Data"
   ],
-  "homepage": "http://yasqe.yasgui.org",
   "maintainers": [
     {
       "name": "Laurens Rietveld",
