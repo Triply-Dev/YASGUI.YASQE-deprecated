@@ -1,11 +1,3 @@
-/* .CodeMirror-scroll { */
-/* 	overflow-x: auto; */
-/* 	overflow-y: hidden; */
-/* } */
-/* .CodeMirror { */
-/* 	height: auto; */
-/* 	width: 100%; */
-/* } */
 
 .affix-top {
 	top: 100px;
@@ -17,4 +9,24 @@ body{
 }
 .doc {
 	margin: 10px;
+}
+
+/* Sidebar stuff*/
+.bs-docs-sidebar .nav>li>a {
+	color: #999;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.bs-docs-sidebar .nav>.active>a, .bs-docs-sidebar .nav>.active:hover>a,
+	.bs-docs-sidebar .nav>.active:focus>a {
+	font-weight: 700;
+	color: #ce4646;
+	border-left: 2px solid #ce4646;
+}
+
+.bs-docs-sidebar .nav .nav>li>a {
+	padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 30px;
 }
