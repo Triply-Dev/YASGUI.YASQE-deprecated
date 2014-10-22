@@ -26363,7 +26363,7 @@ var root = module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "main": "src/main.js",
   "licenses": [
     {
