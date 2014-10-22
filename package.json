@@ -30,10 +30,13 @@
     "gulp-uglify": "^0.2.1",
     "require-dir": "^0.1.0",
     "run-sequence": "^1.0.1",
-    "vinyl-buffer": "0.0.0",
+    "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~0.1.1",
     "watchify": "^0.6.4",
-    "browserify-shim": "^3.8.0"
+    "browserify-shim": "^3.8.0",
+    "gulp-sourcemaps": "^1.2.4",
+    "exorcist": "^0.1.6",
+    "vinyl-transform": "0.0.1"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
