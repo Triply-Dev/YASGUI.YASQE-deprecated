@@ -1381,18 +1381,11 @@ var autoFormatLineBreaks = function(text, start, end) {
  * more options, such as disabling line numbers, or changing keyboard shortcut
  * keys). Either change the default options by setting YASQE.defaults, or by
  * passing your own options as second argument to the YASQE constructor
- * 
- * @attribute
- * @attribute YASQE.defaults
  */
 root.defaults = $.extend(root.defaults, {
 	mode : "sparql11",
 	/**
 	 * Query string
-	 * 
-	 * @property value
-	 * @type String
-	 * @default "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10"
 	 */
 	value : "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10",
 	highlightSelectionMatches : {
@@ -1436,26 +1429,16 @@ root.defaults = $.extend(root.defaults, {
 	},
 	cursorHeight : 0.9,
 
-	// non CodeMirror options
-
 	
 	/**
 	 * Show a button with which users can create a link to this query. Set this value to null to disable this functionality.
 	 * By default, this feature is enabled, and the only the query value is appended to the link.
 	 * ps. This function should return an object which is parseable by jQuery.param (http://api.jquery.com/jQuery.param/)
-	 * 
-	 * @property createShareLink
-	 * @type function
-	 * @default YASQE.createShareLink
 	 */
 	createShareLink: root.createShareLink,
 	
 	/**
 	 * Consume links shared by others, by checking the url for arguments coming from a query link. Defaults by only checking the 'query=' argument in the url
-	 * 
-	 * @property consumeShareLink
-	 * @type function
-	 * @default YASQE.consumeShareLink
 	 */
 	consumeShareLink: root.consumeShareLink,
 	
@@ -1471,7 +1454,6 @@ root.defaults = $.extend(root.defaults, {
 	 * function, to avoid collissions when using multiple YASQE items on one
 	 * page
 	 * 
-	 * @property persistent
 	 * @type function|string
 	 */
 	persistent : function(cm) {
@@ -1481,18 +1463,8 @@ root.defaults = $.extend(root.defaults, {
 	
 	/**
 	 * Settings for querying sparql endpoints
-	 * 
-	 * @property sparql
-	 * @type object
 	 */
 	sparql : {
-		/**
-		 * Show a query button. You don't like it? Then disable this setting, and create your button which calls the query() function of the yasqe document
-		 * 
-		 * @property sparql.showQueryButton
-		 * @type boolean
-		 * @default false
-		 */
 		showQueryButton: false,
 		
 		/**f
@@ -1500,7 +1472,6 @@ root.defaults = $.extend(root.defaults, {
 		 * 
 		 * @property sparql.endpoint
 		 * @type String|function
-		 * @default "http://dbpedia.org/sparql"
 		 */
 		endpoint : "http://dbpedia.org/sparql",
 		/**
@@ -1508,95 +1479,41 @@ root.defaults = $.extend(root.defaults, {
 		 * 
 		 * @property sparql.requestMethod
 		 * @type String|function
-		 * @default "POST"
 		 */
 		requestMethod : "POST",
 		/**
 		 * Query accept header
 		 * 
-		 * @property sparql.acceptHeader
 		 * @type String|function
-		 * @default YASQE.getAcceptHeader
 		 */
 		acceptHeader : root.getAcceptHeader,
 		
 		/**
 		 * Named graphs to query.
-		 * 
-		 * @property sparql.namedGraphs
-		 * @type array
-		 * @default []
 		 */
 		namedGraphs : [],
 		/**
 		 * Default graphs to query.
-		 * 
-		 * @property sparql.defaultGraphs
-		 * @type array
-		 * @default []
 		 */
 		defaultGraphs : [],
 
 		/**
 		 * Additional request arguments. Add them in the form: {name: "name", value: "value"}
-		 * 
-		 * @property sparql.args
-		 * @type array
-		 * @default []
 		 */
 		args : [],
 
 		/**
 		 * Additional request headers
-		 * 
-		 * @property sparql.headers
-		 * @type array
-		 * @default {}
 		 */
 		headers : {},
 
 		/**
 		 * Set of ajax handlers
-		 * 
-		 * @property sparql.handlers
-		 * @type object
 		 */
 		handlers : {
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property sparql.handlers.beforeSend
-			 * @type function
-			 * @default null
-			 */
 			beforeSend : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property sparql.handlers.complete
-			 * @type function
-			 * @default null
-			 */
 			complete : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property sparql.handlers.error
-			 * @type function
-			 * @default null
-			 */
 			error : null,
-			/**
-			 * See https://api.jquery.com/jQuery.ajax/ for more information on
-			 * these handlers, and their arguments.
-			 * 
-			 * @property sparql.handlers.success
-			 * @type function
-			 * @default null
-			 */
 			success : null
 		}
 	},
@@ -1605,26 +1522,12 @@ root.defaults = $.extend(root.defaults, {
 	 * autocompletion for this particular type. By default, only prefix
 	 * autocompletions are fetched from prefix.cc, and property and class
 	 * autocompletions are fetched from the Linked Open Vocabularies API
-	 * 
-	 * @property autocompletions
-	 * @type object
 	 */
 	autocompletions : {
 		/**
 		 * Prefix autocompletion settings
-		 * 
-		 * @property autocompletions.prefixes
-		 * @type object
 		 */
 		prefixes : {
-			/**
-			 * Check whether the cursor is in a proper position for this autocompletion.
-			 * 
-			 * @property autocompletions.prefixes.isValidCompletionPosition
-			 * @type function
-			 * @param yasqe doc
-			 * @return boolean
-			 */
 			isValidCompletionPosition : function(cm) {
 				var cur = cm.getCursor(), token = cm.getTokenAt(cur);
 
@@ -1655,185 +1558,28 @@ root.defaults = $.extend(root.defaults, {
 					return false;
 				return true;
 			},
-			    
-			/**
-			 * Get the autocompletions. Either a function which returns an
-			 * array, or an actual array. The array should be in the form ["rdf: <http://....>"]
-			 * 
-			 * @property autocompletions.prefixes.get
-			 * @type function|array
-			 * @param doc {YASQE}
-			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
-			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
-			 * @param callback {function} In case async is enabled, use this callback
-			 * @default function (YASQE.fetchFromPrefixCc)
-			 */
 			get : root.fetchFromPrefixCc,
-			
-			/**
-			 * Preprocesses the codemirror token before matching it with our autocompletions list.
-			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
-			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
-			 * 
-			 * @property autocompletions.properties.preProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
-			 * @default function
-			 */
 			preProcessToken: preprocessPrefixTokenForCompletion,
-			/**
-			 * Postprocesses the autocompletion suggestion.
-			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
-			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
-			 * 
-			 * @property autocompletions.properties.postProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @param suggestion {string} The suggestion which you are post processing
-			 * @return post-processed suggestion {string}
-			 * @default null
-			 */
 			postProcessToken: null,
-			
-			/**
-			 * The get function is asynchronous
-			 * 
-			 * @property autocompletions.prefixes.async
-			 * @type boolean
-			 * @default false
-			 */
 			async : false,
-			/**
-			 * Use bulk loading of prefixes: all prefixes are retrieved onLoad
-			 * using the get() function. Alternatively, disable bulk loading, to
-			 * call the get() function whenever a token needs autocompletion (in
-			 * this case, the completion token is passed on to the get()
-			 * function) whenever you have an autocompletion list that is static, and that easily
-			 * fits in memory, we advice you to enable bulk for performance
-			 * reasons (especially as we store the autocompletions in a trie)
-			 * 
-			 * @property autocompletions.prefixes.bulk
-			 * @type boolean
-			 * @default true
-			 */
 			bulk : true,
-			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the
-			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are not fetched asynchronously
-			 * 
-			 * @property autocompletions.prefixes.autoShow
-			 * @type boolean
-			 * @default true
-			 */
 			autoShow : true,
-			/**
-			 * Auto-add prefix declaration: when prefixes are loaded in memory
-			 * (bulk: true), and the user types e.g. 'rdf:' in a triple pattern,
-			 * the editor automatically add this particular PREFIX definition to
-			 * the query
-			 * 
-			 * @property autocompletions.prefixes.autoAddDeclaration
-			 * @type boolean
-			 * @default true
-			 */
 			autoAddDeclaration : true,
-			/**
-			 * Automatically store autocompletions in localstorage. This is
-			 * particularly useful when the get() function is an expensive ajax
-			 * call. Autocompletions are stored for a period of a month. Set
-			 * this property to null (or remove it), to disable the use of
-			 * localstorage. Otherwise, set a string value (or a function
-			 * returning a string val), returning the key in which to store the
-			 * data Note: this feature only works combined with completions
-			 * loaded in memory (i.e. bulk: true)
-			 * 
-			 * @property autocompletions.prefixes.persistent
-			 * @type string|function
-			 * @default "prefixes"
-			 */
 			persistent : "prefixes",
-			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint
-			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
-			 * 
-			 * @property autocompletions.prefixes.handlers
-			 * @type object
-			 */
 			handlers : {
-				
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.classes.handlers.validPosition
-				 * @type function
-				 * @default null
-				 */
 				validPosition : null,
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can -not- show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.classes.handlers.invalidPosition
-				 * @type function
-				 * @default null
-				 */
 				invalidPosition : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.showHint
-				 * @type function
-				 * @default null
-				 */
 				shown : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.select
-				 * @type function
-				 * @default null
-				 */
 				select : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.pick
-				 * @type function
-				 * @default null
-				 */
 				pick : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.close
-				 * @type function
-				 * @default null
-				 */
 				close : null,
 			}
 		},
 		/**
 		 * Property autocompletion settings
-		 * 
-		 * @property autocompletions.properties
-		 * @type object
 		 */
 		properties : {
-			/**
-			 * Check whether the cursor is in a proper position for this autocompletion.
-			 * 
-			 * @property autocompletions.properties.isValidCompletionPosition
-			 * @type function
-			 * @param yasqe doc
-			 * @return boolean
-			 */
 			isValidCompletionPosition : function(cm) {
-				
 				var token = root.getCompleteToken(cm);
 				if (token.string.length == 0) 
 					return false; //we want -something- to autocomplete
@@ -1853,170 +1599,26 @@ root.defaults = $.extend(root.defaults, {
 				// yet, when we are busy writing the subject...
 				return false;
 			},
-			/**
-			 * Get the autocompletions. Either a function which returns an
-			 * array, or an actual array. The array should be in the form ["http://...",....]
-			 * 
-			 * @property autocompletions.properties.get
-			 * @type function|array
-			 * @param doc {YASQE}
-			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
-			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
-			 * @param callback {function} In case async is enabled, use this callback
-			 * @default function (YASQE.fetchFromLov)
-			 */
 			get : root.fetchFromLov,
-			/**
-			 * Preprocesses the codemirror token before matching it with our autocompletions list.
-			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
-			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
-			 * 
-			 * @property autocompletions.properties.preProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
-			 * @default function
-			 */
 			preProcessToken: preprocessResourceTokenForCompletion,
-			/**
-			 * Postprocesses the autocompletion suggestion.
-			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
-			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
-			 * 
-			 * @property autocompletions.properties.postProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @param suggestion {string} The suggestion which you are post processing
-			 * @return post-processed suggestion {string}
-			 * @default function
-			 */
 			postProcessToken: postprocessResourceTokenForCompletion,
-
-			/**
-			 * The get function is asynchronous
-			 * 
-			 * @property autocompletions.properties.async
-			 * @type boolean
-			 * @default true
-			 */
 			async : true,
-			/**
-			 * Use bulk loading of properties: all properties are retrieved
-			 * onLoad using the get() function. Alternatively, disable bulk
-			 * loading, to call the get() function whenever a token needs
-			 * autocompletion (in this case, the completion token is passed on
-			 * to the get() function) whenever you have an autocompletion list that is static, and 
-			 * that easily fits in memory, we advice you to enable bulk for
-			 * performance reasons (especially as we store the autocompletions
-			 * in a trie)
-			 * 
-			 * @property autocompletions.properties.bulk
-			 * @type boolean
-			 * @default false
-			 */
 			bulk : false,
-			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the
-			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are not fetched asynchronously
-			 * 
-			 * @property autocompletions.properties.autoShow
-			 * @type boolean
-			 * @default false
-			 */
 			autoShow : false,
-			/**
-			 * Automatically store autocompletions in localstorage. This is
-			 * particularly useful when the get() function is an expensive ajax
-			 * call. Autocompletions are stored for a period of a month. Set
-			 * this property to null (or remove it), to disable the use of
-			 * localstorage. Otherwise, set a string value (or a function
-			 * returning a string val), returning the key in which to store the
-			 * data Note: this feature only works combined with completions
-			 * loaded in memory (i.e. bulk: true)
-			 * 
-			 * @property autocompletions.properties.persistent
-			 * @type string|function
-			 * @default "properties"
-			 */
 			persistent : "properties",
-			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint
-			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
-			 * 
-			 * @property autocompletions.properties.handlers
-			 * @type object
-			 */
 			handlers : {
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.properties.handlers.validPosition
-				 * @type function
-				 * @default YASQE.showCompletionNotification
-				 */
 				validPosition : root.showCompletionNotification,
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can -not- show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.properties.handlers.invalidPosition
-				 * @type function
-				 * @default YASQE.hideCompletionNotification
-				 */
 				invalidPosition : root.hideCompletionNotification,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.properties.handlers.shown
-				 * @type function
-				 * @default null
-				 */
 				shown : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.select
-				 * @type function
-				 * @default null
-				 */
 				select : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.properties.handlers.pick
-				 * @type function
-				 * @default null
-				 */
 				pick : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.properties.handlers.close
-				 * @type function
-				 * @default null
-				 */
 				close : null,
 			}
 		},
 		/**
 		 * Class autocompletion settings
-		 * 
-		 * @property autocompletions.classes
-		 * @type object
 		 */
 		classes : {
-			/**
-			 * Check whether the cursor is in a proper position for this autocompletion.
-			 * 
-			 * @property autocompletions.classes.isValidCompletionPosition
-			 * @type function
-			 * @param yasqe doc
-			 * @return boolean
-			 */
 			isValidCompletionPosition : function(cm) {
 				var token = root.getCompleteToken(cm);
 				if (token.string.indexOf("?") == 0)
@@ -2033,169 +1635,26 @@ root.defaults = $.extend(root.defaults, {
 					return true;
 				return false;
 			},
-			/**
-			 * Get the autocompletions. Either a function which returns an
-			 * array, or an actual array. The array should be in the form ["http://...",....]
-			 * 
-			 * @property autocompletions.classes.get
-			 * @type function|array
-			 * @param doc {YASQE}
-			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
-			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
-			 * @param callback {function} In case async is enabled, use this callback
-			 * @default function (YASQE.fetchFromLov)
-			 */
 			get : root.fetchFromLov,
-			
-			/**
-			 * Preprocesses the codemirror token before matching it with our autocompletions list.
-			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
-			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
-			 * 
-			 * @property autocompletions.properties.preProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
-			 * @default function
-			 */
 			preProcessToken: preprocessResourceTokenForCompletion,
-			/**
-			 * Postprocesses the autocompletion suggestion.
-			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
-			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
-			 * 
-			 * @property autocompletions.properties.postProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @param suggestion {string} The suggestion which you are post processing
-			 * @return post-processed suggestion {string}
-			 * @default function
-			 */
 			postProcessToken: postprocessResourceTokenForCompletion,
-			/**
-			 * The get function is asynchronous
-			 * 
-			 * @property autocompletions.classes.async
-			 * @type boolean
-			 * @default true
-			 */
 			async : true,
-			/**
-			 * Use bulk loading of classes: all classes are retrieved onLoad
-			 * using the get() function. Alternatively, disable bulk loading, to
-			 * call the get() function whenever a token needs autocompletion (in
-			 * this case, the completion token is passed on to the get()
-			 * function) whenever you have an autocompletion list that is static, and that easily
-			 * fits in memory, we advice you to enable bulk for performance
-			 * reasons (especially as we store the autocompletions in a trie)
-			 * 
-			 * @property autocompletions.classes.bulk
-			 * @type boolean
-			 * @default false
-			 */
 			bulk : false,
-			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the
-			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are not fetched asynchronously
-			 * 
-			 * @property autocompletions.classes.autoShow
-			 * @type boolean
-			 * @default false
-			 */
 			autoShow : false,
-			/**
-			 * Automatically store autocompletions in localstorage (only works when 'bulk' is set to true)
-			 * This is particularly useful when the get() function is an expensive ajax
-			 * call. Autocompletions are stored for a period of a month. Set
-			 * this property to null (or remove it), to disable the use of
-			 * localstorage. Otherwise, set a string value (or a function
-			 * returning a string val), returning the key in which to store the
-			 * data Note: this feature only works combined with completions
-			 * loaded in memory (i.e. bulk: true)
-			 * 
-			 * @property autocompletions.classes.persistent
-			 * @type string|function
-			 * @default "classes"
-			 */
 			persistent : "classes",
-			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint
-			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
-			 * 
-			 * @property autocompletions.classes.handlers
-			 * @type object
-			 */
 			handlers : {
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.classes.handlers.validPosition
-				 * @type function
-				 * @default YASQE.showCompletionNotification
-				 */
 				validPosition : root.showCompletionNotification,
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can -not- show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.classes.handlers.invalidPosition
-				 * @type function
-				 * @default YASQE.hideCompletionNotification
-				 */
 				invalidPosition : root.hideCompletionNotification,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.shown
-				 * @type function
-				 * @default null
-				 */
 				shown : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.select
-				 * @type function
-				 * @default null
-				 */
 				select : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.pick
-				 * @type function
-				 * @default null
-				 */
 				pick : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.classes.handlers.close
-				 * @type function
-				 * @default null
-				 */
 				close : null,
 			}
 		},
 		/**
 		 * Variable names autocompletion settings
-		 * 
-		 * @property autocompletions.properties
-		 * @type object
 		 */
 		variableNames : {
-			/**
-			 * Check whether the cursor is in a proper position for this autocompletion.
-			 * 
-			 * @property autocompletions.variableNames.isValidCompletionPosition
-			 * @type function
-			 * @param yasqe {doc}
-			 * @return boolean
-			 */
 			isValidCompletionPosition : function(cm) {
 				var token = cm.getTokenAt(cm.getCursor());
 				if (token.type != "ws") {
@@ -2206,152 +1665,19 @@ root.defaults = $.extend(root.defaults, {
 				}
 				return false;
 			},
-			/**
-			 * Get the autocompletions. Either a function which returns an
-			 * array, or an actual array. The array should be in the form ["http://...",....]
-			 * 
-			 * @property autocompletions.variableNames.get
-			 * @type function|array
-			 * @param doc {YASQE}
-			 * @param token {object|string} When bulk is disabled, use this token to autocomplete
-			 * @param completionType {string} what type of autocompletion we try to attempt. Classes, properties, or prefixes)
-			 * @param callback {function} In case async is enabled, use this callback
-			 * @default function (YASQE.autocompleteVariables)
-			 */
 			get : root.autocompleteVariables,
-						
-			/**
-			 * Preprocesses the codemirror token before matching it with our autocompletions list.
-			 * Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
-			 * I.e., foaf:name -> http://xmlns.com/foaf/0.1/name
-			 * 
-			 * @property autocompletions.variableNames.preProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @return token {object} Return the same token (possibly with more data added to it, which you can use in the postProcessing step)
-			 * @default null
-			 */
 			preProcessToken: null,
-			/**
-			 * Postprocesses the autocompletion suggestion.
-			 * Use this for e.g. returning a prefixed URI based on a full-length URI suggestion
-			 * I.e., http://xmlns.com/foaf/0.1/name -> foaf:name
-			 * 
-			 * @property autocompletions.variableNames.postProcessToken
-			 * @type function
-			 * @param doc {YASQE}
-			 * @param token {object} The CodeMirror token, including the position of this token in the query, as well as the actual string
-			 * @param suggestion {string} The suggestion which you are post processing
-			 * @return post-processed suggestion {string}
-			 * @default null
-			 */
 			postProcessToken: null,
-			/**
-			 * The get function is asynchronous
-			 * 
-			 * @property autocompletions.variableNames.async
-			 * @type boolean
-			 * @default false
-			 */
 			async : false,
-			/**
-			 * Use bulk loading of variableNames: all variable names are retrieved
-			 * onLoad using the get() function. Alternatively, disable bulk
-			 * loading, to call the get() function whenever a token needs
-			 * autocompletion (in this case, the completion token is passed on
-			 * to the get() function) whenever you have an autocompletion list that is static, and 
-			 * that easily fits in memory, we advice you to enable bulk for
-			 * performance reasons (especially as we store the autocompletions
-			 * in a trie)
-			 * 
-			 * @property autocompletions.variableNames.bulk
-			 * @type boolean
-			 * @default false
-			 */
 			bulk : false,
-			/**
-			 * Auto-show the autocompletion dialog. Disabling this requires the
-			 * user to press [ctrl|cmd]-space to summon the dialog. Note: this
-			 * only works when completions are not fetched asynchronously
-			 * 
-			 * @property autocompletions.variableNames.autoShow
-			 * @type boolean
-			 * @default false
-			 */
 			autoShow : true,
-			/**
-			 * Automatically store autocompletions in localstorage. This is
-			 * particularly useful when the get() function is an expensive ajax
-			 * call. Autocompletions are stored for a period of a month. Set
-			 * this property to null (or remove it), to disable the use of
-			 * localstorage. Otherwise, set a string value (or a function
-			 * returning a string val), returning the key in which to store the
-			 * data Note: this feature only works combined with completions
-			 * loaded in memory (i.e. bulk: true)
-			 * 
-			 * @property autocompletions.variableNames.persistent
-			 * @type string|function
-			 * @default null
-			 */
 			persistent : null,
-			/**
-			 * A set of handlers. Most, taken from the CodeMirror showhint
-			 * plugin: http://codemirror.net/doc/manual.html#addon_show-hint
-			 * 
-			 * @property autocompletions.variableNames.handlers
-			 * @type object
-			 */
 			handlers : {
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.variableNames.handlers.validPosition
-				 * @type function
-				 * @default null
-				 */
 				validPosition : null,
-				/**
-				 * Fires when a codemirror change occurs in a position where we
-				 * can -not- show this particular type of autocompletion
-				 * 
-				 * @property autocompletions.variableNames.handlers.invalidPosition
-				 * @type function
-				 * @default null
-				 */
 				invalidPosition : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.variableNames.handlers.shown
-				 * @type function
-				 * @default null
-				 */
 				shown : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.variableNames.handlers.select
-				 * @type function
-				 * @default null
-				 */
 				select : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.variableNames.handlers.pick
-				 * @type function
-				 * @default null
-				 */
 				pick : null,
-				/**
-				 * See http://codemirror.net/doc/manual.html#addon_show-hint
-				 * 
-				 * @property autocompletions.variableNames.handlers.close
-				 * @type function
-				 * @default null
-				 */
 				close : null,
 			}
 		},
@@ -2363,28 +1689,3 @@ root.version = {
 	"jquery": $.fn.jquery,
 	"yasgui-utils": require("yasgui-utils").version
 };
-
-// end with some documentation stuff we'd like to include in the documentation
-// (yes, ugly, but easier than messing about and adding it manually to the
-// generated html ;))
-/**
- * Set query value in editor (see http://codemirror.net/doc/manual.html#setValue)
- * 
- * @method doc.setValue
- * @param query {string}
- */
-
-/**
- * Get query value from editor (see http://codemirror.net/doc/manual.html#getValue)
- * 
- * @method doc.getValue
- * @return query {string}
- */
-
-/**
- * Set size. Use null value to leave width or height unchanged. To resize the editor to fit its content, see http://codemirror.net/demo/resize.html
- * 
- * @param width {number|string}
- * @param height {number|string}
- * @method doc.setSize
- */
