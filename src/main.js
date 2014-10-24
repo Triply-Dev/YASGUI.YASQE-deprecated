@@ -7,6 +7,7 @@ require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
+require('codemirror/addon/display/fullscreen.js');
 
 window.console = window.console || {"log":function(){}};//make sure any console statements
 
@@ -1435,7 +1436,13 @@ root.defaults = $.extend(root.defaults, {
 		"Ctrl-S" : root.storeQuery,
 		"Cmd-S" : root.storeQuery,
 		"Ctrl-Enter" : root.executeQuery,
-		"Cmd-Enter" : root.executeQuery
+		"Cmd-Enter" : root.executeQuery,
+		"F11": function(cm) {
+	          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        "Esc": function(cm) {
+          if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+        }
 	},
 	cursorHeight : 0.9,
 
