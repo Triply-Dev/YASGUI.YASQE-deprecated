@@ -76,7 +76,7 @@ var extendCmInstance = function(cm) {
 	};
 	
 	/**
-	 * Fetch the query type (i.e., SELECT||DESCRIBE||INSERT||DELETE||ASK||CONSTRUCT)
+	 * Fetch the query type (e.g., SELECT||DESCRIBE||INSERT||DELETE||ASK||CONSTRUCT)
 	 * 
 	 * @method doc.getQueryType
 	 * @return string
@@ -661,19 +661,7 @@ root.fetchFromPrefixCc = function(cm) {
 		cm.storeBulkCompletions("prefixes", prefixArray);
 	});
 };
-/**
- * Get accept header for this particular query. Get JSON for regular queries, and text/plain for update queries
- * 
- * @param doc {YASQE}
- * @method YASQE.getAcceptHeader
- */
-root.getAcceptHeader = function(cm) {
-	if (cm.getQueryMode() == "update") {
-		return "text/plain";
-	} else {
-		return "application/sparql-results+json";
-	}
-};
+
 /**
  * Determine unique ID of the YASQE object. Useful when several objects are
  * loaded on the same page, and all have 'persistency' enabled. Currently, the
@@ -775,7 +763,29 @@ root.doAutoFormat = function(cm) {
 	}
 
 };
-
+var getAcceptHeader = function(cm, config) {
+	var acceptHeader = null;
+	if (config.acceptHeader && !config.acceptHeaderGraph && !config.acceptHeaderSelect && !config.acceptHeaderUpdate) {
+		//this is the old config. For backwards compatability, keep supporting it
+		if (typeof config.acceptHeader == "function") {
+			acceptHeader = config.acceptHeader(cm);
+		} else {
+			acceptHeader = config.acceptHeader;
+		}
+	} else {
+		if (cm.getQueryMode() == "update") {
+			acceptHeader = (typeof config.acceptHeader == "function"? config.acceptHeaderUpdate(cm): config.acceptHeaderUpdate);
+		} else {
+			var qType = cm.getQueryType();
+			if (qType == "DESCRIBE" || qType == "CONSTRUCT") {
+				acceptHeader = (typeof config.acceptHeaderGraph == "function"? config.acceptHeaderGraph(cm): config.acceptHeaderGraph);
+			} else {
+				acceptHeader = (typeof config.acceptHeaderSelect == "function" ? config.acceptHeaderSelect(cm): config.acceptHeaderSelect);
+			}
+		}
+	}
+	return acceptHeader;
+};
 root.executeQuery = function(cm, callbackOrConfig) {
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
@@ -797,7 +807,7 @@ root.executeQuery = function(cm, callbackOrConfig) {
 			value : cm.getValue()
 		}],
 		headers : {
-			Accept : (typeof config.acceptHeader == "function"? config.acceptHeader(cm): config.acceptHeader),
+			Accept : getAcceptHeader(cm, config),
 		}
 	};
 
@@ -1481,12 +1491,19 @@ root.defaults = $.extend(root.defaults, {
 		 * @type String|function
 		 */
 		requestMethod : "POST",
+		
 		/**
-		 * Query accept header
-		 * 
 		 * @type String|function
 		 */
-		acceptHeader : root.getAcceptHeader,
+		acceptHeaderGraph: "text/turtle,*/*;q=0.9",
+		/**
+		 * @type String|function
+		 */
+		acceptHeaderSelect: "application/sparql-results+json,*/*;q=0.9",
+		/**
+		 * @type String|function
+		 */
+		acceptHeaderUpdate: "text/plain,*/*;q=0.9",
 		
 		/**
 		 * Named graphs to query.

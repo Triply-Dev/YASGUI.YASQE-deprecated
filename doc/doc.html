@@ -40,38 +40,38 @@
      	<h2 id="gettingStarted">Getting Started</h2>
      	<p>Initialize YASQE via its constructor, or via the command <code>fromTextArea</code>. Both return in instance of YASQE, from now on referred to as <code>yasqe</code> (lowercase). Both function take as argument a config object. See the section on <a href="#config">defaults</a> for more information on this config object.</p>
      	<div class="doc">
-     		<code>YASQE(parent: DOM-Element, settings: Object) → YASQE document: Doc</code>
+     		<code>YASQE(parent: DOM-Element, settings: Object) → YASQE instance: yasqe</code>
      		<p>Main YASQE constructor. Pass a DOM element as argument to append the editor to, and (optionally) pass along config settings (see the YASQE.defaults object below, as well as the regular CodeMirror documentation, for more information on configurability)</p>
      		
      	</div>
      	<div class="doc">
-     		<code>YASQE.fromTextArea(textArea: DOM element, config: Object) → YASQE document: Doc</code>
-     		<p>Initialize YASQE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)</p>
+     		<code>YASQE.fromTextArea(textArea: DOM element, config: Object) → YASQE instance: yasqe</code>
+     		<p>Initialize YASQE from an existing text area (see <a href="http://codemirror.net/doc/manual.html#fromTextArea" target="_blank">CodeMirror</a> for more info)</p>
    		</div>
      	
      	<h2 id="api">API</h2>
      	API methods accessible via the <code>yasqe</code> instance
 		<div class="doc">
-			<code>doc.setValue(query: String)</code>
-			<p>Set query value in editor (see http://codemirror.net/doc/manual.html#setValue)</p>
+			<code>yasqe.setValue(query: String)</code>
+			<p>Set query value in editor (<a href="http://codemirror.net/doc/manual.html#setValue" target="_blank">see also</a>)</p>
 		</div>
 		<div class="doc">
-			<code>doc.getValue() → query: String</code>
-			<p>Get query value from editor (see http://codemirror.net/doc/manual.html#getValue)</p>
+			<code>yasqe.getValue() → query: String</code>
+			<p>Get query value from editor (<a href="http://codemirror.net/doc/manual.html#getValue" target="_blank">see also</a>)</p>
 		</div>
 		<div class="doc">
-			<code>doc.query(function|object)</code>
+			<code>yasqe.query(function|object)</code>
 			<p>Execute query. Pass a callback function, or a configuration object (see
 			the sparql settings in the <a href="#config">configuration object</a> for possible values) I.e., you can change the
 			query configuration by either changing the default settings, changing the
 			settings of this document, or by passing query settings to this function</p>
 		</div>
 		<div class="doc">
-			<code>doc.getQueryMode() → string: </code>
+			<code>yasqe.getQueryMode() → string: </code>
 			<p>Fetch the query mode: 'query' or 'update'</p>
 		</div>
 		<div class="doc">
-			<code>doc.getQueryType() → string: </code>
+			<code>yasqe.getQueryType() → string: </code>
 			<p>Fetch the query type (e.g. SELECT, ASK, DESCRIBE, CONSTRUCT etc)</p>
 		</div>
 		<div class="doc">
@@ -79,17 +79,17 @@
 			<p>Fetch defined prefixes from query string</p>
 		</div>
 		<div class="doc">
-			<code>doc.setSize(width: Number|string, height: Number|string)</code>
+			<code>yasqe.setSize(width: Number|string, height: Number|string)</code>
 			<p>Set size. Use null value to leave width or height unchanged. To resize the editor to fit its content, see http://codemirror.net/demo/resize.html</p>
 		</div>
 		<div class="doc">
-			<code>doc.storeBulkCompletions(type: String)</code>
+			<code>yasqe.storeBulkCompletions(type: String)</code>
 			<p>Store bulk completions in memory as trie, and in localstorage as well (if enabled). The argument should be a key from the <a href="#autocompletions">autocompletion</a> settings</p>
 		</div>
 		
      	<h2 id="config">Configuration</h2>
      	This configuration object is accessible/changeable via <code>YASQE.defaults</code> and <code>yasqe.options</code>, and you can pass these along when initializing YASQE as well.
-     	Other than the configuration we describe here, check the <a href="http://codemirror.net" target="_blank">CodeMirror</a> documentation for even more options you (check the CodeMirror documentation for even more options you can set, such as disabling line numbers, or changing keyboard shortcut keys.
+     	Other than the configuration we describe here, check the <a href="http://codemirror.net" target="_blank">CodeMirror</a> documentation for even more options you can set, such as disabling line numbers, or changing keyboard shortcut keys.
      	<h3 id="defaults">Defaults</h3> 
 		<div class="doc">
 			<code>value: String (default: "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10")</code>
@@ -136,8 +136,16 @@
 			<p>Request method via which to access the SPARQL endpoint</p>
 		</div>
 		<div class="doc" style="margin-left: 30px;">
-			<code>acceptHeader: String|function (default: YASQE.getAcceptHeader)</code>
-			<p>Query accept header</p>
+			<code>acceptHeaderSelect: String|function (default: "application/sparql-results+json,*/*;q=0.9")</code>
+			<p>Accept header for regular <code>SELECT</code> queries</p>
+		</div>
+		<div class="doc" style="margin-left: 30px;">
+			<code>acceptHeaderGraph: String|function (default: "text/turtle,*/*;q=0.9")</code>
+			<p>Accept header for queries returning a graph (e.g. <code>CONSTRUCT</code>)</p>
+		</div>
+		<div class="doc" style="margin-left: 30px;">
+			<code>acceptHeaderUpdate: String|function (default: "text/plain,*/*;q=0.9")</code>
+			<p>Accept header for update queries</p>
 		</div>
 		<div class="doc" style="margin-left: 30px;">
 			<code>namedGraphs: array (default: [])</code>
