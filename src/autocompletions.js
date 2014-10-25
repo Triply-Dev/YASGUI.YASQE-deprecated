@@ -246,7 +246,7 @@ var fetchFromLov = function(yasqe, partialToken, type, callback) {
 		completionNotifications[type]
 		.empty()
 		.append($("<span>Fetchting autocompletions &nbsp;</span>"))
-		.append(require("yasgui-utils").imgs.getElement({id: "loader", width: "18px", height: "18px"}).css("vertical-align", "middle"));
+		.append($(require("yasgui-utils").imgs.getElement({id: "loader", width: "18px", height: "18px"})).css("vertical-align", "middle"));
 	}
 	doRequests();
 };
@@ -503,6 +503,7 @@ module.exports = {
 	autoComplete: autoComplete,
 	autocompleteVariables: autocompleteVariables,
 	fetchFromPrefixCc: fetchFromPrefixCc,
+	fetchFromLov: fetchFromLov,
 //	storeBulkCompletions: storeBulkCompletions,
 	loadBulkCompletions: loadBulkCompletions,
 	appendPrefixIfNeeded: appendPrefixIfNeeded,
