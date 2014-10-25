@@ -6959,6 +6959,6 @@ body{
 	padding-left: 30px;
 }
 
-.CodeMirror {
+.CodeMirror-fullscreen {
 	z-index: 2000;/*make sure the fullscreen positions over the twitter bootstrap page header*/
 }
