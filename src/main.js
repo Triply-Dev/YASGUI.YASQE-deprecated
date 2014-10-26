@@ -232,6 +232,7 @@ var checkSyntax = function(yasqe, deepcheck) {
 			// even though the syntax error might be gone already
 			precise = true;
 		}
+		
 		var token = yasqe.getTokenAt({
 			line : l,
 			ch : yasqe.getLine(l).length
@@ -248,6 +249,9 @@ var checkSyntax = function(yasqe, deepcheck) {
 			var error = document.createElement('span');
 			error.innerHTML = "&rarr;";
 			error.className = "gutterError";
+			if (state.possibleCurrent && state.possibleCurrent.length > 0) {
+				error.title = 'This line is invalid. Expected: ' + state.possibleCurrent.join(', ');
+			}
 			yasqe.setGutterMarker(l, "gutterErrorBar", error);
 			clearError = function() {
 				yasqe.markText({
