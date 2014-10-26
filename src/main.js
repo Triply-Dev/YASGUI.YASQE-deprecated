@@ -9,7 +9,9 @@ var $ = require("jquery"),
 	CodeMirror = require("codemirror"),
 	autocompletions = require('./autocompletions.js'),
 	sparql = require('./sparql.js'),
-	utils = require('./utils.js');
+	utils = require('./utils.js'),
+	yutils = require('yasgui-utils'),
+	imgs = require('./imgs.js');
 
 require("../lib/deparam.js");
 require('codemirror/addon/hint/show-hint.js');
@@ -140,7 +142,7 @@ var postProcessCmElement = function(yasqe) {
 	 */
 	var storageId = utils.getPersistencyId(yasqe, yasqe.options.persistent);
 	if (storageId) {
-		var valueFromStorage = require("yasgui-utils").storage.get(storageId);
+		var valueFromStorage = yutils.storage.get(storageId);
 		if (valueFromStorage)
 			yasqe.setValue(valueFromStorage);
 	}
@@ -329,7 +331,7 @@ root.drawButtons = function(yasqe) {
 	
 	if (yasqe.options.createShareLink) {
 		
-		var svgShare = $(require("yasgui-utils").imgs.getElement({id: "share", width: "30px", height: "30px"}));
+		var svgShare = $(yutils.svg.getElement(imgs.share, {width: "30px", height: "30px"}));
 		svgShare.click(function(event){
 			event.stopPropagation();
 			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(yasqe.buttons);
@@ -416,7 +418,7 @@ root.updateQueryButton = function(yasqe, status) {
 				}).join(" ");
 			})
 			.addClass("query_" + status)
-			.append(require("yasgui-utils").imgs.getElement({id: queryButtonIds[status], width: "100%", height: "100%"}));
+			.append(yutils.svg.getElement(imgs[queryButtonIds[status]], {width: "100%", height: "100%"}));
 		yasqe.queryStatus = status;
 	}
 };
@@ -439,7 +441,7 @@ root.fromTextArea = function(textAreaEl, config) {
 root.storeQuery = function(yasqe) {
 	var storageId = utils.getPersistencyId(yasqe, yasqe.options.persistent);
 	if (storageId) {
-		require("yasgui-utils").storage.set(storageId, yasqe.getValue(), "month");
+		yutils.storage.set(storageId, yasqe.getValue(), "month");
 	}
 };
 root.commentLines = function(yasqe) {
@@ -605,5 +607,5 @@ root.version = {
 	"CodeMirror" : CodeMirror.version,
 	"YASQE" : require("../package.json").version,
 	"jquery": $.fn.jquery,
-	"yasgui-utils": require("yasgui-utils").version
+	"yasgui-utils": yutils.version
 };

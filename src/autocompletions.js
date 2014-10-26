@@ -246,7 +246,7 @@ var fetchFromLov = function(yasqe, partialToken, type, callback) {
 		completionNotifications[type]
 		.empty()
 		.append($("<span>Fetchting autocompletions &nbsp;</span>"))
-		.append($(require("yasgui-utils").imgs.getElement({id: "loader", width: "18px", height: "18px"})).css("vertical-align", "middle"));
+		.append($(utils.svg.getElement(require('./imgs').loader, {width: "18px", height: "18px"})).css("vertical-align", "middle"));
 	}
 	doRequests();
 };
