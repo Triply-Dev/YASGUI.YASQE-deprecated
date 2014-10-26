@@ -1,3 +1,0 @@
-We provide two versions of YASQE:
-- Bundled with all dependencies (bundled)
-- Lightweight without dependencies. In this case, make sure you have both CodeMirror and jQuery included in your page

@@ -88,20 +88,28 @@
       	<div class="row" id="releases">
       	<div class="col-md-12">
       	<h1>Download the latest release</h1>
-<!--       		<a class="btn btn-primary" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release</a> -->
-		
+      	<p>We provide a <i>bundled</i> release containing all external dependencies, and we provide a release containing just the YASQE core. If you choose to use the regular release, make sure to include <a href="http://jquery.com" target="_blank">jQuery</a> and <a href="http://codemirror.net" target="_blank">CodeMirror</a> in your page as well.</p>
       	</div>
       	</div>
       	<div class="row" id="downloads">
-      		<div class="col-md-6">
-      		<h3>GitHub</h3>
-      		Visit the GitHub repository to download the YASQE .css and .js files (find them in the <code>dist</code> directory). 
-      		<br><a class="btn btn-large btn-info" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release from GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png"></a>
+      		<div class="col-md-4">
+      		<h3>CDN</h3>
+      		<p>The YASGUI files are hosted via <a href="http://cdnjs.com" target="_blank">CDNjs</a>. This is the easiest way to include YASQE in your website.</p>
+      		<strong>CSS</strong>
+      		<div><a id="yasqeCss" href="" target="_blank"></a></div>
+      		<strong>JS</strong> <small>Choose either the bundled or the core version</small>
+      		<div><a id="yasqeJsBundled" href="" target="_blank"></a></div>
+      		<div><a id="yasqeJs" href="" target="_blank"></a></div>
       		</div>
-      		<div class="col-md-6">
+      		<div class="col-md-4">
+      		<h3>GitHub</h3>
+      		<p>Visit the GitHub repository to download the YASQE .css and .js files (find them in the <code>dist</code> directory).</p> 
+      		<a class="btn btn-large btn-info" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release from GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png"></a>
+      		</div>
+      		<div class="col-md-4">
       		<h3><img style="height: 26px;" src="doc/imgs/npm.png"></h3>
-      		YASQE is registered as a node package as well, so you'll be able to use the node package manager to keep your version of YASQE up to date.
-      		<br><a class="btn btn-large btn-info" href="https://www.npmjs.org/package/yasgui-yasqe" target="_blank">Show NPM Package</a>
+      		<p>YASQE is registered as a node package as well, so you'll be able to use the node package manager to keep your version of YASQE up to date.</p>
+      		<a class="btn btn-large btn-info" href="https://www.npmjs.org/package/yasgui-yasqe" target="_blank">Show NPM Package</a>
       		</div>
       	</div>
       	
@@ -129,6 +137,13 @@
 <script src="doc/doc.js"></script>
 <script type="text/javascript">
 	var yasqe = YASQE(document.getElementById("showcase"), {sparql:{showQueryButton: true, handlers:{success: function(data){console.log("success", data);}}}});
+	
+	
+	//$.get("http://api.cdnjs.com/libraries?search=yasqe&fields=assets", function(data) {
+		$("#yasqeCss").attr('href', "woeiiii").text("woeiiiii");
+		$("#yasqeJsBundled").attr('href', "woeiiii").text("woeiiiii");
+		$("#yasqeJs").attr('href', "woeiiii").text("woeiiiii");
+	//});
 </script>
   </body>
 </html>
