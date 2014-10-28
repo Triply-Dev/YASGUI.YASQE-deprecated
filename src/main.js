@@ -248,13 +248,20 @@ var checkSyntax = function(yasqe, deepcheck) {
 				//we don't want to gutter error, so return
 				return;
 			}
-			var error = document.createElement('span');
-			error.innerHTML = "&rarr;";
-			error.className = "gutterError";
+			
+			var warningEl = yutils.svg.getElement(imgs.warning, {width: "15px", height: "15px"});
 			if (state.possibleCurrent && state.possibleCurrent.length > 0) {
-				error.title = 'This line is invalid. Expected: ' + state.possibleCurrent.join(', ');
+				warningEl.style.zIndex = "99999999";
+				require('./tooltip')(yasqe, warningEl, function() {
+					var expectedEncoded = [];
+					state.possibleCurrent.forEach(function(expected){
+						expectedEncoded.push("<strong style='text-decoration:underline'>" + $("<div/>").text(expected).html() + "</strong>");
+					});
+					return "This line is invalid. Expected: " + expectedEncoded.join(", ");
+				});
 			}
-			yasqe.setGutterMarker(l, "gutterErrorBar", error);
+			warningEl.style.marginTop = "2px";
+			yasqe.setGutterMarker(l, "gutterErrorBar", warningEl);
 			clearError = function() {
 				yasqe.markText({
 					line : l,
