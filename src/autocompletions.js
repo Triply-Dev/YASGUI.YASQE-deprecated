@@ -134,8 +134,8 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 		}
 	}
 
-	if (token.autocompletionString.indexOf("<") == 0)	token.uri = token.uri.substring(1);
-	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.uri = token.uri.substring(0,	token.uri.length - 1);
+	if (token.autocompletionString.indexOf("<") == 0)	token.autocompletionString = token.autocompletionString.substring(1);
+	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0,	token.autocompletionString.length - 1);
 	return token;
 };
 
