@@ -1,5 +1,6 @@
 var $ = require('jquery'),
 	utils = require('./utils.js'),
+	yutils = require('yasgui-utils'),
 	Trie = require('../lib/trie.js');
 
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
@@ -247,7 +248,7 @@ var fetchFromLov = function(yasqe, partialToken, type, callback) {
 		completionNotifications[type]
 		.empty()
 		.append($("<span>Fetchting autocompletions &nbsp;</span>"))
-		.append($(utils.svg.getElement(require('./imgs').loader, {width: "18px", height: "18px"})).css("vertical-align", "middle"));
+		.append($(yutils.svg.getElement(require('./imgs').loader, {width: "18px", height: "18px"})).css("vertical-align", "middle"));
 	}
 	doRequests();
 };
