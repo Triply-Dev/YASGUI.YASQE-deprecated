@@ -230,7 +230,7 @@
 <!-- 			I.e., http://xmlns.com/foaf/0.1/name -&gt; foaf:name</p> -->
 <!-- 		</div> -->
 		<div class="doc" style="margin-left: 60px;">
-			<code>async: boolean (default: false)</code>
+			<code>async: boolean (default: true)</code>
 			<p>The get function is asynchronous</p>
 		</div>
 		<div class="doc" style="margin-left: 60px;">
@@ -373,13 +373,20 @@
 		<h3 id="autocompletions">Autocompletions</h3>
 		Here, we describe the properties of an autocompletions objects. Add this object to either <code>YASQE.defaults.autocompletions.&lt;name&gt;</code>, <code>yasqe.options.autocompletions&lt;name&gt;</code>, or as part of the configuration object passed during YASQE initialization.
 		<div class="doc" >
-			<code>isValidCompletionPosition: function</code>
-			<p>Check whether the cursor is in a proper position for this autocompletion.</p>
-		</div>
-		<div class="doc" >
 			<code>get: function|array</code>
 			<p>Get the autocompletions. Either a function which returns an
-			array, or an actual array. The array should be in the form ["&lt;completionsString1&gt;", "&lt;completionsString2&gt;"]</p>
+			array, or an actual array. The array should be in the form ["&lt;completionsString1&gt;", "&lt;completionsString2&gt;"].</p>
+			<p>If used as a function, the parameters it receives are</p>
+			<ol>
+				<li><code>doc: yasqe</code> The yasqe instance</li>
+				<li><code>token: object</code> If 'bulk' loading is disabled, use this token to return the appropriate list of suggestions for</li>
+				<li><code>completionType: string</code> The identifier for this type of autocompletion</li>
+				<li><code>callback: function</code> If 'async' is enabled, return the suggestions by passing it on to this callback</li>
+			</ol>
+		</div>
+		<div class="doc" >
+			<code>isValidCompletionPosition: function</code>
+			<p>Check whether the cursor is in a proper position for this autocompletion.</p>
 		</div>
 		<div class="doc" >
 			<code>preProcessToken: function</code>
@@ -459,48 +466,48 @@
      	<h2 id="statics">Statics</h2>
      	Static functions YASQE
    		<div class="doc">
-   			<code>YASQE.consumeShareLink(YASQE: Doc, urlArgs: object)</code>
+   			<code>YASQE.consumeShareLink(doc: yasqe, urlArgs: object)</code>
    			<p>Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASQE doc</p>
  		</div>
  		<div class="doc">
- 			<code>YASQE.createShareLink(YASQE: Doc) → object: </code>
+ 			<code>YASQE.createShareLink(doc: yasqe) → object: </code>
 			<p>Create a share link</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.determineId(doc: YASQE)</code>
+			<code>YASQE.determineId(doc: yasqe)</code>
 			<p>Determine unique ID of the YASQE object. Useful when several objects are
 			loaded on the same page, and all have 'persistency' enabled. Currently, the
 			ID is determined by selecting the nearest parent in the DOM with an ID set</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.fetchFromLov(doc: YASQE, partialToken: Object, type: "properties" | "classes", callback: Function)</code>
+			<code>YASQE.fetchFromLov(doc: yasqe, partialToken: Object, type: "properties" | "classes", callback: Function)</code>
 			<p>Fetch property and class autocompletions the Linked Open Vocabulary services. Issues an async autocompletion call</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.fetchFromPrefixCc(doc: YASQE)</code>
+			<code>YASQE.fetchFromPrefixCc(doc: yasqe)</code>
 			<p>Fetch prefixes from prefix.cc, and store in the YASQE object</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.getAcceptHeader(doc: YASQE)</code>
+			<code>YASQE.getAcceptHeader(doc: yasqe)</code>
 			<p>Get accept header for this particular query. Get JSON for regular queries, and text/plain for update queries</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.getAllVariableNames(YASQE: Doc, token: Object) → variableNames: Array</code>
+			<code>YASQE.getAllVariableNames(doc: yasqe, token: Object) → variableNames: Array</code>
 			<p>Fetch all the used variables names from this query</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.getCompleteToken(yasqe: Doc, token: Object, cursor: Object) → token: Object</code>
+			<code>YASQE.getCompleteToken(doc: yasqe, token: Object, cursor: Object) → token: Object</code>
 			<p>When typing a query, this query is sometimes syntactically invalid, causing
 			the current tokens to be incorrect This causes problem for autocompletion.
 			http://bla might result in two tokens: http:// and bla. We'll want to combine
 			these</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.hideCompletionNotification(doc: YASQE, autocompletionType: String)</code>
+			<code>YASQE.hideCompletionNotification(doc: yasqe, autocompletionType: String)</code>
 			<p>Hide completion notification</p>
 		</div>
 		<div class="doc">
-			<code>YASQE.showCompletionNotification(doc: YASQE, autocompletionType: String)</code>
+			<code>YASQE.showCompletionNotification(doc: yasqe, autocompletionType: String)</code>
 			<p>Show notification</p>
 		</div>
      	

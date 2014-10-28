@@ -43,7 +43,7 @@ var getSuggestionsAsHintObject = function(yasqe, suggestions, type, token) {
 	if (yasqe.options.autocompletions[type].handlers) {
 		for ( var handler in yasqe.options.autocompletions[type].handlers) {
 			if (yasqe.options.autocompletions[type].handlers[handler]) 
-				root.on(returnObj, handler, yasqe.options.autocompletions[type].handlers[handler]);
+				yasqe.on(returnObj, handler, yasqe.options.autocompletions[type].handlers[handler]);
 		}
 	}
 	return returnObj;
@@ -51,16 +51,17 @@ var getSuggestionsAsHintObject = function(yasqe, suggestions, type, token) {
 
 
 var getSuggestionsFromToken = function(yasqe, type, partialToken) {
+	var stringToAutocomplete = partialToken.autocompletionString || partialToken.string;
 	var suggestions = [];
 	if (yasqe.tries[type]) {
-		suggestions = yasqe.tries[type].autoComplete(partialToken.string);
+		suggestions = yasqe.tries[type].autoComplete(stringToAutocomplete);
 	} else if (typeof yasqe.options.autocompletions[type].get == "function" && yasqe.options.autocompletions[type].async == false) {
-		suggestions = yasqe.options.autocompletions[type].get(yasqe, partialToken.string, type);
+		suggestions = yasqe.options.autocompletions[type].get(yasqe, stringToAutocomplete, type);
 	} else if (typeof yasqe.options.autocompletions[type].get == "object") {
-		var partialTokenLength = partialToken.string.length;
+		var partialTokenLength = stringToAutocomplete.length;
 		for (var i = 0; i < yasqe.options.autocompletions[type].get.length; i++) {
 			var completion = yasqe.options.autocompletions[type].get[i];
-			if (completion.slice(0, partialTokenLength) == partialToken.string) {
+			if (completion.slice(0, partialTokenLength) == stringToAutocomplete) {
 				suggestions.push(completion);
 			}
 		}
@@ -70,7 +71,7 @@ var getSuggestionsFromToken = function(yasqe, type, partialToken) {
 };
 
 var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedString) {
-	if (token.tokenPrefix && token.uri && token.tokenPrefixUri) {
+	if (token.tokenPrefix && token.autocompletionString && token.tokenPrefixUri) {
 		// we need to get the suggested string back to prefixed form
 		suggestedString = suggestedString.substring(token.tokenPrefixUri.length);
 		suggestedString = token.tokenPrefix + suggestedString;
@@ -118,22 +119,22 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 		}
 	}
 
-	token.uri = token.string.trim();
+	token.autocompletionString = token.string.trim();
 	if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
 		// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
 		for (var prefix in queryPrefixes) {
 			if (queryPrefixes.hasOwnProperty(prefix)) {
 				if (token.string.indexOf(prefix) == 0) {
-					token.uri = queryPrefixes[prefix];
-					token.uri += token.string.substring(prefix.length);
+					token.autocompletionString = queryPrefixes[prefix];
+					token.autocompletionString += token.string.substring(prefix.length);
 					break;
 				}
 			}
 		}
 	}
 
-	if (token.uri.indexOf("<") == 0)	token.uri = token.uri.substring(1);
-	if (token.uri.indexOf(">", token.length - 1) !== -1) token.uri = token.uri.substring(0,	token.uri.length - 1);
+	if (token.autocompletionString.indexOf("<") == 0)	token.uri = token.uri.substring(1);
+	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.uri = token.uri.substring(0,	token.uri.length - 1);
 	return token;
 };
 
@@ -149,7 +150,7 @@ var getCompletionHintsObject = function(yasqe, type, callback) {
 		// completionhint is the same as the current token
 		// regular behaviour would keep changing the codemirror dom, hence
 		// constantly calling this callback
-		if (yasqe.options.autocompletions[type].async) {
+		if (!yasqe.options.autocompletions[type].bulk && yasqe.options.autocompletions[type].async) {
 			var wrappedCallback = function(suggestions) {
 				callback(getSuggestionsAsHintObject(yasqe, suggestions, type, token));
 			};
@@ -185,7 +186,7 @@ var fetchFromLov = function(yasqe, partialToken, type, callback) {
 	var maxResults = 50;
 
 	var args = {
-		q : partialToken.uri,
+		q : partialToken.autocompletionString,
 		page : 1
 	};
 	if (type == "classes") {
@@ -335,7 +336,7 @@ var autoComplete = function(yasqe, fromAutoShow) {
 	var tryHintType = function(type) {
 		if (fromAutoShow // from autoShow, i.e. this gets called each time the editor content changes
 				&& (!yasqe.options.autocompletions[type].autoShow // autoshow for  this particular type of autocompletion is -not- enabled
-				|| yasqe.options.autocompletions[type].async) // async is enabled (don't want to re-do ajax-like request for every editor change)
+				|| (!yasqe.options.autocompletions[type].bulk && yasqe.options.autocompletions[type].async)) // async is enabled (don't want to re-do ajax-like request for every editor change)
 		) {
 			return false;
 		}
@@ -345,7 +346,7 @@ var autoComplete = function(yasqe, fromAutoShow) {
 			type : type,
 			completeSingle: false
 		};
-		if (yasqe.options.autocompletions[type].async) {
+		if (!yasqe.options.autocompletions[type].bulk && yasqe.options.autocompletions[type].async) {
 			hintConfig.async = true;
 		}
 		var wrappedHintCallback = function(yasqe, callback) {
@@ -428,7 +429,7 @@ var autocompleteVariables = function(yasqe, token) {
  * @param doc {YASQE}
  * @method YASQE.fetchFromPrefixCc
  */
-var fetchFromPrefixCc = function(yasqe) {
+var fetchFromPrefixCc = function(yasqe, token, type, callback) {
 	$.get("http://prefix.cc/popular/all.file.json", function(data) {
 		var prefixArray = [];
 		for ( var prefix in data) {
@@ -439,7 +440,7 @@ var fetchFromPrefixCc = function(yasqe) {
 		}
 		
 		prefixArray.sort();
-		storeBulkCompletions(yasqe, "prefixes", prefixArray);
+		callback(prefixArray);
 	});
 };
 
@@ -461,13 +462,18 @@ var storeBulkCompletions = function(yasqe, type, completions) {
 	if (storageId) require("yasgui-utils").storage.set(storageId, completions, "month");
 };
 var loadBulkCompletions = function(yasqe, type) {
+	var storeArrayAsBulk = function(suggestions) {
+		if (suggestions && suggestions instanceof Array && suggestions.length > 0) {
+			storeBulkCompletions(yasqe, type, suggestions);
+		}
+	}
 	var completions = null;
 	if (utils.keyExists(yasqe.options.autocompletions[type], "get"))
 		completions = yasqe.options.autocompletions[type].get;
 	if (completions instanceof Array) {
 		// we don't care whether the completions are already stored in
 		// localstorage. just use this one
-		storeBulkCompletions(yasqe, type, completions);
+		storeArrayAsBulk(completions);
 	} else {
 		// if completions are defined in localstorage, use those! (calling the
 		// function may come with overhead (e.g. async calls))
@@ -475,17 +481,15 @@ var loadBulkCompletions = function(yasqe, type) {
 		if (utils.getPersistencyId(yasqe, yasqe.options.autocompletions[type].persistent))
 			completionsFromStorage = require("yasgui-utils").storage.get(utils.getPersistencyId(yasqe, yasqe.options.autocompletions[type].persistent));
 		if (completionsFromStorage && completionsFromStorage instanceof Array && completionsFromStorage.length > 0) {
-			storeBulkCompletions(yasqe, type, completionsFromStorage);
+			storeArrayAsBulk(completionsFromStorage);
 		} else {
 			// nothing in storage. check whether we have a function via which we
 			// can get our prefixes
 			if (completions instanceof Function) {
-				var functionResult = completions(yasqe);
-				if (functionResult && functionResult instanceof Array
-						&& functionResult.length > 0) {
-					// function returned an array (if this an async function, we
-					// won't get a direct function result)
-					storeBulkCompletions(yasqe, type, functionResult);
+				if (yasqe.options.autocompletions[type].async) {
+					completions(yasqe, null, type, storeArrayAsBulk);
+				} else {
+					storeArrayAsBulk(completions(yasqe));
 				}
 			}
 		}

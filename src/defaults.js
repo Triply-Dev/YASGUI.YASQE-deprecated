@@ -201,7 +201,7 @@ module.exports = {
 						get : autocompletions.fetchFromPrefixCc,
 						preProcessToken: autocompletions.preprocessPrefixTokenForCompletion,
 						postProcessToken: null,
-						async : false,
+						async : true,
 						bulk : true,
 						autoShow : true,
 						autoAddDeclaration : true,
