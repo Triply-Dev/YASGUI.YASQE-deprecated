@@ -4,7 +4,8 @@ var gulp = require('gulp'),
     paths = require('./paths.js'),
     filter = require('gulp-filter'),
     tag_version = require('gulp-tag-version'),
-	runSequence = require('run-sequence').use(gulp);
+	runSequence = require('run-sequence').use(gulp),
+	spawn = require('child_process').spawn;
 	
 
 
@@ -17,6 +18,10 @@ function inc(importance) {
         // save it back to filesystem
         .pipe(gulp.dest('./'));
 }
+
+gulp.task('publish', function (done) {
+  spawn('npm', ['publish'], { stdio: 'inherit' }).on('close', done);
+});
 
 gulp.task('commitDist', function() {
 	  return gulp.src(['./' + paths.docDir + '/*', './' + paths.bundleDir + '/*'])
@@ -35,11 +40,11 @@ gulp.task('bumpMinor', function() { return inc('minor'); })
 gulp.task('bumpMajor', function() { return inc('major'); })
 
 gulp.task('patch', function() {
-	runSequence('bumpPatch', 'default', 'commitDist', 'tag');
+	runSequence('bumpPatch', 'default', 'commitDist', 'tag', 'publish');
 });
 gulp.task('minor', function() {
-	runSequence('bumpMinor', 'default', 'commitDist', 'tag');
+	runSequence('bumpMinor', 'default', 'commitDist', 'tag', 'publish');
 });
 gulp.task('major', function() {
-	runSequence('bumpMajor', 'default', 'commitDist', 'tag');
+	runSequence('bumpMajor', 'default', 'commitDist', 'tag', 'publish');
 });
