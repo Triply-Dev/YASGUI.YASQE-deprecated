@@ -370,18 +370,14 @@ li.CodeMirror-hint-active {
 .CodeMirror-hint {
 	max-width: 30em;
 }
-
-.gutterError {
-	color: #f00;
-	display:inline-block;
-	font-size: large;
-	margin-left: 3px;
-	margin-top: -1px;
+.gutterErrorBar {
+	width: 4px;
 }
 
 span.cm-error {
 	border-bottom: 2px dotted red;
 }
+
 .yasqe_buttons {
 	position: absolute;
 	top: 5px;
@@ -427,6 +423,28 @@ span.cm-error {
 	z-index: 6;
 	font-size: 90%;
 }
-.svgContainer {
-	display:inline-block;
+
+.yasqe_tooltip{
+	display: inline;
+    position: absolute;
+    background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    bottom: 26px;
+    color: #fff;
+/*     content: attr(title); */
+    left: 20%;
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 99999999;
+    width: 220px;
+    white-space: -moz-pre-wrap !important;
+    /* Mozilla, since 1999 */
+    white-space: -pre-wrap;
+    /* Opera 4-6 */
+    white-space: -o-pre-wrap;
+    /* Opera 7 */
+    white-space: pre-wrap;
+    /* css-3 */
+    white-space: normal;
 }
