@@ -7,7 +7,6 @@ window.console = window.console || {"log":function(){}};
  */
 var $ = require("jquery"),
 	CodeMirror = require("codemirror"),
-	autocompletions = require('./autocompletions.js'),
 	sparql = require('./sparql.js'),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils'),
@@ -65,8 +64,13 @@ var extendCmInstance = function(yasqe) {
 	//add class to instance, to make our styles work
 	$(yasqe.getWrapperElement()).addClass("yasqe");
 	
-	// used to store bulk autocompletions in
-	yasqe.tries = {};
+	//instantiate autocompleters
+	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
+	if (yasqe.options.autocompleters) {
+		yasqe.options.autocompleters.forEach(function(name) {
+			if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+		})
+	}
 	
 	yasqe.getCompleteToken = function(token, cur) {
 		return require('./tokenUtils.js').getCompleteToken(yasqe, token, cur);
@@ -160,28 +164,16 @@ var postProcessCmElement = function(yasqe) {
 	});
 	yasqe.on('change', function(yasqe, eventInfo) {
 		checkSyntax(yasqe);
-		autocompletions.appendPrefixIfNeeded(yasqe);
 		root.updateQueryButton(yasqe);
-		root.positionAbsoluteItems(yasqe);
+		root.positionButtons(yasqe);
 	});
 	
 	yasqe.on('cursorActivity', function(yasqe, eventInfo) {
-		autocompletions.autoComplete(yasqe, true);
 		updateButtonsTransparency(yasqe);
 	});
 	yasqe.prevQueryValid = false;
 	checkSyntax(yasqe);// on first load, check as well (our stored or default query might be incorrect)
-	root.positionAbsoluteItems(yasqe);
-	/**
-	 * load bulk completions
-	 */
-	if (yasqe.options.autocompletions) {
-		for ( var completionType in yasqe.options.autocompletions) {
-			if (yasqe.options.autocompletions[completionType].bulk) {
-				autocompletions.loadBulkCompletions(yasqe, completionType);
-			}
-		}
-	}
+	root.positionButtons(yasqe);
 	
 	/**
 	 * check url args and modify yasqe settings if needed
@@ -303,14 +295,29 @@ var checkSyntax = function(yasqe, deepcheck) {
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
 
-root.positionAbsoluteItems = function(yasqe) {
+//add registrar for autocompleters
+root.Autocompleters = {};
+root.registerAutocompleter = function(name, constructor) {
+	root.Autocompleters[name] = constructor;
+}
+
+root.autoComplete = function(yasqe) {
+	//this function gets called when pressing the keyboard shortcut. I.e., autoShow = false
+	yasqe.autocompleters.autoComplete(false);
+};
+//include the autocompleters we provide out-of-the-box
+root.registerAutocompleter("prefixes", require("./autocompleters/prefixes.js"));
+root.registerAutocompleter("properties", require("./autocompleters/properties.js"));
+root.registerAutocompleter("classes", require("./autocompleters/classes.js"));
+root.registerAutocompleter("variables", require("./autocompleters/variables.js"));
+
+
+root.positionButtons = function(yasqe) {
 	var scrollBar = $(yasqe.getWrapperElement()).find(".CodeMirror-vscrollbar");
 	var offset = 0;
 	if (scrollBar.is(":visible")) {
 		offset = scrollBar.outerWidth();
 	}
-	var completionNotification = $(yasqe.getWrapperElement()).find(".completionNotification");
-	if (completionNotification.is(":visible")) completionNotification.css("right", offset);
 	if (yasqe.buttons.is(":visible")) yasqe.buttons.css("right", offset);
 };
 

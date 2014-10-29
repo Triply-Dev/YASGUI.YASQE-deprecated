@@ -27,14 +27,14 @@ module.exports = {
 			};
 
 			/**
-			 * add complete, beforesend, etc handlers (if specified)
+			 * add complete, beforesend, etc callbacks (if specified)
 			 */
 			var handlerDefined = false;
-			if (config.handlers) {
-				for ( var handler in config.handlers) {
-					if (config.handlers[handler]) {
+			if (config.callbacks) {
+				for ( var handler in config.callbacks) {
+					if (config.callbacks[handler]) {
 						handlerDefined = true;
-						ajaxConfig[handler] = config.handlers[handler];
+						ajaxConfig[handler] = config.callbacks[handler];
 					}
 				}
 			}

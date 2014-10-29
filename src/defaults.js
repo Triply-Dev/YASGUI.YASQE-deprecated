@@ -5,9 +5,7 @@
  * passing your own options as second argument to the YASQE constructor
  */
 var $ = require('jquery'),
-	autocompletions = require('./autocompletions.js'),
-	sparql = require('./sparql.js'),
-	utils = require('./utils.js');
+	sparql = require('./sparql.js');
 module.exports = {
 	use: function(YASQE) {
 		YASQE.defaults = $.extend(YASQE.defaults, {
@@ -32,8 +30,8 @@ module.exports = {
 				 * @type object
 				 */
 				extraKeys : {
-					"Ctrl-Space" : autocompletions.autoComplete,
-					"Cmd-Space" : autocompletions.autoComplete,
+					"Ctrl-Space" : YASQE.autoComplete,
+					"Cmd-Space" : YASQE.autoComplete,
 					"Ctrl-D" : YASQE.deleteLine,
 					"Ctrl-K" : YASQE.deleteLine,
 					"Cmd-D" : YASQE.deleteLine,
@@ -150,178 +148,15 @@ module.exports = {
 					/**
 					 * Set of ajax handlers
 					 */
-					handlers : {
+					callbacks : {
 						beforeSend : null,
 						complete : null,
 						error : null,
 						success : null
 					}
 				},
-				/**
-				 * Types of completions. Setting the value to null, will disable
-				 * autocompletion for this particular type. By default, only prefix
-				 * autocompletions are fetched from prefix.cc, and property and class
-				 * autocompletions are fetched from the Linked Open Vocabularies API
-				 */
-				autocompletions : {
-					/**
-					 * Prefix autocompletion settings
-					 */
-					prefixes : {
-						isValidCompletionPosition : function(yasqe) {
-							var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
-
-							// not at end of line
-							if (yasqe.getLine(cur.line).length > cur.ch)
-								return false;
-
-							if (token.type != "ws") {
-								// we want to complete token, e.g. when the prefix starts with an a
-								// (treated as a token in itself..)
-								// but we to avoid including the PREFIX tag. So when we have just
-								// typed a space after the prefix tag, don't get the complete token
-								token = yasqe.getCompleteToken();
-							}
-
-							// we shouldnt be at the uri part the prefix declaration
-							// also check whether current token isnt 'a' (that makes codemirror
-							// thing a namespace is a possiblecurrent
-							if (!token.string.indexOf("a") == 0
-									&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
-								return false;
-
-							// First token of line needs to be PREFIX,
-							// there should be no trailing text (otherwise, text is wrongly inserted
-							// in between)
-							var firstToken = yasqe.getNextNonWsToken(cur.line);
-							if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
-								return false;
-							return true;
-						},
-						get : autocompletions.fetchFromPrefixCc,
-						preProcessToken: autocompletions.preprocessPrefixTokenForCompletion,
-						postProcessToken: null,
-						async : true,
-						bulk : true,
-						autoShow : true,
-						autoAddDeclaration : true,
-						persistent : "prefixes",
-						handlers : {
-							validPosition : null,
-							invalidPosition : null,
-							shown : null,
-							select : null,
-							pick : null,
-							close : null,
-						}
-					},
-					/**
-					 * Property autocompletion settings
-					 */
-					properties : {
-						isValidCompletionPosition : function(yasqe) {
-							var token = yasqe.getCompleteToken();
-							if (token.string.length == 0) 
-								return false; //we want -something- to autocomplete
-							if (token.string.indexOf("?") == 0)
-								return false; // we are typing a var
-							if ($.inArray("a", token.state.possibleCurrent) >= 0)
-								return true;// predicate pos
-							var cur = yasqe.getCursor();
-							var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-							if (previousToken.string == "rdfs:subPropertyOf")
-								return true;
-
-							// hmm, we would like -better- checks here, e.g. checking whether we are
-							// in a subject, and whether next item is a rdfs:subpropertyof.
-							// difficult though... the grammar we use is unreliable when the query
-							// is invalid (i.e. during typing), and often the predicate is not typed
-							// yet, when we are busy writing the subject...
-							return false;
-						},
-						get : autocompletions.fetchFromLov,
-						preProcessToken: autocompletions.preprocessResourceTokenForCompletion,
-						postProcessToken: autocompletions.postprocessResourceTokenForCompletion,
-						async : true,
-						bulk : false,
-						autoShow : false,
-						persistent : "properties",
-						handlers : {
-							validPosition : autocompletions.showCompletionNotification,
-							invalidPosition : autocompletions.hideCompletionNotification,
-							shown : null,
-							select : null,
-							pick : null,
-							close : null,
-						}
-					},
-					/**
-					 * Class autocompletion settings
-					 */
-					classes : {
-						isValidCompletionPosition : function(yasqe) {
-							var token = yasqe.getCompleteToken();
-							if (token.string.indexOf("?") == 0)
-								return false;
-							var cur = yasqe.getCursor();
-							var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-							if (previousToken.string == "a")
-								return true;
-							if (previousToken.string == "rdf:type")
-								return true;
-							if (previousToken.string == "rdfs:domain")
-								return true;
-							if (previousToken.string == "rdfs:range")
-								return true;
-							return false;
-						},
-						get : autocompletions.fetchFromLov,
-						preProcessToken: autocompletions.preprocessResourceTokenForCompletion,
-						postProcessToken: autocompletions.postprocessResourceTokenForCompletion,
-						async : true,
-						bulk : false,
-						autoShow : false,
-						persistent : "classes",
-						handlers : {
-							validPosition : autocompletions.showCompletionNotification,
-							invalidPosition : autocompletions.hideCompletionNotification,
-							shown : null,
-							select : null,
-							pick : null,
-							close : null,
-						}
-					},
-					/**
-					 * Variable names autocompletion settings
-					 */
-					variableNames : {
-						isValidCompletionPosition : function(yasqe) {
-							var token = yasqe.getTokenAt(yasqe.getCursor());
-							if (token.type != "ws") {
-								token = yasqe.getCompleteToken(token);
-								if (token && token.string.indexOf("?") == 0) {
-									return true;
-								}
-							}
-							return false;
-						},
-						get : autocompletions.autocompleteVariables,
-						preProcessToken: null,
-						postProcessToken: null,
-						async : false,
-						bulk : false,
-						autoShow : true,
-						persistent : null,
-						handlers : {
-							validPosition : null,
-							invalidPosition : null,
-							shown : null,
-							select : null,
-							pick : null,
-							close : null,
-						}
-					},
-				}
+				
+				autocompleters : ["prefixes", "properties", "classes", "variables"]
 			});
 	}
 };
