@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 gulp.task('watch', function() {
 	gulp.watch(["./src/*", './lib/*.js'], [ 'browserifyForDebug' ]);
-	gulp.watch(paths.style, [ 'minifyCss' ]);
+	gulp.watch(paths.style, [ 'makeCss' ]);
 	  gulp.watch(
 		'./*.html'
 	, function(files) {

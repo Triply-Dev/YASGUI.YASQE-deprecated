@@ -62,6 +62,9 @@ var extendConfig = function(config) {
  * @private
  */
 var extendCmInstance = function(yasqe) {
+	//add class to instance, to make our styles work
+	$(yasqe.getWrapperElement()).addClass("yasqe");
+	
 	// used to store bulk autocompletions in
 	yasqe.tries = {};
 	
@@ -261,6 +264,7 @@ var checkSyntax = function(yasqe, deepcheck) {
 				});
 			}
 			warningEl.style.marginTop = "2px";
+			warningEl.style.marginLeft = "2px";
 			yasqe.setGutterMarker(l, "gutterErrorBar", warningEl);
 			clearError = function() {
 				yasqe.markText({
