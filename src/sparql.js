@@ -7,7 +7,12 @@ module.exports = {
 			var queryMode = yasqe.getQueryMode();
 			if (yasqe.options.sparql)
 				config = $.extend({}, yasqe.options.sparql, config);
-
+			
+			//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
+			if (config.handlers) 
+				$.extend(true, config.callbacks, config.handlers);
+			
+			
 			if (!config.endpoint || config.endpoint.length == 0)
 				return;// nothing to query!
 
