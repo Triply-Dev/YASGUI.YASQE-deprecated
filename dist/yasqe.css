@@ -429,6 +429,13 @@ li.CodeMirror-hint-active {
 .CodeMirror-hint {
   max-width: 30em; }
 
+.yasqe .yasqe_buttons {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 5; }
+.yasqe .yasqe_buttons div {
+  vertical-align: middle; }
 .yasqe .yasqe_queryButton {
   display: inline-block;
   cursor: pointer; }

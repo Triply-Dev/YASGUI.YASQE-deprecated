@@ -54,6 +54,7 @@ var extendConfig = function(config) {
 	var extendedConfig = $.extend(true, {}, root.defaults, config);
 	// I know, codemirror deals with  default options as well. 
 	//However, it does not do this recursively (i.e. the persistency option)
+	
 	return extendedConfig;
 };
 /**
@@ -6490,7 +6491,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "src/main.js",
   "licenses": [
     {
@@ -6889,11 +6890,14 @@ module.exports = function(yasqe) {
 	}
 };
 },{"./utils":20,"./utils.js":20}],18:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
 	"atom": "var"
 };
+
 module.exports = function(yasqe) {
 	//this autocompleter also fires on-change!
 	yasqe.on("change", function() {
@@ -7012,7 +7016,10 @@ module.exports = function(yasqe) {
 
 
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],19:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
 module.exports = function(yasqe) {
 	return {
 		isValidCompletionPosition : function() {
@@ -7050,6 +7057,7 @@ module.exports = function(yasqe) {
 		}
 	}
 };
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./utils":20,"./utils.js":20}],20:[function(require,module,exports){
 (function (global){
 var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
@@ -7184,6 +7192,8 @@ module.exports = {
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../imgs.js":23,"./utils.js":20,"yasgui-utils":12}],21:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
 module.exports = function(yasqe) {
 	return {
 		isValidCompletionPosition : function() {
@@ -7238,6 +7248,7 @@ module.exports = function(yasqe) {
 	}
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],22:[function(require,module,exports){
 (function (global){
 /**
@@ -7386,16 +7397,17 @@ module.exports = {
 					 * Additional request headers
 					 */
 					headers : {},
-
+					
 					/**
-					 * Set of ajax handlers
+					 * Set of ajax callbacks
 					 */
 					callbacks : {
 						beforeSend : null,
 						complete : null,
 						error : null,
 						success : null
-					}
+					},
+					handlers: {}//keep here for backwards compatability
 				},
 				
 				autocompleters : ["prefixes", "properties", "classes", "variables"]
@@ -7518,7 +7530,12 @@ module.exports = {
 			var queryMode = yasqe.getQueryMode();
 			if (yasqe.options.sparql)
 				config = $.extend({}, yasqe.options.sparql, config);
-
+			
+			//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
+			if (config.handlers) 
+				$.extend(true, config.callbacks, config.handlers);
+			
+			
 			if (!config.endpoint || config.endpoint.length == 0)
 				return;// nothing to query!
 
@@ -7751,7 +7768,8 @@ module.exports = function(yasqe, parent, html) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./utils.js":28}],28:[function(require,module,exports){
-
+(function (global){
+var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
 
 var keyExists = function(objectToTest, key) {
 	var exists = false;
@@ -7804,6 +7822,7 @@ module.exports = {
 	getPersistencyId: getPersistencyId,
 	elementsOverlap:elementsOverlap,
 };
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[1])(1)
 });
 

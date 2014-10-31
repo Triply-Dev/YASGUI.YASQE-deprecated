@@ -53,6 +53,7 @@ var extendConfig = function(config) {
 	var extendedConfig = $.extend(true, {}, root.defaults, config);
 	// I know, codemirror deals with  default options as well. 
 	//However, it does not do this recursively (i.e. the persistency option)
+	
 	return extendedConfig;
 };
 /**
@@ -24616,7 +24617,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "src/main.js",
   "licenses": [
     {
@@ -25013,11 +25014,13 @@ module.exports = function(yasqe) {
 	}
 };
 },{"./utils":22,"./utils.js":22}],20:[function(require,module,exports){
+var $ = require('jquery');
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
 	"atom": "var"
 };
+
 module.exports = function(yasqe) {
 	//this autocompleter also fires on-change!
 	yasqe.on("change", function() {
@@ -25136,7 +25139,8 @@ module.exports = function(yasqe) {
 
 
 
-},{}],21:[function(require,module,exports){
+},{"jquery":11}],21:[function(require,module,exports){
+var $ = require('jquery');
 module.exports = function(yasqe) {
 	return {
 		isValidCompletionPosition : function() {
@@ -25174,7 +25178,7 @@ module.exports = function(yasqe) {
 		}
 	}
 };
-},{"./utils":22,"./utils.js":22}],22:[function(require,module,exports){
+},{"./utils":22,"./utils.js":22,"jquery":11}],22:[function(require,module,exports){
 var $ = require('jquery'),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils');
@@ -25306,6 +25310,7 @@ module.exports = {
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
 },{"../imgs.js":25,"./utils.js":22,"jquery":11,"yasgui-utils":14}],23:[function(require,module,exports){
+var $ = require('jquery');
 module.exports = function(yasqe) {
 	return {
 		isValidCompletionPosition : function() {
@@ -25360,7 +25365,7 @@ module.exports = function(yasqe) {
 	}
 };
 
-},{}],24:[function(require,module,exports){
+},{"jquery":11}],24:[function(require,module,exports){
 /**
  * The default options of YASQE (check the CodeMirror documentation for even
  * more options, such as disabling line numbers, or changing keyboard shortcut
@@ -25507,16 +25512,17 @@ module.exports = {
 					 * Additional request headers
 					 */
 					headers : {},
-
+					
 					/**
-					 * Set of ajax handlers
+					 * Set of ajax callbacks
 					 */
 					callbacks : {
 						beforeSend : null,
 						complete : null,
 						error : null,
 						success : null
-					}
+					},
+					handlers: {}//keep here for backwards compatability
 				},
 				
 				autocompleters : ["prefixes", "properties", "classes", "variables"]
@@ -25637,7 +25643,12 @@ module.exports = {
 			var queryMode = yasqe.getQueryMode();
 			if (yasqe.options.sparql)
 				config = $.extend({}, yasqe.options.sparql, config);
-
+			
+			//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
+			if (config.handlers) 
+				$.extend(true, config.callbacks, config.handlers);
+			
+			
 			if (!config.endpoint || config.endpoint.length == 0)
 				return;// nothing to query!
 
@@ -25867,7 +25878,7 @@ module.exports = function(yasqe, parent, html) {
 
 
 },{"./utils.js":30,"jquery":11}],30:[function(require,module,exports){
-
+var $ = require('jquery');
 
 var keyExists = function(objectToTest, key) {
 	var exists = false;
@@ -25920,7 +25931,7 @@ module.exports = {
 	getPersistencyId: getPersistencyId,
 	elementsOverlap:elementsOverlap,
 };
-},{}]},{},[1])(1)
+},{"jquery":11}]},{},[1])(1)
 });
 
 
