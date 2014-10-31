@@ -1,4 +1,4 @@
-
+var $ = require('jquery');
 
 var keyExists = function(objectToTest, key) {
 	var exists = false;

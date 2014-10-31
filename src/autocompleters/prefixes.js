@@ -1,8 +1,10 @@
+var $ = require('jquery');
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
 	"atom": "var"
 };
+
 module.exports = function(yasqe) {
 	//this autocompleter also fires on-change!
 	yasqe.on("change", function() {
