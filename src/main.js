@@ -52,6 +52,10 @@ var extendConfig = function(config) {
 	var extendedConfig = $.extend(true, {}, root.defaults, config);
 	// I know, codemirror deals with  default options as well. 
 	//However, it does not do this recursively (i.e. the persistency option)
+	
+	//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
+	if (extendedConfig.sparql.callbacks && extendedConfig.sparql.handlers) 
+		$.extend(extendedConfig.sparql.callbacks, extendedConfig.sparql.handlers);
 	return extendedConfig;
 };
 /**

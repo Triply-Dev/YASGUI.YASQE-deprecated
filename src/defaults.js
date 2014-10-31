@@ -144,16 +144,17 @@ module.exports = {
 					 * Additional request headers
 					 */
 					headers : {},
-
+					
 					/**
-					 * Set of ajax handlers
+					 * Set of ajax callbacks
 					 */
 					callbacks : {
 						beforeSend : null,
 						complete : null,
 						error : null,
 						success : null
-					}
+					},
+					handlers: {}//keep here for backwards compatability
 				},
 				
 				autocompleters : ["prefixes", "properties", "classes", "variables"]
