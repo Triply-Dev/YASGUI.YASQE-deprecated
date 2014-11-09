@@ -93,10 +93,10 @@
       	</div>
       	<div id="downloads">
 	      	<div class="row">
-	      		<div class="row">
+	      		<div id="cdnDownload" class="row">
 	      			<div class="well col-md-12" style="margin-bottom: 0px">
 			      		<h3>CDN</h3>
-			      		<p>The YASQE files are hosted via <a href="https://cdnjs.com/libraries/yasqe" target="_blank">cdnjs</a>. This is the easiest way to include YASQE in your website.</p>
+			      		<p>The YASQE files are hosted via <a href="http://www.jsdelivr.com/#!yasqe" target="_blank">JsDelivr</a>. This CDN is the easiest way to include YASQE in your website.</p>
 			      		<strong>CSS</strong>
 			      		<div><code id="yasqeCss"></code></div>
 			      		<strong>JS</strong> <small>Choose either the bundled or the core version</small>
@@ -142,14 +142,6 @@
 <script src="doc/doc.min.js"></script>
 <script type="text/javascript">
 	var yasqe = YASQE(document.getElementById("showcase"), {sparql:{showQueryButton: true, handlers:{success: function(data){console.log("success", data);}}}});
-	
-	var setLinkVal = function(id, href) {
-		var el = document.getElementById(id);
-		el.appendChild(document.createTextNode(href));
-	}
-	setLinkVal('yasqeCss', "<link href='//cdnjs.cloudflare.com/ajax/libs/yasqe/" + YASQE.version.YASQE + "/yasqe.min.css' rel='stylesheet' type='text/css'/>");
-	setLinkVal('yasqeJsBundled', "<script src='//cdnjs.cloudflare.com/ajax/libs/yasqe/" + YASQE.version.YASQE + "/yasqe.bundled.min.js'></script" + ">");
-	setLinkVal('yasqeJs', "<script src='//cdnjs.cloudflare.com/ajax/libs/yasqe/" + YASQE.version.YASQE + "/yasqe.min.js'></script" + ">");
 </script>
   </body>
 </html>
