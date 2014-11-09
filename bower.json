@@ -1,0 +1,25 @@
+{
+  "name": "yasqe",
+  "version": "2.0.1",
+  "homepage": "http://yasqe.yasgui.org",
+  "authors": [
+    "Laurens Rietveld <laurens.rietveld@gmail.com>"
+  ],
+  "description": "Yet Another SPARQL Query Editor",
+  "main": "dist/yasqe.bundled.min.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "SPARQL",
+    "Linked Data"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
