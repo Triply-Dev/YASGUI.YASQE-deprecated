@@ -49,7 +49,7 @@ $(document).ready(function() {
 				if (splitted.length > 0) {
 					if ((splitted[0].indexOf("YASQE") == 0 || splitted[0].indexOf("YASR") == 0) && splitted[0].slice(-1) == ":") {
 						//we want to change "#YASQE: some gist" into "some gist". So, remove the first item
-						return splitted.splice(1,1).join(" ");
+						return splitted.splice(1).join(" ");
 					} else {
 						return splitted.join(" ");
 					}
