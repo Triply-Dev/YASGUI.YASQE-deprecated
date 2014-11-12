@@ -106,10 +106,12 @@ var extendCmInstance = function(yasqe) {
 		return require('./prefixUtils.js').getPrefixesFromQuery(yasqe);
 	};
 	
-	yasqe.addPrefix = function(prefix) {
-		return require('./prefixUtils.js').addPrefix(yasqe, prefix);
+	yasqe.addPrefixes = function(prefixes) {
+		return require('./prefixUtils.js').addPrefixes(yasqe, prefixes);
 	};
-	
+	yasqe.removePrefixes = function(prefixes) {
+		return require('./prefixUtils.js').removePrefixes(yasqe, prefixes);
+	};
 	/**
 	 * Fetch the query type (e.g., SELECT||DESCRIBE||INSERT||DELETE||ASK||CONSTRUCT)
 	 * 

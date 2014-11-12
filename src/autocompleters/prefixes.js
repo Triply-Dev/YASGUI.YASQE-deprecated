@@ -40,14 +40,14 @@ module.exports = function(yasqe) {
 		if (tokenTypes[token.type] == "prefixed") {
 			var colonIndex = token.string.indexOf(":");
 			if (colonIndex !== -1) {
-				// check first token isnt PREFIX, and previous token isnt a '<'
-				// (i.e. we are in a uri)
-				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+				// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
+//				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+				var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
 				var previousToken = yasqe.getTokenAt({
 					line : cur.line,
 					ch : token.start
 				});// needs to be null (beginning of line), or whitespace
-				if (firstTokenString != "PREFIX"
+				if (lastNonWsTokenString != "PREFIX"
 						&& (previousToken.type == "ws" || previousToken.type == null)) {
 					// check whether it isnt defined already (saves us from looping
 					// through the array)
@@ -57,7 +57,7 @@ module.exports = function(yasqe) {
 						// ok, so it isnt added yet!
 						var completions = yasqe.autocompleters.getTrie('prefixes').autoComplete(currentPrefix);
 						if (completions.length > 0) {
-							yasqe.addPrefix(completions[0]);
+							yasqe.addPrefixes(completions[0]);
 						}
 					}
 				}
@@ -92,9 +92,8 @@ module.exports = function(yasqe) {
 			// First token of line needs to be PREFIX,
 			// there should be no trailing text (otherwise, text is wrongly inserted
 			// in between)
-			var firstToken = yasqe.getNextNonWsToken(cur.line);
-			if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
-				return false;
+			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+			if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
 			return true;
 		},
 		get : function(token, callback) {
