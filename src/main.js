@@ -143,9 +143,29 @@ var extendCmInstance = function(yasqe) {
 		yasqe.options.syntaxErrorCheck = isEnabled;
 		checkSyntax(yasqe);
 	};
+	
+	yasqe.enableCompleter = function(name) {
+		addCompleterToSettings(yasqe.options, name);
+	};
+	yasqe.disableCompleter = function(name) {
+		removeCompleterFromSettings(yasqe.options, name);
+	};
 	return yasqe;
 };
 
+var addCompleterToSettings = function(settings, name) {
+	if (!settings.autocompleters) settings.autocompleters = [];
+	settings.autocompleters.push(name);
+};
+var removeCompleterFromSettings = function(settings, name) {
+	if (typeof settings.autocompleters == "object") {
+		var index = $.inArray(name, settings.autocompleters);
+		if (index>=0) {
+			settings.autocompleters.splice(index, 1);
+			removeCompleterFromSettings(settings, name);//just in case. suppose 1 completer is listed twice
+		}
+	}
+};
 var postProcessCmElement = function(yasqe) {
 	/**
 	 * Set doc value
@@ -297,11 +317,13 @@ var checkSyntax = function(yasqe, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
+require('./defaults.js').use(root);
 
 //add registrar for autocompleters
 root.Autocompleters = {};
 root.registerAutocompleter = function(name, constructor) {
 	root.Autocompleters[name] = constructor;
+	addCompleterToSettings(root.defaults, name);
 }
 
 root.autoComplete = function(yasqe) {
@@ -622,7 +644,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 require('./sparql.js').use(root);
-require('./defaults.js').use(root);
+
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,

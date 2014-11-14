@@ -93,6 +93,14 @@
 			<p>Set size. Use null value to leave width or height unchanged. To resize the editor to fit its content, see http://codemirror.net/demo/resize.html</p>
 		</div>
 		<div class="doc">
+			<code>yasqe.enableCompleter(completerName: String)</code>
+			<p>Enable an autocompleter with this name. Only makes sense if you've programatically disabled this completer before, as a plugin is automatically enabled when registering it (see <a href="#registerAutocompleter">this function</a>)</p>
+		</div>
+		<div class="doc">
+			<code>yasqe.disableCompleter(completerName: String)</code>
+			<p>Disable an autocompleter with this name. </p>
+		</div>
+		<div class="doc">
 			<code>yasqe.storeBulkCompletions(type: String)</code>
 			<p>Store bulk completions in memory as trie, and in localstorage as well (if enabled). The argument should be a key from the <a href="#autocompletions">autocompletion</a> settings</p>
 		</div>
@@ -101,7 +109,7 @@
      	Static functions YASQE
    		<div class="doc" id="registerAutocompleter">
    			<code>YASQE.registerAutocompleter(name: String, autocompleter: function)</code>
-   			<p>Register an <a href="#autocompletions">autocompleter</a> in YASQE. To enable this autocompleter, make sure to pass its name to YASQE configuration as well</p>
+   			<p>Register an <a href="#autocompletions">autocompleter</a> in YASQE. This automatically enables the completer as well</p>
  		</div>
    		<div class="doc">
    			<code>YASQE.consumeShareLink(doc: yasqe, urlArgs: object)</code>
@@ -157,10 +165,10 @@
 			<code>value: String (default: "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10")</code>
 			<p>Query string</p>
 		</div>
-		<div class="doc">
-			<code>autocompleters: array (default: ["prefixes", "properties", "classes", "variables"])</code>
-			<p>The list of enabled autocompletion plugins (See <a href="#autocompletions">this section</a> on how to write your own)</p>
-		</div>
+<!-- 		<div class="doc"> -->
+<!-- 			<code>autocompleters: array (default: ["prefixes", "properties", "classes", "variables"])</code> -->
+<!-- 			<p>The list of enabled autocompletion plugins (See <a href="#autocompletions">this section</a> on how to write your own)</p> -->
+<!-- 		</div> -->
 		<div class="doc">
 			<code>syntaxErrorCheck: boolean (default: true)</code>
 			<p>Whether to validate the SPARQL syntax</p>

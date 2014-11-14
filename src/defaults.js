@@ -156,8 +156,6 @@ module.exports = {
 					},
 					handlers: {}//keep here for backwards compatability
 				},
-				
-				autocompleters : ["prefixes", "properties", "classes", "variables"]
 			});
 	}
 };

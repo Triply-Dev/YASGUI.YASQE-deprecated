@@ -111,6 +111,7 @@ module.exports = function(yasqe) {
 			return true;
 		};
 		for ( var completerName in completers) {
+			if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue;//this completer is disabled
 			var completer = completers[completerName];
 			if (!completer.isValidCompletionPosition) continue; //no way to check whether we are in a valid position
 			
