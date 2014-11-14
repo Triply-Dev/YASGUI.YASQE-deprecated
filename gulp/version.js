@@ -30,7 +30,7 @@ gulp.task('commitDist', function() {
 });
 
 gulp.task('tag', function() {
-	return gulp.src('./package.json')
+	return gulp.src(['./package.json', './bower.json'])
     .pipe(git.commit('version bump')).pipe(tag_version());
 });
 
