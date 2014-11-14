@@ -16,7 +16,7 @@ var gulp = require('gulp'),
 
 
 gulp.task('browserify', function() {
-	browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true, global:true})
+	browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
 		.transform({global:true},shim)
 		.exclude('jquery')
 		.exclude('codemirror')

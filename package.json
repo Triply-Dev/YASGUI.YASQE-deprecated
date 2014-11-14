@@ -60,7 +60,7 @@
   },
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "^4.2.0",
+    "codemirror": "^4.7.0",
     "twitter-bootstrap-3.0.0": "^3.0.0",
     "yasgui-utils": "^1.4.1",
     "gulp-minify-css": "^0.3.11"
