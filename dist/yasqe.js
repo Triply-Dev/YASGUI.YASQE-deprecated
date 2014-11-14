@@ -108,10 +108,12 @@ var extendCmInstance = function(yasqe) {
 		return require('./prefixUtils.js').getPrefixesFromQuery(yasqe);
 	};
 	
-	yasqe.addPrefix = function(prefix) {
-		return require('./prefixUtils.js').addPrefix(yasqe, prefix);
+	yasqe.addPrefixes = function(prefixes) {
+		return require('./prefixUtils.js').addPrefixes(yasqe, prefixes);
 	};
-	
+	yasqe.removePrefixes = function(prefixes) {
+		return require('./prefixUtils.js').removePrefixes(yasqe, prefixes);
+	};
 	/**
 	 * Fetch the query type (e.g., SELECT||DESCRIBE||INSERT||DELETE||ASK||CONSTRUCT)
 	 * 
@@ -143,9 +145,29 @@ var extendCmInstance = function(yasqe) {
 		yasqe.options.syntaxErrorCheck = isEnabled;
 		checkSyntax(yasqe);
 	};
+	
+	yasqe.enableCompleter = function(name) {
+		addCompleterToSettings(yasqe.options, name);
+	};
+	yasqe.disableCompleter = function(name) {
+		removeCompleterFromSettings(yasqe.options, name);
+	};
 	return yasqe;
 };
 
+var addCompleterToSettings = function(settings, name) {
+	if (!settings.autocompleters) settings.autocompleters = [];
+	settings.autocompleters.push(name);
+};
+var removeCompleterFromSettings = function(settings, name) {
+	if (typeof settings.autocompleters == "object") {
+		var index = $.inArray(name, settings.autocompleters);
+		if (index>=0) {
+			settings.autocompleters.splice(index, 1);
+			removeCompleterFromSettings(settings, name);//just in case. suppose 1 completer is listed twice
+		}
+	}
+};
 var postProcessCmElement = function(yasqe) {
 	/**
 	 * Set doc value
@@ -297,11 +319,13 @@ var checkSyntax = function(yasqe, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
+require('./defaults.js').use(root);
 
 //add registrar for autocompleters
 root.Autocompleters = {};
 root.registerAutocompleter = function(name, constructor) {
 	root.Autocompleters[name] = constructor;
+	addCompleterToSettings(root.defaults, name);
 }
 
 root.autoComplete = function(yasqe) {
@@ -622,7 +646,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 require('./sparql.js').use(root);
-require('./defaults.js').use(root);
+
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,
@@ -6491,7 +6515,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "main": "src/main.js",
   "licenses": [
     {
@@ -6677,6 +6701,7 @@ module.exports = function(yasqe) {
 			return true;
 		};
 		for ( var completerName in completers) {
+			if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue;//this completer is disabled
 			var completer = completers[completerName];
 			if (!completer.isValidCompletionPosition) continue; //no way to check whether we are in a valid position
 			
@@ -6933,14 +6958,14 @@ module.exports = function(yasqe) {
 		if (tokenTypes[token.type] == "prefixed") {
 			var colonIndex = token.string.indexOf(":");
 			if (colonIndex !== -1) {
-				// check first token isnt PREFIX, and previous token isnt a '<'
-				// (i.e. we are in a uri)
-				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+				// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
+//				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+				var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
 				var previousToken = yasqe.getTokenAt({
 					line : cur.line,
 					ch : token.start
 				});// needs to be null (beginning of line), or whitespace
-				if (firstTokenString != "PREFIX"
+				if (lastNonWsTokenString != "PREFIX"
 						&& (previousToken.type == "ws" || previousToken.type == null)) {
 					// check whether it isnt defined already (saves us from looping
 					// through the array)
@@ -6950,7 +6975,7 @@ module.exports = function(yasqe) {
 						// ok, so it isnt added yet!
 						var completions = yasqe.autocompleters.getTrie('prefixes').autoComplete(currentPrefix);
 						if (completions.length > 0) {
-							yasqe.addPrefix(completions[0]);
+							yasqe.addPrefixes(completions[0]);
 						}
 					}
 				}
@@ -6985,9 +7010,8 @@ module.exports = function(yasqe) {
 			// First token of line needs to be PREFIX,
 			// there should be no trailing text (otherwise, text is wrongly inserted
 			// in between)
-			var firstToken = yasqe.getNextNonWsToken(cur.line);
-			if (firstToken == null || firstToken.string.toUpperCase() != "PREFIX")
-				return false;
+			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+			if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
 			return true;
 		},
 		get : function(token, callback) {
@@ -7409,8 +7433,6 @@ module.exports = {
 					},
 					handlers: {}//keep here for backwards compatability
 				},
-				
-				autocompleters : ["prefixes", "properties", "classes", "variables"]
 			});
 	}
 };
@@ -7434,7 +7456,18 @@ module.exports = {
  * @param yasqe
  * @param prefix
  */
-var addPrefix = function(yasqe, prefix) {
+var addPrefixes = function(yasqe, prefixes) {
+	//for backwards compatability, we stil support prefixes value as string (e.g. 'rdf: <http://fbfgfgf>'
+	if (typeof prefixes == "string") {
+		addPrefixAsString(yasqe, prefixes);
+	} else {
+		for (var pref in prefixes) {
+			addPrefixAsString(pref + " " + prefixes);
+		}
+	}
+};
+
+var addPrefixAsString = function(yasqe, prefixString) {
 	var lastPrefix = null;
 	var lastPrefixLine = 0;
 	var numLines = yasqe.lineCount();
@@ -7448,18 +7481,27 @@ var addPrefix = function(yasqe, prefix) {
 	}
 
 	if (lastPrefix == null) {
-		yasqe.replaceRange("PREFIX " + prefix + "\n", {
+		yasqe.replaceRange("PREFIX " + prefixString + "\n", {
 			line : 0,
 			ch : 0
 		});
 	} else {
 		var previousIndent = getIndentFromLine(yasqe, lastPrefixLine);
-		yasqe.replaceRange("\n" + previousIndent + "PREFIX " + prefix, {
+		yasqe.replaceRange("\n" + previousIndent + "PREFIX " + prefixString, {
 			line : lastPrefixLine
 		});
 	}
 };
-
+var removePrefixes = function(yasqe, prefixes) {
+	var escapeRegex = function(string) {
+		//taken from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+		return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	}
+	for (var pref in prefixes) {
+		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + "\\s*" + escapeRegex(prefixes[pref]) + "\\s*", "ig"), ''));
+	}
+	
+};
 
 /**
  * Get defined prefixes from query as array, in format {"prefix:" "uri"}
@@ -7469,25 +7511,46 @@ var addPrefix = function(yasqe, prefix) {
  */
 var getPrefixesFromQuery = function(yasqe) {
 	var queryPrefixes = {};
-	var numLines = yasqe.lineCount();
-	for (var i = 0; i < numLines; i++) {
-		var firstToken = yasqe.getNextNonWsToken(i);
-		if (firstToken != null && firstToken.string.toUpperCase() == "PREFIX") {
-			var prefix = yasqe.getNextNonWsToken(i, firstToken.end + 1);
-			if (prefix) {
-				var uri = yasqe.getNextNonWsToken(i, prefix.end + 1);
-				if (prefix != null && prefix.string.length > 0 && uri != null
-						&& uri.string.length > 0) {
-					var uriString = uri.string;
-					if (uriString.indexOf("<") == 0)
-						uriString = uriString.substring(1);
-					if (uriString.slice(-1) == ">")
-						uriString = uriString
-								.substring(0, uriString.length - 1);
-					queryPrefixes[prefix.string] = uriString;
+	var shouldContinue = true;
+	var getPrefixesFromLine = function(lineOffset, colOffset) {
+		if (!shouldContinue) return;
+		if (!colOffset) colOffset = 1;
+		var token = yasqe.getNextNonWsToken(i, colOffset);
+		if (token) {
+			if (token.state.possibleCurrent.indexOf("PREFIX") == -1 && token.state.possibleNext.indexOf("PREFIX") == -1) shouldContinue = false;//we are beyond the place in the query where we can enter prefixes
+			if (token.string.toUpperCase() == "PREFIX") {
+				var prefix = yasqe.getNextNonWsToken(i, token.end + 1);
+				if (prefix) {
+					var uri = yasqe.getNextNonWsToken(i, prefix.end + 1);
+					if (uri) {
+						var uriString = uri.string;
+						if (uriString.indexOf("<") == 0)
+							uriString = uriString.substring(1);
+						if (uriString.slice(-1) == ">")
+							uriString = uriString
+									.substring(0, uriString.length - 1);
+						queryPrefixes[prefix.string] = uriString;
+						
+						getPrefixesFromLine(lineOffset, uri.end+1);
+					} else {
+						getPrefixesFromLine(lineOffset, prefix.end+1);
+					}
+					
+				} else {
+					getPrefixesFromLine(lineOffset, token.end+1);
 				}
+			} else {
+				getPrefixesFromLine(lineOffset, token.end+1);
 			}
 		}
+	};
+	
+	
+	var numLines = yasqe.lineCount();
+	for (var i = 0; i < numLines; i++) {
+		if (!shouldContinue) break;
+		getPrefixesFromLine(i);
+		
 	}
 	return queryPrefixes;
 };
@@ -7516,8 +7579,9 @@ var getIndentFromLine = function(yasqe, line, charNumber) {
 };
 
 module.exports = {
-	addPrefix: addPrefix,
-	getPrefixesFromQuery: getPrefixesFromQuery
+	addPrefixes: addPrefixes,
+	getPrefixesFromQuery: getPrefixesFromQuery,
+	removePrefixes: removePrefixes
 };
 },{}],25:[function(require,module,exports){
 (function (global){
