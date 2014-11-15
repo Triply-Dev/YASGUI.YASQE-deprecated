@@ -34,6 +34,7 @@ module.exports = function(yasqe) {
 	var appendPrefixIfNeeded = function() {
 		if (!yasqe.autocompleters.getTrie('prefixes'))
 			return;// no prefixed defined. just stop
+		if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf("prefixes") == -1) return;//this autocompleter is disabled
 		var cur = yasqe.getCursor();
 
 		var token = yasqe.getTokenAt(cur);
