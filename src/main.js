@@ -317,7 +317,7 @@ var checkSyntax = function(yasqe, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
-require('./defaults.js').use(root);
+
 
 //add registrar for autocompleters
 root.Autocompleters = {};
@@ -644,7 +644,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 require('./sparql.js').use(root);
-
+require('./defaults.js').use(root);
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,

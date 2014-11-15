@@ -49,7 +49,7 @@ module.exports = function(yasqe) {
 	};
 	
 	var initCompleter = function(name, completionInit) {
-		var completer = completers[name] = new completionInit(yasqe);
+		var completer = completers[name] = new completionInit(yasqe, name);
 		completer.name = name;
 		if (completer.bulk) {
 			var storeArrayAsBulk = function(suggestions) {

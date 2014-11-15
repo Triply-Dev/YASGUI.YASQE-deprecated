@@ -30,7 +30,11 @@ module.exports = {
 				 * @type object
 				 */
 				extraKeys : {
+//					"Ctrl-Space" : function(yasqe) {
+//						YASQE.autoComplete(yasqe);
+//					},
 					"Ctrl-Space" : YASQE.autoComplete,
+					
 					"Cmd-Space" : YASQE.autoComplete,
 					"Ctrl-D" : YASQE.deleteLine,
 					"Ctrl-K" : YASQE.deleteLine,
