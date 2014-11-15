@@ -15,13 +15,13 @@ module.exports = function(yasqe) {
 			if (token.trim().length == 0) return [];//nothing to autocomplete
 			var distinctVars = {};
 			//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
-			$(yasqe.getWrapperElement()).find(".yasqe-atom").each(function() {
+			$(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
 				var variable = this.innerHTML;
 				if (variable.indexOf("?") == 0) {
 					//ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
 					var nextEl = $(this).next();
 					var nextElClass = nextEl.attr('class');
-					if (nextElClass && nextEl.attr('class').indexOf("yasqe-atom") >= 0) {
+					if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
 						variable += nextEl.text();			
 					}
 					
