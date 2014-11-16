@@ -31,7 +31,6 @@ module.exports = function(yasqe, completerName) {
 		preProcessToken: function(token) {module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
 		async : true,
 		bulk : true,
-		autoShow : true,
 		persistent : completerName,
 	};
 };
