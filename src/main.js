@@ -146,6 +146,7 @@ var extendCmInstance = function(yasqe) {
 	
 	yasqe.enableCompleter = function(name) {
 		addCompleterToSettings(yasqe.options, name);
+		if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
 	};
 	yasqe.disableCompleter = function(name) {
 		removeCompleterFromSettings(yasqe.options, name);
