@@ -8,16 +8,15 @@ var gulp = require('gulp'),
 	uglify = require("gulp-uglify"),
 	rename = require("gulp-rename"),
 	streamify = require('gulp-streamify'),
-	shim = require('browserify-shim'),
 	paths = require("./paths.js"),
 	buffer = require('vinyl-buffer'),
 	exorcist = require('exorcist'),
+	optionalShim = require('./optionalShim.js'),
 	sourcemaps = require('gulp-sourcemaps');
-
 
 gulp.task('browserify', function() {
 	browserify({entries: ["./src/main.js"],standalone: "YASQE", debug: true})
-		.transform({global:true},shim)
+		.transform({global:true}, optionalShim)
 		.exclude('jquery')
 		.exclude('codemirror')
 		.exclude('../../lib/codemirror') 
