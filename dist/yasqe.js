@@ -1,5 +1,4 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.YASQE=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (global){
 'use strict';
 //make sure any console statements
 window.console = window.console || {"log":function(){}};
@@ -7,8 +6,8 @@ window.console = window.console || {"log":function(){}};
 /**
  * Load libraries
  */
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
-	CodeMirror = (typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null),
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
+	CodeMirror = (function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})(),
 	sparql = require('./sparql.js'),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils'),
@@ -71,7 +70,7 @@ var extendCmInstance = function(yasqe) {
 	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
 	if (yasqe.options.autocompleters) {
 		yasqe.options.autocompleters.forEach(function(name) {
-			if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+			if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
 		})
 	}
 	
@@ -148,6 +147,7 @@ var extendCmInstance = function(yasqe) {
 	
 	yasqe.enableCompleter = function(name) {
 		addCompleterToSettings(yasqe.options, name);
+		if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
 	};
 	yasqe.disableCompleter = function(name) {
 		removeCompleterFromSettings(yasqe.options, name);
@@ -319,7 +319,7 @@ var checkSyntax = function(yasqe, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
-require('./defaults.js').use(root);
+
 
 //add registrar for autocompleters
 root.Autocompleters = {};
@@ -646,7 +646,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 require('./sparql.js').use(root);
-
+require('./defaults.js').use(root);
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,
@@ -655,14 +655,12 @@ root.version = {
 	"yasgui-utils": yutils.version
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../lib/deparam.js":2,"../lib/flint.js":3,"../package.json":15,"./autocompleters/autocompleterBase.js":16,"./autocompleters/classes.js":17,"./autocompleters/prefixes.js":18,"./autocompleters/properties.js":19,"./autocompleters/variables.js":21,"./defaults.js":22,"./imgs.js":23,"./prefixUtils.js":24,"./sparql.js":25,"./tokenUtils.js":26,"./tooltip":27,"./utils.js":28,"codemirror/addon/display/fullscreen.js":5,"codemirror/addon/edit/matchbrackets.js":6,"codemirror/addon/hint/show-hint.js":7,"codemirror/addon/runmode/runmode.js":8,"codemirror/addon/search/searchcursor.js":9,"yasgui-utils":12}],2:[function(require,module,exports){
-(function (global){
+},{"../lib/deparam.js":2,"../lib/flint.js":3,"../package.json":15,"./autocompleters/autocompleterBase.js":16,"./autocompleters/classes.js":17,"./autocompleters/prefixes.js":18,"./autocompleters/properties.js":19,"./autocompleters/variables.js":21,"./defaults.js":22,"./imgs.js":23,"./prefixUtils.js":24,"./sparql.js":25,"./tokenUtils.js":26,"./tooltip":27,"./utils.js":28,"codemirror":undefined,"codemirror/addon/display/fullscreen.js":5,"codemirror/addon/edit/matchbrackets.js":6,"codemirror/addon/hint/show-hint.js":7,"codemirror/addon/runmode/runmode.js":8,"codemirror/addon/search/searchcursor.js":9,"jquery":undefined,"yasgui-utils":12}],2:[function(require,module,exports){
 /*
   jQuery deparam is an extraction of the deparam method from Ben Alman's jQuery BBQ
   http://benalman.com/projects/jquery-bbq-plugin/
 */
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 $.deparam = function (params, coerce) {
 var obj = {},
 	coerce_types = { 'true': !0, 'false': !1, 'null': null };
@@ -755,12 +753,10 @@ $.each(params.replace(/\+/g, ' ').split('&'), function (j,v) {
 return obj;
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-(function (global){
+},{"jquery":undefined}],3:[function(require,module,exports){
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["codemirror"], mod);
   else // Plain browser env
@@ -5118,8 +5114,7 @@ return obj;
 	CodeMirror.defineMIME("application/x-sparql-query", "sparql11");
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(require,module,exports){
+},{"codemirror":undefined}],4:[function(require,module,exports){
 /*
 * TRIE implementation in Javascript
 * Copyright (c) 2010 Saurabh Odhyan | http://odhyan.com
@@ -5396,13 +5391,12 @@ Trie.prototype = {
 };
 
 },{}],5:[function(require,module,exports){
-(function (global){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -5439,15 +5433,13 @@ Trie.prototype = {
   }
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],6:[function(require,module,exports){
-(function (global){
+},{"codemirror":undefined}],6:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -5563,15 +5555,13 @@ Trie.prototype = {
   });
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],7:[function(require,module,exports){
-(function (global){
+},{"codemirror":undefined}],7:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -5956,15 +5946,13 @@ Trie.prototype = {
   CodeMirror.defineOption("hintOptions", null);
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
-(function (global){
+},{"codemirror":undefined}],8:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -6032,15 +6020,13 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],9:[function(require,module,exports){
-(function (global){
+},{"codemirror":undefined}],9:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod((typeof window !== "undefined" ? window.CodeMirror : typeof global !== "undefined" ? global.CodeMirror : null));
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -6225,8 +6211,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   });
 });
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{"codemirror":undefined}],10:[function(require,module,exports){
 ;(function(win){
 	var store = {},
 		doc = win.document,
@@ -6515,7 +6500,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "src/main.js",
   "licenses": [
     {
@@ -6536,7 +6521,7 @@ module.exports={
     "gulp-git": "^0.5.2",
     "gulp-jsvalidate": "^0.2.0",
     "gulp-livereload": "^1.3.1",
-    "gulp-minify-css": "^0.3.0",
+    "gulp-minify-css": "^0.3.11",
     "gulp-notify": "^1.2.5",
     "gulp-rename": "^1.2.0",
     "gulp-streamify": "0.0.5",
@@ -6547,11 +6532,11 @@ module.exports={
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~0.1.1",
     "watchify": "^0.6.4",
-    "browserify-shim": "^3.8.0",
     "gulp-sourcemaps": "^1.2.4",
     "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
-    "gulp-sass": "^1.2.2"
+    "gulp-sass": "^1.2.2",
+    "browserify-transform-tools": "^1.2.1"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -6574,21 +6559,28 @@ module.exports={
   },
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "^4.2.0",
+    "codemirror": "^4.7.0",
     "twitter-bootstrap-3.0.0": "^3.0.0",
-    "yasgui-utils": "^1.4.1",
-    "gulp-minify-css": "^0.3.11"
+    "yasgui-utils": "^1.4.1"
   },
-  "browserify-shim": {
-    "jquery": "global:jQuery",
-    "codemirror": "global:CodeMirror",
-    "../../lib/codemirror": "global:CodeMirror"
+  "optionalShim": {
+    "codemirror": {
+      "require": "codemirror",
+      "global": "CodeMirror"
+    },
+    "jquery": {
+      "require": "jquery",
+      "global": "jQuery"
+    },
+    "../../lib/codemirror": {
+      "require": "codemirror",
+      "global": "CodeMirror"
+    }
   }
 }
 
 },{}],16:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('../utils.js'),
 	yutils = require('yasgui-utils'),
 	Trie = require('../../lib/trie.js');
@@ -6639,7 +6631,7 @@ module.exports = function(yasqe) {
 	};
 	
 	var initCompleter = function(name, completionInit) {
-		var completer = completers[name] = new completionInit(yasqe);
+		var completer = completers[name] = new completionInit(yasqe, name);
 		completer.name = name;
 		if (completer.bulk) {
 			var storeArrayAsBulk = function(suggestions) {
@@ -6879,141 +6871,66 @@ var selectHint = function(yasqe, data, completion) {
 ////	storeBulkCompletions: storeBulkCompletions,
 //	loadBulkCompletions: loadBulkCompletions,
 //};
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../lib/trie.js":4,"../utils.js":28,"yasgui-utils":12}],17:[function(require,module,exports){
-module.exports = function(yasqe) {
+},{"../../lib/trie.js":4,"../utils.js":28,"jquery":undefined,"yasgui-utils":12}],17:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
+module.exports = function(yasqe, name) {
 	return {
-		isValidCompletionPosition : function() {
-			var token = yasqe.getCompleteToken();
-			if (token.string.indexOf("?") == 0)
-				return false;
-			var cur = yasqe.getCursor();
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (previousToken.string == "a")
-				return true;
-			if (previousToken.string == "rdf:type")
-				return true;
-			if (previousToken.string == "rdfs:domain")
-				return true;
-			if (previousToken.string == "rdfs:range")
-				return true;
-			return false;
-		},
+		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			return require('./utils').fetchFromLov(yasqe, this, token, callback);
 		},
-		preProcessToken: function(token) {return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token)},
-		postProcessToken: function(token, suggestedString) {return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)},
+		preProcessToken: function(token) {return module.exports.preProcessToken(yasqe, token)},
+		postProcessToken: function(token, suggestedString) {return module.exports.postProcessToken(yasqe, token, suggestedString);},
 		async : true,
 		bulk : false,
 		autoShow : false,
-		persistent : "classes",
+		persistent : name,
 		callbacks : {
 			validPosition : yasqe.autocompleters.notifications.show,
 			invalidPosition : yasqe.autocompleters.notifications.hide,
 		}
 	}
 };
-},{"./utils":20,"./utils.js":20}],18:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var token = yasqe.getCompleteToken();
+	if (token.string.indexOf("?") == 0)
+		return false;
+	var cur = yasqe.getCursor();
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (previousToken.string == "a")
+		return true;
+	if (previousToken.string == "rdf:type")
+		return true;
+	if (previousToken.string == "rdfs:domain")
+		return true;
+	if (previousToken.string == "rdfs:range")
+		return true;
+	return false;
+};
+module.exports.preProcessToken = function(yasqe, token) {
+	return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token);
+};
+module.exports.postProcessToken = function(yasqe, token, suggestedString) {
+	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
+};
+},{"./utils":20,"./utils.js":20,"jquery":undefined}],18:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
 	"string-2" : "prefixed",
 	"atom": "var"
 };
 
-module.exports = function(yasqe) {
+module.exports = function(yasqe, completerName) {
 	//this autocompleter also fires on-change!
 	yasqe.on("change", function() {
-		appendPrefixIfNeeded();
+		module.exports.appendPrefixIfNeeded(yasqe, completerName);
 	});
-	
-	var preprocessPrefixTokenForCompletion = function(token) {
-		var previousToken = yasqe.getPreviousNonWsToken(yasqe.getCursor().line, token);
-		if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
-			//combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
-			//we want the token to be "bla: <", en not "<"
-			token = {
-				start: previousToken.start,
-				end: token.end,
-				string: previousToken.string + " " + token.string,
-				state: token.state
-			};
-		}
-		return token;
-	};
-	/**
-	 * Check whether typed prefix is declared. If not, automatically add declaration
-	 * using list from prefix.cc
-	 * 
-	 * @param yasqe
-	 */
-	var appendPrefixIfNeeded = function() {
-		if (!yasqe.autocompleters.getTrie('prefixes'))
-			return;// no prefixed defined. just stop
-		var cur = yasqe.getCursor();
-
-		var token = yasqe.getTokenAt(cur);
-		if (tokenTypes[token.type] == "prefixed") {
-			var colonIndex = token.string.indexOf(":");
-			if (colonIndex !== -1) {
-				// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
-//				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
-				var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
-				var previousToken = yasqe.getTokenAt({
-					line : cur.line,
-					ch : token.start
-				});// needs to be null (beginning of line), or whitespace
-				if (lastNonWsTokenString != "PREFIX"
-						&& (previousToken.type == "ws" || previousToken.type == null)) {
-					// check whether it isnt defined already (saves us from looping
-					// through the array)
-					var currentPrefix = token.string.substring(0, colonIndex + 1);
-					var queryPrefixes = yasqe.getPrefixesFromQuery();
-					if (queryPrefixes[currentPrefix] == null) {
-						// ok, so it isnt added yet!
-						var completions = yasqe.autocompleters.getTrie('prefixes').autoComplete(currentPrefix);
-						if (completions.length > 0) {
-							yasqe.addPrefixes(completions[0]);
-						}
-					}
-				}
-			}
-		}
-	};
 	
 	
 	return {
-		isValidCompletionPosition : function() {
-			var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
-
-			// not at end of line
-			if (yasqe.getLine(cur.line).length > cur.ch)
-				return false;
-
-			if (token.type != "ws") {
-				// we want to complete token, e.g. when the prefix starts with an a
-				// (treated as a token in itself..)
-				// but we to avoid including the PREFIX tag. So when we have just
-				// typed a space after the prefix tag, don't get the complete token
-				token = yasqe.getCompleteToken();
-			}
-
-			// we shouldnt be at the uri part the prefix declaration
-			// also check whether current token isnt 'a' (that makes codemirror
-			// thing a namespace is a possiblecurrent
-			if (!token.string.indexOf("a") == 0
-					&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
-				return false;
-
-			// First token of line needs to be PREFIX,
-			// there should be no trailing text (otherwise, text is wrongly inserted
-			// in between)
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
-			return true;
-		},
+		isValidCompletionPosition : function(){module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			$.get("http://prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
@@ -7028,63 +6945,146 @@ module.exports = function(yasqe) {
 				callback(prefixArray);
 			});
 		},
-		preProcessToken: preprocessPrefixTokenForCompletion,
+		preProcessToken: function(token) {module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
 		async : true,
 		bulk : true,
-		autoShow : true,
-		autoAddDeclaration : true,
-		persistent : "prefixes",
+		persistent : completerName,
 	};
+};
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
+
+	// not at end of line
+	if (yasqe.getLine(cur.line).length > cur.ch)
+		return false;
+
+	if (token.type != "ws") {
+		// we want to complete token, e.g. when the prefix starts with an a
+		// (treated as a token in itself..)
+		// but we to avoid including the PREFIX tag. So when we have just
+		// typed a space after the prefix tag, don't get the complete token
+		token = yasqe.getCompleteToken();
+	}
+
+	// we shouldnt be at the uri part the prefix declaration
+	// also check whether current token isnt 'a' (that makes codemirror
+	// thing a namespace is a possiblecurrent
+	if (!token.string.indexOf("a") == 0
+			&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
+		return false;
+
+	// First token of line needs to be PREFIX,
+	// there should be no trailing text (otherwise, text is wrongly inserted
+	// in between)
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
+	return true;
+};
+module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
+	var previousToken = yasqe.getPreviousNonWsToken(yasqe.getCursor().line, token);
+	if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
+		//combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
+		//we want the token to be "bla: <", en not "<"
+		token = {
+			start: previousToken.start,
+			end: token.end,
+			string: previousToken.string + " " + token.string,
+			state: token.state
+		};
+	}
+	return token;
+};
+/**
+ * Check whether typed prefix is declared. If not, automatically add declaration
+ * using list from prefix.cc
+ * 
+ * @param yasqe
+ */
+module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
+	if (!yasqe.autocompleters.getTrie(completerName))
+		return;// no prefixed defined. just stop
+	if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf(completerName) == -1) return;//this autocompleter is disabled
+	var cur = yasqe.getCursor();
+
+	var token = yasqe.getTokenAt(cur);
+	if (tokenTypes[token.type] == "prefixed") {
+		var colonIndex = token.string.indexOf(":");
+		if (colonIndex !== -1) {
+			// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
+//			var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+			var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
+			var previousToken = yasqe.getTokenAt({
+				line : cur.line,
+				ch : token.start
+			});// needs to be null (beginning of line), or whitespace
+			if (lastNonWsTokenString != "PREFIX"
+					&& (previousToken.type == "ws" || previousToken.type == null)) {
+				// check whether it isnt defined already (saves us from looping
+				// through the array)
+				var currentPrefix = token.string.substring(0, colonIndex + 1);
+				var queryPrefixes = yasqe.getPrefixesFromQuery();
+				if (queryPrefixes[currentPrefix] == null) {
+					// ok, so it isnt added yet!
+					var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
+					if (completions.length > 0) {
+						yasqe.addPrefixes(completions[0]);
+					}
+				}
+			}
+		}
+	}
 };
 
 
-
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
-module.exports = function(yasqe) {
+},{"jquery":undefined}],19:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
+module.exports = function(yasqe, name) {
 	return {
-		isValidCompletionPosition : function() {
-			var token = yasqe.getCompleteToken();
-			if (token.string.length == 0) 
-				return false; //we want -something- to autocomplete
-			if (token.string.indexOf("?") == 0)
-				return false; // we are typing a var
-			if ($.inArray("a", token.state.possibleCurrent) >= 0)
-				return true;// predicate pos
-			var cur = yasqe.getCursor();
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (previousToken.string == "rdfs:subPropertyOf")
-				return true;
-
-			// hmm, we would like -better- checks here, e.g. checking whether we are
-			// in a subject, and whether next item is a rdfs:subpropertyof.
-			// difficult though... the grammar we use is unreliable when the query
-			// is invalid (i.e. during typing), and often the predicate is not typed
-			// yet, when we are busy writing the subject...
-			return false;
-		},
+		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			return require('./utils').fetchFromLov(yasqe, this, token, callback);
 		},
-		preProcessToken: function(token) {return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token)},
-		postProcessToken: function(token, suggestedString) {return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)},
+		preProcessToken: function(token) {return module.exports.preProcessToken(yasqe, token)},
+		postProcessToken: function(token, suggestedString) {return module.exports.postProcessToken(yasqe, token, suggestedString);},
 		async : true,
 		bulk : false,
 		autoShow : false,
-		persistent : "properties",
+		persistent : name,
 		callbacks : {
 			validPosition : yasqe.autocompleters.notifications.show,
 			invalidPosition : yasqe.autocompleters.notifications.hide,
 		}
 	}
 };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils":20,"./utils.js":20}],20:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
+
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var token = yasqe.getCompleteToken();
+	if (token.string.length == 0) 
+		return false; //we want -something- to autocomplete
+	if (token.string.indexOf("?") == 0)
+		return false; // we are typing a var
+	if ($.inArray("a", token.state.possibleCurrent) >= 0)
+		return true;// predicate pos
+	var cur = yasqe.getCursor();
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (previousToken.string == "rdfs:subPropertyOf")
+		return true;
+
+	// hmm, we would like -better- checks here, e.g. checking whether we are
+	// in a subject, and whether next item is a rdfs:subpropertyof.
+	// difficult though... the grammar we use is unreliable when the query
+	// is invalid (i.e. during typing), and often the predicate is not typed
+	// yet, when we are busy writing the subject...
+	return false;
+};
+module.exports.preProcessToken = function(yasqe, token) {
+	return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token);
+};
+module.exports.postProcessToken = function(yasqe, token, suggestedString) {
+	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
+};
+},{"./utils":20,"./utils.js":20,"jquery":undefined}],20:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils');
 /**
@@ -7214,10 +7214,8 @@ module.exports = {
 	preprocessResourceTokenForCompletion: preprocessResourceTokenForCompletion,
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../imgs.js":23,"./utils.js":20,"yasgui-utils":12}],21:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+},{"../imgs.js":23,"./utils.js":20,"jquery":undefined,"yasgui-utils":12}],21:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe) {
 	return {
 		isValidCompletionPosition : function() {
@@ -7234,13 +7232,13 @@ module.exports = function(yasqe) {
 			if (token.trim().length == 0) return [];//nothing to autocomplete
 			var distinctVars = {};
 			//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
-			$(yasqe.getWrapperElement()).find(".yasqe-atom").each(function() {
+			$(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
 				var variable = this.innerHTML;
 				if (variable.indexOf("?") == 0) {
 					//ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
 					var nextEl = $(this).next();
 					var nextElClass = nextEl.attr('class');
-					if (nextElClass && nextEl.attr('class').indexOf("yasqe-atom") >= 0) {
+					if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
 						variable += nextEl.text();			
 					}
 					
@@ -7272,16 +7270,14 @@ module.exports = function(yasqe) {
 	}
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],22:[function(require,module,exports){
-(function (global){
+},{"jquery":undefined}],22:[function(require,module,exports){
 /**
  * The default options of YASQE (check the CodeMirror documentation for even
  * more options, such as disabling line numbers, or changing keyboard shortcut
  * keys). Either change the default options by setting YASQE.defaults, or by
  * passing your own options as second argument to the YASQE constructor
  */
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	sparql = require('./sparql.js');
 module.exports = {
 	use: function(YASQE) {
@@ -7307,7 +7303,11 @@ module.exports = {
 				 * @type object
 				 */
 				extraKeys : {
+//					"Ctrl-Space" : function(yasqe) {
+//						YASQE.autoComplete(yasqe);
+//					},
 					"Ctrl-Space" : YASQE.autoComplete,
+					
 					"Cmd-Space" : YASQE.autoComplete,
 					"Ctrl-D" : YASQE.deleteLine,
 					"Ctrl-K" : YASQE.deleteLine,
@@ -7437,8 +7437,7 @@ module.exports = {
 	}
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./sparql.js":25}],23:[function(require,module,exports){
+},{"./sparql.js":25,"jquery":undefined}],23:[function(require,module,exports){
 module.exports = {
 	loader: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%" fill="black">  <circle cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(45 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.125s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(90 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.25s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(135 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.375s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(225 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.625s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(270 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.75s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(315 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.875s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle></svg>',
 	query: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g id="Layer_1"></g><g id="Layer_2">	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>',
@@ -7584,8 +7583,7 @@ module.exports = {
 	removePrefixes: removePrefixes
 };
 },{}],25:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = {
 	use: function(YASQE) {
 		YASQE.executeQuery = function(yasqe, callbackOrConfig) {
@@ -7713,8 +7711,7 @@ var getAcceptHeader = function(yasqe, config) {
 	return acceptHeader;
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{"jquery":undefined}],26:[function(require,module,exports){
 
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
@@ -7793,8 +7790,7 @@ module.exports = {
 
 
 },{}],27:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null),
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('./utils.js');
 
 /**
@@ -7830,10 +7826,8 @@ module.exports = function(yasqe, parent, html) {
 };
 
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils.js":28}],28:[function(require,module,exports){
-(function (global){
-var $ = (typeof window !== "undefined" ? window.jQuery : typeof global !== "undefined" ? global.jQuery : null);
+},{"./utils.js":28,"jquery":undefined}],28:[function(require,module,exports){
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 
 var keyExists = function(objectToTest, key) {
 	var exists = false;
@@ -7886,8 +7880,7 @@ module.exports = {
 	getPersistencyId: getPersistencyId,
 	elementsOverlap:elementsOverlap,
 };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[1])(1)
+},{"jquery":undefined}]},{},[1])(1)
 });
 
 

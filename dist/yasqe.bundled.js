@@ -70,7 +70,7 @@ var extendCmInstance = function(yasqe) {
 	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
 	if (yasqe.options.autocompleters) {
 		yasqe.options.autocompleters.forEach(function(name) {
-			if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+			if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
 		})
 	}
 	
@@ -147,6 +147,7 @@ var extendCmInstance = function(yasqe) {
 	
 	yasqe.enableCompleter = function(name) {
 		addCompleterToSettings(yasqe.options, name);
+		if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
 	};
 	yasqe.disableCompleter = function(name) {
 		removeCompleterFromSettings(yasqe.options, name);
@@ -318,7 +319,7 @@ var checkSyntax = function(yasqe, deepcheck) {
  */
 // first take all CodeMirror references and store them in the YASQE object
 $.extend(root, CodeMirror);
-require('./defaults.js').use(root);
+
 
 //add registrar for autocompleters
 root.Autocompleters = {};
@@ -645,7 +646,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
 require('./sparql.js').use(root);
-
+require('./defaults.js').use(root);
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,
@@ -24641,7 +24642,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "src/main.js",
   "licenses": [
     {
@@ -24662,7 +24663,7 @@ module.exports={
     "gulp-git": "^0.5.2",
     "gulp-jsvalidate": "^0.2.0",
     "gulp-livereload": "^1.3.1",
-    "gulp-minify-css": "^0.3.0",
+    "gulp-minify-css": "^0.3.11",
     "gulp-notify": "^1.2.5",
     "gulp-rename": "^1.2.0",
     "gulp-streamify": "0.0.5",
@@ -24673,11 +24674,11 @@ module.exports={
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~0.1.1",
     "watchify": "^0.6.4",
-    "browserify-shim": "^3.8.0",
     "gulp-sourcemaps": "^1.2.4",
     "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
-    "gulp-sass": "^1.2.2"
+    "gulp-sass": "^1.2.2",
+    "browserify-transform-tools": "^1.2.1"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -24700,15 +24701,23 @@ module.exports={
   },
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "^4.2.0",
+    "codemirror": "^4.7.0",
     "twitter-bootstrap-3.0.0": "^3.0.0",
-    "yasgui-utils": "^1.4.1",
-    "gulp-minify-css": "^0.3.11"
+    "yasgui-utils": "^1.4.1"
   },
-  "browserify-shim": {
-    "jquery": "global:jQuery",
-    "codemirror": "global:CodeMirror",
-    "../../lib/codemirror": "global:CodeMirror"
+  "optionalShim": {
+    "codemirror": {
+      "require": "codemirror",
+      "global": "CodeMirror"
+    },
+    "jquery": {
+      "require": "jquery",
+      "global": "jQuery"
+    },
+    "../../lib/codemirror": {
+      "require": "codemirror",
+      "global": "CodeMirror"
+    }
   }
 }
 
@@ -24764,7 +24773,7 @@ module.exports = function(yasqe) {
 	};
 	
 	var initCompleter = function(name, completionInit) {
-		var completer = completers[name] = new completionInit(yasqe);
+		var completer = completers[name] = new completionInit(yasqe, name);
 		completer.name = name;
 		if (completer.bulk) {
 			var storeArrayAsBulk = function(suggestions) {
@@ -25005,40 +25014,49 @@ var selectHint = function(yasqe, data, completion) {
 //	loadBulkCompletions: loadBulkCompletions,
 //};
 },{"../../lib/trie.js":4,"../utils.js":30,"jquery":11,"yasgui-utils":14}],19:[function(require,module,exports){
-module.exports = function(yasqe) {
+var $ = require('jquery');
+module.exports = function(yasqe, name) {
 	return {
-		isValidCompletionPosition : function() {
-			var token = yasqe.getCompleteToken();
-			if (token.string.indexOf("?") == 0)
-				return false;
-			var cur = yasqe.getCursor();
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (previousToken.string == "a")
-				return true;
-			if (previousToken.string == "rdf:type")
-				return true;
-			if (previousToken.string == "rdfs:domain")
-				return true;
-			if (previousToken.string == "rdfs:range")
-				return true;
-			return false;
-		},
+		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			return require('./utils').fetchFromLov(yasqe, this, token, callback);
 		},
-		preProcessToken: function(token) {return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token)},
-		postProcessToken: function(token, suggestedString) {return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)},
+		preProcessToken: function(token) {return module.exports.preProcessToken(yasqe, token)},
+		postProcessToken: function(token, suggestedString) {return module.exports.postProcessToken(yasqe, token, suggestedString);},
 		async : true,
 		bulk : false,
 		autoShow : false,
-		persistent : "classes",
+		persistent : name,
 		callbacks : {
 			validPosition : yasqe.autocompleters.notifications.show,
 			invalidPosition : yasqe.autocompleters.notifications.hide,
 		}
 	}
 };
-},{"./utils":22,"./utils.js":22}],20:[function(require,module,exports){
+
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var token = yasqe.getCompleteToken();
+	if (token.string.indexOf("?") == 0)
+		return false;
+	var cur = yasqe.getCursor();
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (previousToken.string == "a")
+		return true;
+	if (previousToken.string == "rdf:type")
+		return true;
+	if (previousToken.string == "rdfs:domain")
+		return true;
+	if (previousToken.string == "rdfs:range")
+		return true;
+	return false;
+};
+module.exports.preProcessToken = function(yasqe, token) {
+	return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token);
+};
+module.exports.postProcessToken = function(yasqe, token, suggestedString) {
+	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
+};
+},{"./utils":22,"./utils.js":22,"jquery":11}],20:[function(require,module,exports){
 var $ = require('jquery');
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
@@ -25046,97 +25064,15 @@ var tokenTypes = {
 	"atom": "var"
 };
 
-module.exports = function(yasqe) {
+module.exports = function(yasqe, completerName) {
 	//this autocompleter also fires on-change!
 	yasqe.on("change", function() {
-		appendPrefixIfNeeded();
+		module.exports.appendPrefixIfNeeded(yasqe, completerName);
 	});
-	
-	var preprocessPrefixTokenForCompletion = function(token) {
-		var previousToken = yasqe.getPreviousNonWsToken(yasqe.getCursor().line, token);
-		if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
-			//combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
-			//we want the token to be "bla: <", en not "<"
-			token = {
-				start: previousToken.start,
-				end: token.end,
-				string: previousToken.string + " " + token.string,
-				state: token.state
-			};
-		}
-		return token;
-	};
-	/**
-	 * Check whether typed prefix is declared. If not, automatically add declaration
-	 * using list from prefix.cc
-	 * 
-	 * @param yasqe
-	 */
-	var appendPrefixIfNeeded = function() {
-		if (!yasqe.autocompleters.getTrie('prefixes'))
-			return;// no prefixed defined. just stop
-		var cur = yasqe.getCursor();
-
-		var token = yasqe.getTokenAt(cur);
-		if (tokenTypes[token.type] == "prefixed") {
-			var colonIndex = token.string.indexOf(":");
-			if (colonIndex !== -1) {
-				// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
-//				var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
-				var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
-				var previousToken = yasqe.getTokenAt({
-					line : cur.line,
-					ch : token.start
-				});// needs to be null (beginning of line), or whitespace
-				if (lastNonWsTokenString != "PREFIX"
-						&& (previousToken.type == "ws" || previousToken.type == null)) {
-					// check whether it isnt defined already (saves us from looping
-					// through the array)
-					var currentPrefix = token.string.substring(0, colonIndex + 1);
-					var queryPrefixes = yasqe.getPrefixesFromQuery();
-					if (queryPrefixes[currentPrefix] == null) {
-						// ok, so it isnt added yet!
-						var completions = yasqe.autocompleters.getTrie('prefixes').autoComplete(currentPrefix);
-						if (completions.length > 0) {
-							yasqe.addPrefixes(completions[0]);
-						}
-					}
-				}
-			}
-		}
-	};
 	
 	
 	return {
-		isValidCompletionPosition : function() {
-			var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
-
-			// not at end of line
-			if (yasqe.getLine(cur.line).length > cur.ch)
-				return false;
-
-			if (token.type != "ws") {
-				// we want to complete token, e.g. when the prefix starts with an a
-				// (treated as a token in itself..)
-				// but we to avoid including the PREFIX tag. So when we have just
-				// typed a space after the prefix tag, don't get the complete token
-				token = yasqe.getCompleteToken();
-			}
-
-			// we shouldnt be at the uri part the prefix declaration
-			// also check whether current token isnt 'a' (that makes codemirror
-			// thing a namespace is a possiblecurrent
-			if (!token.string.indexOf("a") == 0
-					&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
-				return false;
-
-			// First token of line needs to be PREFIX,
-			// there should be no trailing text (otherwise, text is wrongly inserted
-			// in between)
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
-			return true;
-		},
+		isValidCompletionPosition : function(){module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			$.get("http://prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
@@ -25151,56 +25087,143 @@ module.exports = function(yasqe) {
 				callback(prefixArray);
 			});
 		},
-		preProcessToken: preprocessPrefixTokenForCompletion,
+		preProcessToken: function(token) {module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
 		async : true,
 		bulk : true,
-		autoShow : true,
-		autoAddDeclaration : true,
-		persistent : "prefixes",
+		persistent : completerName,
 	};
 };
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
 
+	// not at end of line
+	if (yasqe.getLine(cur.line).length > cur.ch)
+		return false;
 
+	if (token.type != "ws") {
+		// we want to complete token, e.g. when the prefix starts with an a
+		// (treated as a token in itself..)
+		// but we to avoid including the PREFIX tag. So when we have just
+		// typed a space after the prefix tag, don't get the complete token
+		token = yasqe.getCompleteToken();
+	}
+
+	// we shouldnt be at the uri part the prefix declaration
+	// also check whether current token isnt 'a' (that makes codemirror
+	// thing a namespace is a possiblecurrent
+	if (!token.string.indexOf("a") == 0
+			&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
+		return false;
+
+	// First token of line needs to be PREFIX,
+	// there should be no trailing text (otherwise, text is wrongly inserted
+	// in between)
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
+	return true;
+};
+module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
+	var previousToken = yasqe.getPreviousNonWsToken(yasqe.getCursor().line, token);
+	if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
+		//combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
+		//we want the token to be "bla: <", en not "<"
+		token = {
+			start: previousToken.start,
+			end: token.end,
+			string: previousToken.string + " " + token.string,
+			state: token.state
+		};
+	}
+	return token;
+};
+/**
+ * Check whether typed prefix is declared. If not, automatically add declaration
+ * using list from prefix.cc
+ * 
+ * @param yasqe
+ */
+module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
+	if (!yasqe.autocompleters.getTrie(completerName))
+		return;// no prefixed defined. just stop
+	if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf(completerName) == -1) return;//this autocompleter is disabled
+	var cur = yasqe.getCursor();
+
+	var token = yasqe.getTokenAt(cur);
+	if (tokenTypes[token.type] == "prefixed") {
+		var colonIndex = token.string.indexOf(":");
+		if (colonIndex !== -1) {
+			// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
+//			var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+			var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
+			var previousToken = yasqe.getTokenAt({
+				line : cur.line,
+				ch : token.start
+			});// needs to be null (beginning of line), or whitespace
+			if (lastNonWsTokenString != "PREFIX"
+					&& (previousToken.type == "ws" || previousToken.type == null)) {
+				// check whether it isnt defined already (saves us from looping
+				// through the array)
+				var currentPrefix = token.string.substring(0, colonIndex + 1);
+				var queryPrefixes = yasqe.getPrefixesFromQuery();
+				if (queryPrefixes[currentPrefix] == null) {
+					// ok, so it isnt added yet!
+					var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
+					if (completions.length > 0) {
+						yasqe.addPrefixes(completions[0]);
+					}
+				}
+			}
+		}
+	}
+};
 
 
 },{"jquery":11}],21:[function(require,module,exports){
 var $ = require('jquery');
-module.exports = function(yasqe) {
+module.exports = function(yasqe, name) {
 	return {
-		isValidCompletionPosition : function() {
-			var token = yasqe.getCompleteToken();
-			if (token.string.length == 0) 
-				return false; //we want -something- to autocomplete
-			if (token.string.indexOf("?") == 0)
-				return false; // we are typing a var
-			if ($.inArray("a", token.state.possibleCurrent) >= 0)
-				return true;// predicate pos
-			var cur = yasqe.getCursor();
-			var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-			if (previousToken.string == "rdfs:subPropertyOf")
-				return true;
-
-			// hmm, we would like -better- checks here, e.g. checking whether we are
-			// in a subject, and whether next item is a rdfs:subpropertyof.
-			// difficult though... the grammar we use is unreliable when the query
-			// is invalid (i.e. during typing), and often the predicate is not typed
-			// yet, when we are busy writing the subject...
-			return false;
-		},
+		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			return require('./utils').fetchFromLov(yasqe, this, token, callback);
 		},
-		preProcessToken: function(token) {return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token)},
-		postProcessToken: function(token, suggestedString) {return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)},
+		preProcessToken: function(token) {return module.exports.preProcessToken(yasqe, token)},
+		postProcessToken: function(token, suggestedString) {return module.exports.postProcessToken(yasqe, token, suggestedString);},
 		async : true,
 		bulk : false,
 		autoShow : false,
-		persistent : "properties",
+		persistent : name,
 		callbacks : {
 			validPosition : yasqe.autocompleters.notifications.show,
 			invalidPosition : yasqe.autocompleters.notifications.hide,
 		}
 	}
+};
+
+module.exports.isValidCompletionPosition = function(yasqe) {
+	var token = yasqe.getCompleteToken();
+	if (token.string.length == 0) 
+		return false; //we want -something- to autocomplete
+	if (token.string.indexOf("?") == 0)
+		return false; // we are typing a var
+	if ($.inArray("a", token.state.possibleCurrent) >= 0)
+		return true;// predicate pos
+	var cur = yasqe.getCursor();
+	var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
+	if (previousToken.string == "rdfs:subPropertyOf")
+		return true;
+
+	// hmm, we would like -better- checks here, e.g. checking whether we are
+	// in a subject, and whether next item is a rdfs:subpropertyof.
+	// difficult though... the grammar we use is unreliable when the query
+	// is invalid (i.e. during typing), and often the predicate is not typed
+	// yet, when we are busy writing the subject...
+	return false;
+};
+module.exports.preProcessToken = function(yasqe, token) {
+	return require('./utils.js').preprocessResourceTokenForCompletion(yasqe, token);
+};
+module.exports.postProcessToken = function(yasqe, token, suggestedString) {
+	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
 };
 },{"./utils":22,"./utils.js":22,"jquery":11}],22:[function(require,module,exports){
 var $ = require('jquery'),
@@ -25351,13 +25374,13 @@ module.exports = function(yasqe) {
 			if (token.trim().length == 0) return [];//nothing to autocomplete
 			var distinctVars = {};
 			//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
-			$(yasqe.getWrapperElement()).find(".yasqe-atom").each(function() {
+			$(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
 				var variable = this.innerHTML;
 				if (variable.indexOf("?") == 0) {
 					//ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
 					var nextEl = $(this).next();
 					var nextElClass = nextEl.attr('class');
-					if (nextElClass && nextEl.attr('class').indexOf("yasqe-atom") >= 0) {
+					if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
 						variable += nextEl.text();			
 					}
 					
@@ -25422,7 +25445,11 @@ module.exports = {
 				 * @type object
 				 */
 				extraKeys : {
+//					"Ctrl-Space" : function(yasqe) {
+//						YASQE.autoComplete(yasqe);
+//					},
 					"Ctrl-Space" : YASQE.autoComplete,
+					
 					"Cmd-Space" : YASQE.autoComplete,
 					"Ctrl-D" : YASQE.deleteLine,
 					"Ctrl-K" : YASQE.deleteLine,
