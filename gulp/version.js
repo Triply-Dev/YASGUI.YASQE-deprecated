@@ -31,7 +31,10 @@ gulp.task('commitDist', function() {
 
 gulp.task('tag', function() {
 	return gulp.src(['./package.json', './bower.json'])
-    .pipe(git.commit('version bump')).pipe(tag_version());
+    .pipe(git.commit('version bump'))
+    // read only one file to get the version number
+	.pipe(filter('package.json')) 
+	.pipe(tag_version());
 });
 
 
