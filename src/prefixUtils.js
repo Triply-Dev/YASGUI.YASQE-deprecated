@@ -6,12 +6,14 @@
  * @param prefix
  */
 var addPrefixes = function(yasqe, prefixes) {
+	var existingPrefixes = yasqe.getPrefixesFromQuery();
 	//for backwards compatability, we stil support prefixes value as string (e.g. 'rdf: <http://fbfgfgf>'
 	if (typeof prefixes == "string") {
 		addPrefixAsString(yasqe, prefixes);
 	} else {
 		for (var pref in prefixes) {
-			addPrefixAsString(pref + " " + prefixes);
+			if (!(pref in existingPrefixes))
+			addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
 		}
 	}
 };
@@ -47,7 +49,7 @@ var removePrefixes = function(yasqe, prefixes) {
 		return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 	}
 	for (var pref in prefixes) {
-		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + "\\s*" + escapeRegex(prefixes[pref]) + "\\s*", "ig"), ''));
+		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), ''));
 	}
 	
 };
@@ -78,7 +80,7 @@ var getPrefixesFromQuery = function(yasqe) {
 						if (uriString.slice(-1) == ">")
 							uriString = uriString
 									.substring(0, uriString.length - 1);
-						queryPrefixes[prefix.string] = uriString;
+						queryPrefixes[prefix.string.slice(0,-1)] = uriString;
 						
 						getPrefixesFromLine(lineOffset, uri.end+1);
 					} else {

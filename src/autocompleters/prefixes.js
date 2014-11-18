@@ -107,7 +107,7 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 				// through the array)
 				var currentPrefix = token.string.substring(0, colonIndex + 1);
 				var queryPrefixes = yasqe.getPrefixesFromQuery();
-				if (queryPrefixes[currentPrefix] == null) {
+				if (queryPrefixes[currentPrefix.slice(0,-1)] == null) {
 					// ok, so it isnt added yet!
 					var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
 					if (completions.length > 0) {

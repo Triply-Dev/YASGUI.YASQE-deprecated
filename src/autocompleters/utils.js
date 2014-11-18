@@ -16,8 +16,8 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	if (!token.string.indexOf("<") == 0) {
 		token.tokenPrefix = token.string.substring(0,	token.string.indexOf(":") + 1);
 
-		if (queryPrefixes[token.tokenPrefix] != null) {
-			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix];
+		if (queryPrefixes[token.tokenPrefix.slice(0,-1)] != null) {
+			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix.slice(0,-1)];
 		}
 	}
 
@@ -25,18 +25,17 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
 		// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
 		for (var prefix in queryPrefixes) {
-			if (queryPrefixes.hasOwnProperty(prefix)) {
-				if (token.string.indexOf(prefix) == 0) {
-					token.autocompletionString = queryPrefixes[prefix];
-					token.autocompletionString += token.string.substring(prefix.length);
-					break;
-				}
+			if (token.string.indexOf(prefix) == 0) {
+				token.autocompletionString = queryPrefixes[prefix];
+				token.autocompletionString += token.string.substring(prefix.length + 1);
+				break;
 			}
 		}
 	}
 
 	if (token.autocompletionString.indexOf("<") == 0)	token.autocompletionString = token.autocompletionString.substring(1);
 	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0,	token.autocompletionString.length - 1);
+	console.log(token);
 	return token;
 };
 
