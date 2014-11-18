@@ -69,7 +69,7 @@ var extendCmInstance = function(yasqe) {
 	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
 	if (yasqe.options.autocompleters) {
 		yasqe.options.autocompleters.forEach(function(name) {
-			if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+			if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
 		})
 	}
 	
