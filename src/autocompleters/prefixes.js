@@ -13,7 +13,7 @@ module.exports = function(yasqe, completerName) {
 	
 	
 	return {
-		isValidCompletionPosition : function(){module.exports.isValidCompletionPosition(yasqe);},
+		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
 		get : function(token, callback) {
 			$.get("http://prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
@@ -28,9 +28,10 @@ module.exports = function(yasqe, completerName) {
 				callback(prefixArray);
 			});
 		},
-		preProcessToken: function(token) {module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
+		preProcessToken: function(token) {return module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
 		async : true,
 		bulk : true,
+		autoShow: true,
 		persistent : completerName,
 	};
 };
