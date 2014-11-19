@@ -356,7 +356,10 @@ root.positionButtons = function(yasqe) {
  * @return object
  */
 root.createShareLink = function(yasqe) {
-	return {query: yasqe.getValue()};
+	//extend existing link, so first fetch current arguments
+	var urlParams = $.deparam(window.location.search.substring(1));
+	urlParams['query'] = yasqe.getValue();
+	return urlParams;
 };
 
 /**
