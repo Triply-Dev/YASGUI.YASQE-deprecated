@@ -357,7 +357,10 @@ root.positionButtons = function(yasqe) {
  * @return object
  */
 root.createShareLink = function(yasqe) {
-	return {query: yasqe.getValue()};
+	//extend existing link, so first fetch current arguments
+	var urlParams = $.deparam(window.location.search.substring(1));
+	urlParams['query'] = yasqe.getValue();
+	return urlParams;
 };
 
 /**
@@ -6500,7 +6503,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "main": "src/main.js",
   "licenses": [
     {
@@ -7024,7 +7027,7 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 				// through the array)
 				var currentPrefix = token.string.substring(0, colonIndex + 1);
 				var queryPrefixes = yasqe.getPrefixesFromQuery();
-				if (queryPrefixes[currentPrefix] == null) {
+				if (queryPrefixes[currentPrefix.slice(0,-1)] == null) {
 					// ok, so it isnt added yet!
 					var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
 					if (completions.length > 0) {
@@ -7103,8 +7106,8 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	if (!token.string.indexOf("<") == 0) {
 		token.tokenPrefix = token.string.substring(0,	token.string.indexOf(":") + 1);
 
-		if (queryPrefixes[token.tokenPrefix] != null) {
-			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix];
+		if (queryPrefixes[token.tokenPrefix.slice(0,-1)] != null) {
+			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix.slice(0,-1)];
 		}
 	}
 
@@ -7112,18 +7115,17 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
 		// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
 		for (var prefix in queryPrefixes) {
-			if (queryPrefixes.hasOwnProperty(prefix)) {
-				if (token.string.indexOf(prefix) == 0) {
-					token.autocompletionString = queryPrefixes[prefix];
-					token.autocompletionString += token.string.substring(prefix.length);
-					break;
-				}
+			if (token.string.indexOf(prefix) == 0) {
+				token.autocompletionString = queryPrefixes[prefix];
+				token.autocompletionString += token.string.substring(prefix.length + 1);
+				break;
 			}
 		}
 	}
 
 	if (token.autocompletionString.indexOf("<") == 0)	token.autocompletionString = token.autocompletionString.substring(1);
 	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0,	token.autocompletionString.length - 1);
+	console.log(token);
 	return token;
 };
 
@@ -7278,8 +7280,7 @@ module.exports = function(yasqe) {
  * keys). Either change the default options by setting YASQE.defaults, or by
  * passing your own options as second argument to the YASQE constructor
  */
-var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
-	sparql = require('./sparql.js');
+var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = {
 	use: function(YASQE) {
 		YASQE.defaults = $.extend(YASQE.defaults, {
@@ -7328,8 +7329,8 @@ module.exports = {
 					"Cmd-[" : YASQE.indentLess,
 					"Ctrl-S" : YASQE.storeQuery,
 					"Cmd-S" : YASQE.storeQuery,
-					"Ctrl-Enter" : sparql.executeQuery,
-					"Cmd-Enter" : sparql.executeQuery,
+					"Ctrl-Enter" : YASQE.executeQuery,
+					"Cmd-Enter" : YASQE.executeQuery,
 					"F11": function(yasqe) {
 				          yasqe.setOption("fullScreen", !yasqe.getOption("fullScreen"));
 			        },
@@ -7438,7 +7439,7 @@ module.exports = {
 	}
 };
 
-},{"./sparql.js":25,"jquery":undefined}],23:[function(require,module,exports){
+},{"jquery":undefined}],23:[function(require,module,exports){
 module.exports = {
 	loader: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%" fill="black">  <circle cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(45 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.125s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(90 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.25s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(135 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.375s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(225 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.625s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(270 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.75s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(315 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.875s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle></svg>',
 	query: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g id="Layer_1"></g><g id="Layer_2">	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>',
@@ -7457,12 +7458,14 @@ module.exports = {
  * @param prefix
  */
 var addPrefixes = function(yasqe, prefixes) {
+	var existingPrefixes = yasqe.getPrefixesFromQuery();
 	//for backwards compatability, we stil support prefixes value as string (e.g. 'rdf: <http://fbfgfgf>'
 	if (typeof prefixes == "string") {
 		addPrefixAsString(yasqe, prefixes);
 	} else {
 		for (var pref in prefixes) {
-			addPrefixAsString(pref + " " + prefixes);
+			if (!(pref in existingPrefixes))
+			addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
 		}
 	}
 };
@@ -7498,7 +7501,7 @@ var removePrefixes = function(yasqe, prefixes) {
 		return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 	}
 	for (var pref in prefixes) {
-		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + "\\s*" + escapeRegex(prefixes[pref]) + "\\s*", "ig"), ''));
+		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), ''));
 	}
 	
 };
@@ -7529,7 +7532,7 @@ var getPrefixesFromQuery = function(yasqe) {
 						if (uriString.slice(-1) == ">")
 							uriString = uriString
 									.substring(0, uriString.length - 1);
-						queryPrefixes[prefix.string] = uriString;
+						queryPrefixes[prefix.string.slice(0,-1)] = uriString;
 						
 						getPrefixesFromLine(lineOffset, uri.end+1);
 					} else {
@@ -7583,6 +7586,7 @@ module.exports = {
 	getPrefixesFromQuery: getPrefixesFromQuery,
 	removePrefixes: removePrefixes
 };
+
 },{}],25:[function(require,module,exports){
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = {
