@@ -4,8 +4,7 @@
  * keys). Either change the default options by setting YASQE.defaults, or by
  * passing your own options as second argument to the YASQE constructor
  */
-var $ = require('jquery'),
-	sparql = require('./sparql.js');
+var $ = require('jquery');
 module.exports = {
 	use: function(YASQE) {
 		YASQE.defaults = $.extend(YASQE.defaults, {
@@ -54,8 +53,8 @@ module.exports = {
 					"Cmd-[" : YASQE.indentLess,
 					"Ctrl-S" : YASQE.storeQuery,
 					"Cmd-S" : YASQE.storeQuery,
-					"Ctrl-Enter" : sparql.executeQuery,
-					"Cmd-Enter" : sparql.executeQuery,
+					"Ctrl-Enter" : YASQE.executeQuery,
+					"Cmd-Enter" : YASQE.executeQuery,
 					"F11": function(yasqe) {
 				          yasqe.setOption("fullScreen", !yasqe.getOption("fullScreen"));
 			        },
