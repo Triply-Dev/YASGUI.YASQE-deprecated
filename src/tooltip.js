@@ -1,3 +1,4 @@
+'use strict';
 var $ = require('jquery'),
 	utils = require('./utils.js');
 

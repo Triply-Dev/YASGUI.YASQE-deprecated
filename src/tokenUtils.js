@@ -1,4 +1,4 @@
-
+'use strict';
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
  * the current tokens to be incorrect This causes problem for autocompletion.

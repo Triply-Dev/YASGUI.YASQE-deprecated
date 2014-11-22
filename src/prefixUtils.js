@@ -1,4 +1,4 @@
-
+'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
  * 
