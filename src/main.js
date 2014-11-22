@@ -13,6 +13,10 @@ var $ = require("jquery"),
 	imgs = require('./imgs.js');
 
 require("../lib/deparam.js");
+require('codemirror/addon/fold/foldcode.js');
+require('codemirror/addon/fold/foldgutter.js');
+require('codemirror/addon/fold/xml-fold.js');
+require('codemirror/addon/fold/brace-fold.js');
 require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');

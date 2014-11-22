@@ -18,7 +18,11 @@ module.exports = {
 				},
 				tabMode : "indent",
 				lineNumbers : true,
-				gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
+			    lineWrapping: true,
+			    
+			    foldGutter: {rangeFinder:YASQE.fold.brace },
+			    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+//			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 
 				matchBrackets : true,
 				fixedGutter : true,
 				syntaxErrorCheck: true,
