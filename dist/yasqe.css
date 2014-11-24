@@ -49,12 +49,12 @@
 .CodeMirror div.CodeMirror-secondarycursor {
   border-left: 1px solid silver; }
 
-.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
+.CodeMirror.cm-fat-cursor div.CodeMirror-cursor {
   width: auto;
   border: 0;
   background: #7e7; }
 
-.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursors {
+.CodeMirror.cm-fat-cursor div.CodeMirror-cursors {
   z-index: 1; }
 
 .cm-animate-fat-cursor {
@@ -176,6 +176,9 @@
 .cm-link {
   text-decoration: underline; }
 
+.cm-strikethrough {
+  text-decoration: line-through; }
+
 .cm-s-default .cm-error {
   color: #f00; }
 
@@ -270,6 +273,11 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   /* Hack to make IE7 behave */
   *zoom: 1;
   *display: inline; }
+
+.CodeMirror-gutter-wrapper {
+  position: absolute;
+  z-index: 4;
+  height: 100%; }
 
 .CodeMirror-gutter-elt {
   position: absolute;
@@ -370,6 +378,10 @@ div.CodeMirror-cursors {
     visibility: hidden; }
  }
 
+/* See issue #2901 */
+.cm-tab-wrap-hack:after {
+  content: ''; }
+
 /* Help users use markselection to safely style text background */
 span.CodeMirror-selectedtext {
   background: none; }
@@ -415,6 +427,25 @@ li.CodeMirror-hint-active {
   height: auto;
   z-index: 9; }
 
+.CodeMirror-foldmarker {
+  color: blue;
+  text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
+  font-family: arial;
+  line-height: 0.3;
+  cursor: pointer; }
+
+.CodeMirror-foldgutter {
+  width: 0.7em; }
+
+.CodeMirror-foldgutter-open, .CodeMirror-foldgutter-folded {
+  cursor: pointer; }
+
+.CodeMirror-foldgutter-open:after {
+  content: "\25BE"; }
+
+.CodeMirror-foldgutter-folded:after {
+  content: "\25B8"; }
+
 .CodeMirror .gutterErrorBar {
   width: 4px; }
 
@@ -428,6 +459,9 @@ li.CodeMirror-hint-active {
 
 .CodeMirror-hint {
   max-width: 30em; }
+
+.yasqe.CodeMirror-fullscreen {
+  z-index: 22222; }
 
 .yasqe .yasqe_buttons {
   position: absolute;

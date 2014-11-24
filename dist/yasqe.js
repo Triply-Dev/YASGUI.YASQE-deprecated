@@ -14,6 +14,10 @@ var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}}
 	imgs = require('./imgs.js');
 
 require("../lib/deparam.js");
+require('codemirror/addon/fold/foldcode.js');
+require('codemirror/addon/fold/foldgutter.js');
+require('codemirror/addon/fold/xml-fold.js');
+require('codemirror/addon/fold/brace-fold.js');
 require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
@@ -658,7 +662,8 @@ root.version = {
 	"yasgui-utils": yutils.version
 };
 
-},{"../lib/deparam.js":2,"../lib/flint.js":3,"../package.json":15,"./autocompleters/autocompleterBase.js":16,"./autocompleters/classes.js":17,"./autocompleters/prefixes.js":18,"./autocompleters/properties.js":19,"./autocompleters/variables.js":21,"./defaults.js":22,"./imgs.js":23,"./prefixUtils.js":24,"./sparql.js":25,"./tokenUtils.js":26,"./tooltip":27,"./utils.js":28,"codemirror":undefined,"codemirror/addon/display/fullscreen.js":5,"codemirror/addon/edit/matchbrackets.js":6,"codemirror/addon/hint/show-hint.js":7,"codemirror/addon/runmode/runmode.js":8,"codemirror/addon/search/searchcursor.js":9,"jquery":undefined,"yasgui-utils":12}],2:[function(require,module,exports){
+},{"../lib/deparam.js":2,"../lib/flint.js":3,"../package.json":19,"./autocompleters/autocompleterBase.js":20,"./autocompleters/classes.js":21,"./autocompleters/prefixes.js":22,"./autocompleters/properties.js":23,"./autocompleters/variables.js":25,"./defaults.js":26,"./imgs.js":27,"./prefixUtils.js":28,"./sparql.js":29,"./tokenUtils.js":30,"./tooltip":31,"./utils.js":32,"codemirror":undefined,"codemirror/addon/display/fullscreen.js":5,"codemirror/addon/edit/matchbrackets.js":6,"codemirror/addon/fold/brace-fold.js":7,"codemirror/addon/fold/foldcode.js":8,"codemirror/addon/fold/foldgutter.js":9,"codemirror/addon/fold/xml-fold.js":10,"codemirror/addon/hint/show-hint.js":11,"codemirror/addon/runmode/runmode.js":12,"codemirror/addon/search/searchcursor.js":13,"jquery":undefined,"yasgui-utils":16}],2:[function(require,module,exports){
+'use strict';
 /*
   jQuery deparam is an extraction of the deparam method from Ben Alman's jQuery BBQ
   http://benalman.com/projects/jquery-bbq-plugin/
@@ -5154,7 +5159,7 @@ return obj;
 * @class Trie
 * @constructor
 */  
-module.exports = Trie = function() {
+var Trie = module.exports = function() {
     this.words = 0;
     this.prefixes = 0;
     this.children = [];
@@ -5570,6 +5575,580 @@ Trie.prototype = {
   else // Plain browser env
     mod(CodeMirror);
 })(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "brace", function(cm, start) {
+  var line = start.line, lineText = cm.getLine(line);
+  var startCh, tokenType;
+
+  function findOpening(openCh) {
+    for (var at = start.ch, pass = 0;;) {
+      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+      if (found == -1) {
+        if (pass == 1) break;
+        pass = 1;
+        at = lineText.length;
+        continue;
+      }
+      if (pass == 1 && found < start.ch) break;
+      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+      if (!/^(comment|string)/.test(tokenType)) return found + 1;
+      at = found - 1;
+    }
+  }
+
+  var startToken = "{", endToken = "}", startCh = findOpening("{");
+  if (startCh == null) {
+    startToken = "[", endToken = "]";
+    startCh = findOpening("[");
+  }
+
+  if (startCh == null) return;
+  var count = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
+        if (pos == nextOpen) ++count;
+        else if (!--count) { end = i; endCh = pos; break outer; }
+      }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+CodeMirror.registerHelper("fold", "import", function(cm, start) {
+  function hasImport(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type != "keyword" || start.string != "import") return null;
+    // Now find closing semicolon, return its position
+    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
+      var text = cm.getLine(i), semi = text.indexOf(";");
+      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
+    }
+  }
+
+  var start = start.line, has = hasImport(start), prev;
+  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+    return null;
+  for (var end = has.end;;) {
+    var next = hasImport(end.line + 1);
+    if (next == null) break;
+    end = next.end;
+  }
+  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+});
+
+CodeMirror.registerHelper("fold", "include", function(cm, start) {
+  function hasInclude(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
+  }
+
+  var start = start.line, has = hasInclude(start);
+  if (has == null || hasInclude(start - 1) != null) return null;
+  for (var end = start;;) {
+    var next = hasInclude(end + 1);
+    if (next == null) break;
+    ++end;
+  }
+  return {from: CodeMirror.Pos(start, has + 1),
+          to: cm.clipPos(CodeMirror.Pos(end))};
+});
+
+});
+
+},{"codemirror":undefined}],8:[function(require,module,exports){
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  function doFold(cm, pos, options, force) {
+    if (options && options.call) {
+      var finder = options;
+      options = null;
+    } else {
+      var finder = getOption(cm, options, "rangeFinder");
+    }
+    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
+    var minSize = getOption(cm, options, "minFoldSize");
+
+    function getRange(allowFolded) {
+      var range = finder(cm, pos);
+      if (!range || range.to.line - range.from.line < minSize) return null;
+      var marks = cm.findMarksAt(range.from);
+      for (var i = 0; i < marks.length; ++i) {
+        if (marks[i].__isFold && force !== "fold") {
+          if (!allowFolded) return null;
+          range.cleared = true;
+          marks[i].clear();
+        }
+      }
+      return range;
+    }
+
+    var range = getRange(true);
+    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
+      pos = CodeMirror.Pos(pos.line - 1, 0);
+      range = getRange(false);
+    }
+    if (!range || range.cleared || force === "unfold") return;
+
+    var myWidget = makeWidget(cm, options);
+    CodeMirror.on(myWidget, "mousedown", function(e) {
+      myRange.clear();
+      CodeMirror.e_preventDefault(e);
+    });
+    var myRange = cm.markText(range.from, range.to, {
+      replacedWith: myWidget,
+      clearOnEnter: true,
+      __isFold: true
+    });
+    myRange.on("clear", function(from, to) {
+      CodeMirror.signal(cm, "unfold", cm, from, to);
+    });
+    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
+  }
+
+  function makeWidget(cm, options) {
+    var widget = getOption(cm, options, "widget");
+    if (typeof widget == "string") {
+      var text = document.createTextNode(widget);
+      widget = document.createElement("span");
+      widget.appendChild(text);
+      widget.className = "CodeMirror-foldmarker";
+    }
+    return widget;
+  }
+
+  // Clumsy backwards-compatible interface
+  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
+    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
+  };
+
+  // New-style interface
+  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
+    doFold(this, pos, options, force);
+  });
+
+  CodeMirror.defineExtension("isFolded", function(pos) {
+    var marks = this.findMarksAt(pos);
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold) return true;
+  });
+
+  CodeMirror.commands.toggleFold = function(cm) {
+    cm.foldCode(cm.getCursor());
+  };
+  CodeMirror.commands.fold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "fold");
+  };
+  CodeMirror.commands.unfold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "unfold");
+  };
+  CodeMirror.commands.foldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
+    });
+  };
+  CodeMirror.commands.unfoldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
+    });
+  };
+
+  CodeMirror.registerHelper("fold", "combine", function() {
+    var funcs = Array.prototype.slice.call(arguments, 0);
+    return function(cm, start) {
+      for (var i = 0; i < funcs.length; ++i) {
+        var found = funcs[i](cm, start);
+        if (found) return found;
+      }
+    };
+  });
+
+  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
+    var helpers = cm.getHelpers(start, "fold");
+    for (var i = 0; i < helpers.length; i++) {
+      var cur = helpers[i](cm, start);
+      if (cur) return cur;
+    }
+  });
+
+  var defaultOptions = {
+    rangeFinder: CodeMirror.fold.auto,
+    widget: "\u2194",
+    minFoldSize: 0,
+    scanUp: false
+  };
+
+  CodeMirror.defineOption("foldOptions", null);
+
+  function getOption(cm, options, name) {
+    if (options && options[name] !== undefined)
+      return options[name];
+    var editorOptions = cm.options.foldOptions;
+    if (editorOptions && editorOptions[name] !== undefined)
+      return editorOptions[name];
+    return defaultOptions[name];
+  }
+});
+
+},{"codemirror":undefined}],9:[function(require,module,exports){
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})(), require("./foldcode"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror", "./foldcode"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
+    if (old && old != CodeMirror.Init) {
+      cm.clearGutter(cm.state.foldGutter.options.gutter);
+      cm.state.foldGutter = null;
+      cm.off("gutterClick", onGutterClick);
+      cm.off("change", onChange);
+      cm.off("viewportChange", onViewportChange);
+      cm.off("fold", onFold);
+      cm.off("unfold", onFold);
+      cm.off("swapDoc", updateInViewport);
+    }
+    if (val) {
+      cm.state.foldGutter = new State(parseOptions(val));
+      updateInViewport(cm);
+      cm.on("gutterClick", onGutterClick);
+      cm.on("change", onChange);
+      cm.on("viewportChange", onViewportChange);
+      cm.on("fold", onFold);
+      cm.on("unfold", onFold);
+      cm.on("swapDoc", updateInViewport);
+    }
+  });
+
+  var Pos = CodeMirror.Pos;
+
+  function State(options) {
+    this.options = options;
+    this.from = this.to = 0;
+  }
+
+  function parseOptions(opts) {
+    if (opts === true) opts = {};
+    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
+    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
+    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
+    return opts;
+  }
+
+  function isFolded(cm, line) {
+    var marks = cm.findMarksAt(Pos(line));
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold && marks[i].find().from.line == line) return true;
+  }
+
+  function marker(spec) {
+    if (typeof spec == "string") {
+      var elt = document.createElement("div");
+      elt.className = spec + " CodeMirror-guttermarker-subtle";
+      return elt;
+    } else {
+      return spec.cloneNode(true);
+    }
+  }
+
+  function updateFoldInfo(cm, from, to) {
+    var opts = cm.state.foldGutter.options, cur = from;
+    cm.eachLine(from, to, function(line) {
+      var mark = null;
+      if (isFolded(cm, cur)) {
+        mark = marker(opts.indicatorFolded);
+      } else {
+        var pos = Pos(cur, 0), func = opts.rangeFinder || CodeMirror.fold.auto;
+        var range = func && func(cm, pos);
+        if (range && range.from.line + 1 < range.to.line)
+          mark = marker(opts.indicatorOpen);
+      }
+      cm.setGutterMarker(line, opts.gutter, mark);
+      ++cur;
+    });
+  }
+
+  function updateInViewport(cm) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    if (!state) return;
+    cm.operation(function() {
+      updateFoldInfo(cm, vp.from, vp.to);
+    });
+    state.from = vp.from; state.to = vp.to;
+  }
+
+  function onGutterClick(cm, line, gutter) {
+    var opts = cm.state.foldGutter.options;
+    if (gutter != opts.gutter) return;
+    cm.foldCode(Pos(line, 0), opts.rangeFinder);
+  }
+
+  function onChange(cm) {
+    var state = cm.state.foldGutter, opts = cm.state.foldGutter.options;
+    state.from = state.to = 0;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
+  }
+
+  function onViewportChange(cm) {
+    var state = cm.state.foldGutter, opts = cm.state.foldGutter.options;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() {
+      var vp = cm.getViewport();
+      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
+        updateInViewport(cm);
+      } else {
+        cm.operation(function() {
+          if (vp.from < state.from) {
+            updateFoldInfo(cm, vp.from, state.from);
+            state.from = vp.from;
+          }
+          if (vp.to > state.to) {
+            updateFoldInfo(cm, state.to, vp.to);
+            state.to = vp.to;
+          }
+        });
+      }
+    }, opts.updateViewportTimeSpan || 400);
+  }
+
+  function onFold(cm, from) {
+    var state = cm.state.foldGutter, line = from.line;
+    if (line >= state.from && line < state.to)
+      updateFoldInfo(cm, line, line + 1);
+  }
+});
+
+},{"./foldcode":8,"codemirror":undefined}],10:[function(require,module,exports){
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var Pos = CodeMirror.Pos;
+  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
+
+  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
+
+  function Iter(cm, line, ch, range) {
+    this.line = line; this.ch = ch;
+    this.cm = cm; this.text = cm.getLine(line);
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
+  }
+
+  function tagAt(iter, ch) {
+    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
+    return type && /\btag\b/.test(type);
+  }
+
+  function nextLine(iter) {
+    if (iter.line >= iter.max) return;
+    iter.ch = 0;
+    iter.text = iter.cm.getLine(++iter.line);
+    return true;
+  }
+  function prevLine(iter) {
+    if (iter.line <= iter.min) return;
+    iter.text = iter.cm.getLine(--iter.line);
+    iter.ch = iter.text.length;
+    return true;
+  }
+
+  function toTagEnd(iter) {
+    for (;;) {
+      var gt = iter.text.indexOf(">", iter.ch);
+      if (gt == -1) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+  function toTagStart(iter) {
+    for (;;) {
+      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
+      if (lt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
+      xmlTagStart.lastIndex = lt;
+      iter.ch = lt;
+      var match = xmlTagStart.exec(iter.text);
+      if (match && match.index == lt) return match;
+    }
+  }
+
+  function toNextTag(iter) {
+    for (;;) {
+      xmlTagStart.lastIndex = iter.ch;
+      var found = xmlTagStart.exec(iter.text);
+      if (!found) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
+      iter.ch = found.index + found[0].length;
+      return found;
+    }
+  }
+  function toPrevTag(iter) {
+    for (;;) {
+      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
+      if (gt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+
+  function findMatchingClose(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
+      if (!next || !(end = toTagEnd(iter))) return;
+      if (end == "selfClose") continue;
+      if (next[1]) { // closing tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == next[2])) return {
+          tag: next[2],
+          from: Pos(startLine, startCh),
+          to: Pos(iter.line, iter.ch)
+        };
+      } else { // opening tag
+        stack.push(next[2]);
+      }
+    }
+  }
+  function findMatchingOpen(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var prev = toPrevTag(iter);
+      if (!prev) return;
+      if (prev == "selfClose") { toTagStart(iter); continue; }
+      var endLine = iter.line, endCh = iter.ch;
+      var start = toTagStart(iter);
+      if (!start) return;
+      if (start[1]) { // closing tag
+        stack.push(start[2]);
+      } else { // opening tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == start[2])) return {
+          tag: start[2],
+          from: Pos(iter.line, iter.ch),
+          to: Pos(endLine, endCh)
+        };
+      }
+    }
+  }
+
+  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
+    var iter = new Iter(cm, start.line, 0);
+    for (;;) {
+      var openTag = toNextTag(iter), end;
+      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
+      if (!openTag[1] && end != "selfClose") {
+        var start = Pos(iter.line, iter.ch);
+        var close = findMatchingClose(iter, openTag[2]);
+        return close && {from: start, to: close.from};
+      }
+    }
+  });
+  CodeMirror.findMatchingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
+    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
+    var start = end && toTagStart(iter);
+    if (!end || !start || cmp(iter, pos) > 0) return;
+    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
+    if (end == "selfClose") return {open: here, close: null, at: "open"};
+
+    if (start[1]) { // closing tag
+      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
+    } else { // opening tag
+      iter = new Iter(cm, to.line, to.ch, range);
+      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
+    }
+  };
+
+  CodeMirror.findEnclosingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    for (;;) {
+      var open = findMatchingOpen(iter);
+      if (!open) break;
+      var forward = new Iter(cm, pos.line, pos.ch, range);
+      var close = findMatchingClose(forward, open.tag);
+      if (close) return {open: open, close: close};
+    }
+  };
+
+  // Used by addon/edit/closetag.js
+  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
+    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
+    return findMatchingClose(iter, name);
+  };
+});
+
+},{"codemirror":undefined}],11:[function(require,module,exports){
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod((function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})());
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
   "use strict";
 
   var HINT_ELEMENT_CLASS        = "CodeMirror-hint";
@@ -5949,7 +6528,7 @@ Trie.prototype = {
   CodeMirror.defineOption("hintOptions", null);
 });
 
-},{"codemirror":undefined}],8:[function(require,module,exports){
+},{"codemirror":undefined}],12:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -6023,7 +6602,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 
 });
 
-},{"codemirror":undefined}],9:[function(require,module,exports){
+},{"codemirror":undefined}],13:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -6214,7 +6793,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   });
 });
 
-},{"codemirror":undefined}],10:[function(require,module,exports){
+},{"codemirror":undefined}],14:[function(require,module,exports){
 ;(function(win){
 	var store = {},
 		doc = win.document,
@@ -6383,7 +6962,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 
 })(Function('return this')());
 
-},{}],11:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports={
   "name": "yasgui-utils",
   "version": "1.4.1",
@@ -6416,7 +6995,7 @@ module.exports={
   }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 window.console = window.console || {"log":function(){}};//make sure any console statements don't break IE
 module.exports = {
 	storage: require("./storage.js"),
@@ -6426,7 +7005,7 @@ module.exports = {
 	}
 };
 
-},{"../package.json":11,"./storage.js":13,"./svg.js":14}],13:[function(require,module,exports){
+},{"../package.json":15,"./storage.js":17,"./svg.js":18}],17:[function(require,module,exports){
 var store = require("store");
 var times = {
 	day: function() {
@@ -6466,7 +7045,7 @@ var root = module.exports = {
 
 };
 
-},{"store":10}],14:[function(require,module,exports){
+},{"store":14}],18:[function(require,module,exports){
 module.exports = {
 	draw: function(parent, svgString, config) {
 		if (!parent) return;
@@ -6499,11 +7078,11 @@ module.exports = {
 		return false;
 	}
 };
-},{}],15:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "main": "src/main.js",
   "licenses": [
     {
@@ -6529,13 +7108,13 @@ module.exports={
     "gulp-rename": "^1.2.0",
     "gulp-streamify": "0.0.5",
     "gulp-tag-version": "^1.1.0",
-    "gulp-uglify": "^0.2.1",
+    "gulp-uglify": "^1.0.1",
     "require-dir": "^0.1.0",
     "run-sequence": "^1.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~0.1.1",
     "watchify": "^0.6.4",
-    "gulp-sourcemaps": "^1.2.4",
+    "gulp-sourcemaps": "^1.2.8",
     "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
     "gulp-sass": "^1.2.2",
@@ -6582,7 +7161,8 @@ module.exports={
   }
 }
 
-},{}],16:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('../utils.js'),
 	yutils = require('yasgui-utils'),
@@ -6874,7 +7454,8 @@ var selectHint = function(yasqe, data, completion) {
 ////	storeBulkCompletions: storeBulkCompletions,
 //	loadBulkCompletions: loadBulkCompletions,
 //};
-},{"../../lib/trie.js":4,"../utils.js":28,"jquery":undefined,"yasgui-utils":12}],17:[function(require,module,exports){
+},{"../../lib/trie.js":4,"../utils.js":32,"jquery":undefined,"yasgui-utils":16}],21:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe, name) {
 	return {
@@ -6917,7 +7498,8 @@ module.exports.preProcessToken = function(yasqe, token) {
 module.exports.postProcessToken = function(yasqe, token, suggestedString) {
 	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
 };
-},{"./utils":20,"./utils.js":20,"jquery":undefined}],18:[function(require,module,exports){
+},{"./utils":24,"./utils.js":24,"jquery":undefined}],22:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
@@ -7040,7 +7622,8 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 };
 
 
-},{"jquery":undefined}],19:[function(require,module,exports){
+},{"jquery":undefined}],23:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe, name) {
 	return {
@@ -7087,7 +7670,8 @@ module.exports.preProcessToken = function(yasqe, token) {
 module.exports.postProcessToken = function(yasqe, token, suggestedString) {
 	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
 };
-},{"./utils":20,"./utils.js":20,"jquery":undefined}],20:[function(require,module,exports){
+},{"./utils":24,"./utils.js":24,"jquery":undefined}],24:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils');
@@ -7217,7 +7801,8 @@ module.exports = {
 	preprocessResourceTokenForCompletion: preprocessResourceTokenForCompletion,
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
-},{"../imgs.js":23,"./utils.js":20,"jquery":undefined,"yasgui-utils":12}],21:[function(require,module,exports){
+},{"../imgs.js":27,"./utils.js":24,"jquery":undefined,"yasgui-utils":16}],25:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe) {
 	return {
@@ -7273,7 +7858,7 @@ module.exports = function(yasqe) {
 	}
 };
 
-},{"jquery":undefined}],22:[function(require,module,exports){
+},{"jquery":undefined}],26:[function(require,module,exports){
 /**
  * The default options of YASQE (check the CodeMirror documentation for even
  * more options, such as disabling line numbers, or changing keyboard shortcut
@@ -7294,7 +7879,11 @@ module.exports = {
 				},
 				tabMode : "indent",
 				lineNumbers : true,
-				gutters : [ "gutterErrorBar", "CodeMirror-linenumbers" ],
+			    lineWrapping: true,
+			    
+			    foldGutter: {rangeFinder:YASQE.fold.brace },
+			    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+//			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 
 				matchBrackets : true,
 				fixedGutter : true,
 				syntaxErrorCheck: true,
@@ -7439,7 +8028,8 @@ module.exports = {
 	}
 };
 
-},{"jquery":undefined}],23:[function(require,module,exports){
+},{"jquery":undefined}],27:[function(require,module,exports){
+'use strict';
 module.exports = {
 	loader: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%" fill="black">  <circle cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(45 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.125s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(90 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.25s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(135 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.375s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(225 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.625s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(270 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.75s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(315 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.875s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle></svg>',
 	query: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g id="Layer_1"></g><g id="Layer_2">	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>',
@@ -7449,8 +8039,8 @@ module.exports = {
 //	warning: '<svg  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"  x="0px"   y="0px"   width="100%"   height="100%"   viewBox="0 0 59.998001 59.995998"   enable-background="new 0 0 100 100"  ><path     d="M 29.998,0 C 13.434,0 0,13.431 0,29.997 c 0,16.568 13.434,29.999 29.998,29.999 16.568,0 30,-13.431 30,-29.999 C 59.998,13.431 46.566,0 29.998,0 z m 2.722,47.149 c -0.764,0.765 -1.642,1.146 -2.635,1.146 -1.108,0 -2.043,-0.381 -2.807,-1.146 -0.764,-0.763 -1.145,-1.66 -1.145,-2.69 0,-1.069 0.381,-1.985 1.145,-2.749 0.764,-0.764 1.698,-1.146 2.807,-1.146 0.993,0 1.871,0.383 2.635,1.146 0.763,0.764 1.145,1.68 1.145,2.749 -0.001,1.03 -0.383,1.928 -1.145,2.69 z m 1.144,-12.255 c 0,1.108 -0.382,2.033 -1.145,2.777 -0.764,0.744 -1.642,1.117 -2.635,1.117 -1.108,0 -2.043,-0.373 -2.807,-1.117 -0.764,-0.744 -1.145,-1.669 -1.145,-2.777 v -19.3 c 0,-1.106 0.381,-2.032 1.145,-2.777 0.764,-0.744 1.698,-1.116 2.807,-1.116 0.993,0 1.871,0.372 2.635,1.116 0.763,0.745 1.145,1.671 1.145,2.777 v 19.3 z"     id="path3"     style="fill:#d40000" /></svg>',
 	warning: '<svg   xmlns:dc="http://purl.org/dc/elements/1.1/"   xmlns:cc="http://creativecommons.org/ns#"   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"   xmlns:svg="http://www.w3.org/2000/svg"   xmlns="http://www.w3.org/2000/svg"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   version="1.1"   x="0px"   y="0px"   viewBox="0 0 66.399998 66.399998"   enable-background="new 0 0 69.3 69.3"   xml:space="preserve"   height="100%"   width="100%"   inkscape:version="0.48.4 r9939"   ><g     id="g3"     transform="translate(-1.5,-1.5)"     style="fill:#ff0000"><path       d="M 34.7,1.5 C 16.4,1.5 1.5,16.4 1.5,34.7 1.5,53 16.4,67.9 34.7,67.9 53,67.9 67.9,53 67.9,34.7 67.9,16.4 53,1.5 34.7,1.5 z m 0,59.4 C 20.2,60.9 8.5,49.1 8.5,34.7 8.5,20.2 20.3,8.5 34.7,8.5 c 14.4,0 26.2,11.8 26.2,26.2 0,14.4 -11.8,26.2 -26.2,26.2 z"       id="path5"       inkscape:connector-curvature="0"       style="fill:#ff0000" /><path       d="m 34.6,47.1 c -1.4,0 -2.5,0.5 -3.5,1.5 -0.9,1 -1.4,2.2 -1.4,3.6 0,1.6 0.5,2.8 1.5,3.8 1,0.9 2.1,1.3 3.4,1.3 1.3,0 2.4,-0.5 3.4,-1.4 1,-0.9 1.5,-2.2 1.5,-3.7 0,-1.4 -0.5,-2.6 -1.4,-3.6 -0.9,-1 -2.1,-1.5 -3.5,-1.5 z"       id="path7"       inkscape:connector-curvature="0"       style="fill:#ff0000" /><path       d="m 34.8,13.9 c -1.5,0 -2.8,0.5 -3.7,1.6 -0.9,1 -1.4,2.4 -1.4,4.2 0,1.1 0.1,2.9 0.2,5.6 l 0.8,13.1 c 0.2,1.8 0.4,3.2 0.9,4.1 0.5,1.2 1.5,1.8 2.9,1.8 1.3,0 2.3,-0.7 2.9,-1.9 0.5,-1 0.7,-2.3 0.9,-4 L 39.4,25 c 0.1,-1.3 0.2,-2.5 0.2,-3.8 0,-2.2 -0.3,-3.9 -0.8,-5.1 -0.5,-1 -1.6,-2.2 -4,-2.2 z"       id="path9"       inkscape:connector-curvature="0"       style="fill:#ff0000" /></g></svg>',
 };
-},{}],24:[function(require,module,exports){
-
+},{}],28:[function(require,module,exports){
+'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
  * 
@@ -7587,7 +8177,8 @@ module.exports = {
 	removePrefixes: removePrefixes
 };
 
-},{}],25:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = {
 	use: function(YASQE) {
@@ -7716,8 +8307,8 @@ var getAcceptHeader = function(yasqe, config) {
 	return acceptHeader;
 };
 
-},{"jquery":undefined}],26:[function(require,module,exports){
-
+},{"jquery":undefined}],30:[function(require,module,exports){
+'use strict';
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
  * the current tokens to be incorrect This causes problem for autocompletion.
@@ -7794,7 +8385,8 @@ module.exports = {
 };
 
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('./utils.js');
 
@@ -7831,7 +8423,8 @@ module.exports = function(yasqe, parent, html) {
 };
 
 
-},{"./utils.js":28,"jquery":undefined}],28:[function(require,module,exports){
+},{"./utils.js":32,"jquery":undefined}],32:[function(require,module,exports){
+'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 
 var keyExists = function(objectToTest, key) {
