@@ -1,4 +1,23 @@
 .yasqe {
+	@import "../../node_modules/codemirror/lib/codemirror.css";
+	@import "../../node_modules/codemirror/addon/hint/show-hint.css";
+	@import "../../node_modules/codemirror/addon/display/fullscreen.css";
+	@import "../../node_modules/codemirror/addon/fold/foldgutter.css";
+	
+	line-height: 1.5em;
+	border: 1px solid #d1d1d1;	
+	pre {
+		font-size: 13px;
+	}
+	span.cm-error {
+		border-bottom: 2px dotted red;
+	}
+	.gutterErrorBar {
+		width: 4px;
+	}
+	&.CodeMirror-fullscreen {
+		z-index: 22222;
+	}
 	.yasqe_buttons {
 		position: absolute;
 		top: 5px;
