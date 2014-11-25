@@ -36,8 +36,9 @@ require('../lib/flint.js');
  * @return {doc} YASQE document
  */
 var root = module.exports = function(parent, config) {
+	var rootEl = $("<div>", {class:'yasqe'}).appendTo($(parent));
 	config = extendConfig(config);
-	var yasqe = extendCmInstance(CodeMirror(parent, config));
+	var yasqe = extendCmInstance(CodeMirror(rootEl[0], config));
 	postProcessCmElement(yasqe);
 	return yasqe;
 };
@@ -66,9 +67,6 @@ var extendConfig = function(config) {
  * @private
  */
 var extendCmInstance = function(yasqe) {
-	//add class to instance, to make our styles work
-	$(yasqe.getWrapperElement()).addClass("yasqe");
-	
 	//instantiate autocompleters
 	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(root, yasqe);
 	if (yasqe.options.autocompleters) {
@@ -483,6 +481,9 @@ root.updateQueryButton = function(yasqe, status) {
  */
 root.fromTextArea = function(textAreaEl, config) {
 	config = extendConfig(config);
+	//add yasqe div as parent (needed for styles to be manageable and scoped). 
+	//In this case, I -also- put it as parent el of the text area. This is wrapped in a div now
+	var rootEl = $("<div>", {class:'yasqe'}).insertBefore($(textAreaEl)).append($(textAreaEl));
 	var yasqe = extendCmInstance(CodeMirror.fromTextArea(textAreaEl, config));
 	postProcessCmElement(yasqe);
 	return yasqe;

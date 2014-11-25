@@ -4,14 +4,15 @@ var gulp = require('gulp'),
 	connect = require('gulp-connect'),
 	sourcemaps = require('gulp-sourcemaps');
 	sass = require('gulp-sass'),
+	cssImport = require('gulp-cssimport'),
 	rename = require("gulp-rename"),
 	minifyCSS = require('gulp-minify-css');
 
 
 gulp.task('makeCss', function() {
 	  return gulp.src(paths.style)
-	    .pipe(sass({
-	    }))
+		  .pipe(cssImport())//needed, because css files are not -actually- imported by sass, but remain as css @import statement...
+	    .pipe(sass())
 	    .pipe(concat(paths.bundleName + '.css'))
 	    .pipe(gulp.dest(paths.bundleDir))
 	    .pipe(minifyCSS())

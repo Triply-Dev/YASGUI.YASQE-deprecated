@@ -37,7 +37,9 @@
     "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
     "gulp-sass": "^1.2.2",
-    "browserify-transform-tools": "^1.2.1"
+    "twitter-bootstrap-3.0.0": "^3.0.0",
+    "browserify-transform-tools": "^1.2.1",
+    "gulp-cssimport": "^1.3.1"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -61,7 +63,6 @@
   "dependencies": {
     "jquery": "~ 1.11.0",
     "codemirror": "^4.7.0",
-    "twitter-bootstrap-3.0.0": "^3.0.0",
     "yasgui-utils": "^1.4.1"
   },
   "optionalShim": {
