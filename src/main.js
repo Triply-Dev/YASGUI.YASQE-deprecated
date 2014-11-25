@@ -70,7 +70,7 @@ var extendCmInstance = function(yasqe) {
 	$(yasqe.getWrapperElement()).addClass("yasqe");
 	
 	//instantiate autocompleters
-	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
+	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(root, yasqe);
 	if (yasqe.options.autocompleters) {
 		yasqe.options.autocompleters.forEach(function(name) {
 			if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
@@ -150,7 +150,7 @@ var extendCmInstance = function(yasqe) {
 	
 	yasqe.enableCompleter = function(name) {
 		addCompleterToSettings(yasqe.options, name);
-		if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+		if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
 	};
 	yasqe.disableCompleter = function(name) {
 		removeCompleterFromSettings(yasqe.options, name);

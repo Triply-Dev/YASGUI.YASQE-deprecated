@@ -4,7 +4,7 @@ var $ = require('jquery'),
 	yutils = require('yasgui-utils'),
 	Trie = require('../../lib/trie.js');
 
-module.exports = function(yasqe) {
+module.exports = function(YASQE, yasqe) {
 	var completionNotifications = {};
 	var completers = {};
 	var tries = {};
@@ -99,7 +99,6 @@ module.exports = function(yasqe) {
 
 			var hintConfig = {
 				closeCharacters : /(?=a)b/,
-//				type : type,
 				completeSingle: false
 			};
 			if (!completer.bulk && completer.async) {
