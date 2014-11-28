@@ -37,8 +37,9 @@ require('../lib/flint.js');
  * @return {doc} YASQE document
  */
 var root = module.exports = function(parent, config) {
+	var rootEl = $("<div>", {class:'yasqe'}).appendTo($(parent));
 	config = extendConfig(config);
-	var yasqe = extendCmInstance(CodeMirror(parent, config));
+	var yasqe = extendCmInstance(CodeMirror(rootEl[0], config));
 	postProcessCmElement(yasqe);
 	return yasqe;
 };
@@ -67,11 +68,8 @@ var extendConfig = function(config) {
  * @private
  */
 var extendCmInstance = function(yasqe) {
-	//add class to instance, to make our styles work
-	$(yasqe.getWrapperElement()).addClass("yasqe");
-	
 	//instantiate autocompleters
-	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(yasqe);
+	yasqe.autocompleters = require('./autocompleters/autocompleterBase.js')(root, yasqe);
 	if (yasqe.options.autocompleters) {
 		yasqe.options.autocompleters.forEach(function(name) {
 			if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
@@ -151,7 +149,7 @@ var extendCmInstance = function(yasqe) {
 	
 	yasqe.enableCompleter = function(name) {
 		addCompleterToSettings(yasqe.options, name);
-		if (YASQE.Autocompleters[name]) yasqe.autocompleters.init(name,YASQE.Autocompleters[name]);
+		if (root.Autocompleters[name]) yasqe.autocompleters.init(name,root.Autocompleters[name]);
 	};
 	yasqe.disableCompleter = function(name) {
 		removeCompleterFromSettings(yasqe.options, name);
@@ -484,6 +482,9 @@ root.updateQueryButton = function(yasqe, status) {
  */
 root.fromTextArea = function(textAreaEl, config) {
 	config = extendConfig(config);
+	//add yasqe div as parent (needed for styles to be manageable and scoped). 
+	//In this case, I -also- put it as parent el of the text area. This is wrapped in a div now
+	var rootEl = $("<div>", {class:'yasqe'}).insertBefore($(textAreaEl)).append($(textAreaEl));
 	var yasqe = extendCmInstance(CodeMirror.fromTextArea(textAreaEl, config));
 	postProcessCmElement(yasqe);
 	return yasqe;
@@ -25036,17 +25037,21 @@ return jQuery;
 		storage
 
 	store.disabled = false
+	store.version = '1.3.17'
 	store.set = function(key, value) {}
-	store.get = function(key) {}
+	store.get = function(key, defaultVal) {}
+	store.has = function(key) { return store.get(key) !== undefined }
 	store.remove = function(key) {}
 	store.clear = function() {}
 	store.transact = function(key, defaultVal, transactionFn) {
-		var val = store.get(key)
 		if (transactionFn == null) {
 			transactionFn = defaultVal
 			defaultVal = null
 		}
-		if (typeof val == 'undefined') { val = defaultVal || {} }
+		if (defaultVal == null) {
+			defaultVal = {}
+		}
+		var val = store.get(key, defaultVal)
 		transactionFn(val)
 		store.set(key, val)
 	}
@@ -25077,7 +25082,10 @@ return jQuery;
 			storage.setItem(key, store.serialize(val))
 			return val
 		}
-		store.get = function(key) { return store.deserialize(storage.getItem(key)) }
+		store.get = function(key, defaultVal) {
+			var val = store.deserialize(storage.getItem(key))
+			return (val === undefined ? defaultVal : val)
+		}
 		store.remove = function(key) { storage.removeItem(key) }
 		store.clear = function() { storage.clear() }
 		store.getAll = function() {
@@ -25119,7 +25127,7 @@ return jQuery;
 			storage = doc.createElement('div')
 			storageOwner = doc.body
 		}
-		function withIEStorage(storeFunction) {
+		var withIEStorage = function(storeFunction) {
 			return function() {
 				var args = Array.prototype.slice.call(arguments, 0)
 				args.unshift(storage)
@@ -25148,9 +25156,10 @@ return jQuery;
 			storage.save(localStorageName)
 			return val
 		})
-		store.get = withIEStorage(function(storage, key) {
+		store.get = withIEStorage(function(storage, key, defaultVal) {
 			key = ieKeyFix(key)
-			return store.deserialize(storage.getAttribute(key))
+			var val = store.deserialize(storage.getAttribute(key))
+			return (val === undefined ? defaultVal : val)
 		})
 		store.remove = withIEStorage(function(storage, key) {
 			key = ieKeyFix(key)
@@ -25316,7 +25325,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "main": "src/main.js",
   "licenses": [
     {
@@ -25352,7 +25361,9 @@ module.exports={
     "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
     "gulp-sass": "^1.2.2",
-    "browserify-transform-tools": "^1.2.1"
+    "twitter-bootstrap-3.0.0": "^3.0.0",
+    "browserify-transform-tools": "^1.2.1",
+    "gulp-cssimport": "^1.3.1"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -25376,7 +25387,6 @@ module.exports={
   "dependencies": {
     "jquery": "~ 1.11.0",
     "codemirror": "^4.7.0",
-    "twitter-bootstrap-3.0.0": "^3.0.0",
     "yasgui-utils": "^1.4.1"
   },
   "optionalShim": {
@@ -25402,7 +25412,7 @@ var $ = require('jquery'),
 	yutils = require('yasgui-utils'),
 	Trie = require('../../lib/trie.js');
 
-module.exports = function(yasqe) {
+module.exports = function(YASQE, yasqe) {
 	var completionNotifications = {};
 	var completers = {};
 	var tries = {};
@@ -25497,7 +25507,6 @@ module.exports = function(yasqe) {
 
 			var hintConfig = {
 				closeCharacters : /(?=a)b/,
-//				type : type,
 				completeSingle: false
 			};
 			if (!completer.bulk && completer.async) {
@@ -25688,6 +25697,7 @@ var selectHint = function(yasqe, data, completion) {
 ////	storeBulkCompletions: storeBulkCompletions,
 //	loadBulkCompletions: loadBulkCompletions,
 //};
+
 },{"../../lib/trie.js":4,"../utils.js":34,"jquery":15,"yasgui-utils":18}],23:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
@@ -25943,7 +25953,6 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 
 	if (token.autocompletionString.indexOf("<") == 0)	token.autocompletionString = token.autocompletionString.substring(1);
 	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0,	token.autocompletionString.length - 1);
-	console.log(token);
 	return token;
 };
 
