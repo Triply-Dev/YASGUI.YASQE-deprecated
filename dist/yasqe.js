@@ -7091,7 +7091,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "main": "src/main.js",
   "licenses": [
     {
@@ -7877,7 +7877,7 @@ module.exports = function(yasqe) {
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = {
 	use: function(YASQE) {
-		YASQE.defaults = $.extend(YASQE.defaults, {
+		YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 				mode : "sparql11",
 				/**
 				 * Query string
