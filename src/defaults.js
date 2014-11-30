@@ -7,7 +7,7 @@
 var $ = require('jquery');
 module.exports = {
 	use: function(YASQE) {
-		YASQE.defaults = $.extend(YASQE.defaults, {
+		YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 				mode : "sparql11",
 				/**
 				 * Query string
