@@ -7,7 +7,7 @@
 		line-height: 1.5em;
 		border: 1px solid #d1d1d1;
 		&.CodeMirror-fullscreen {
-			z-index: 22222;
+/* 			z-index: 22222; */
 		}
 	}
 	
@@ -25,7 +25,7 @@
 		position: absolute;
 		top: 5px;
 		right: 5px;
-		z-index: 5;
+/* 		z-index: 5; */
 	}
 	.yasqe_buttons div {
 		vertical-align: middle;
@@ -40,7 +40,7 @@
 	}
 	.yasqe_sharePopup {
 		position:absolute;
-		z-index:7;
+/* 		z-index:7; */
 		padding: 6px;
 		background-color: #f5f5f5;
 		border: 1px solid #e3e3e3;
@@ -60,7 +60,7 @@
 		padding: 0px 5px;
 		right: 0px;
 		bottom: 0px;
-		z-index: 6;
+/* 		z-index: 6; */
 		font-size: 90%;
 	}
 	
@@ -75,7 +75,7 @@
 	    left: 20%;
 	    padding: 5px 15px;
 	    position: absolute;
-	    z-index: 99999999;
+/* 	    z-index: $zIndex-offset-modal; */
 	    width: 220px;
 	    white-space: -moz-pre-wrap !important;
 	    /* Mozilla, since 1999 */
