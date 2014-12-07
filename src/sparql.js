@@ -90,11 +90,7 @@ module.exports = {
 			};
 			//Make sure the query button is updated again on complete
 			if (ajaxConfig.complete) {
-				var customComplete = ajaxConfig.complete;
-				ajaxConfig.complete = function(arg1, arg2) {
-					customComplete(arg1, arg2);
-					updateQueryButton();
-				};
+				ajaxConfig.complete = [updateQueryButton, ajaxConfig.complete];
 			} else {
 				ajaxConfig.complete = updateQueryButton;
 			}
