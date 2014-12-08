@@ -1,7 +1,5 @@
-$ = jQuery = require("jquery");
-
-require("../node_modules/twitter-bootstrap-3.0.0/dist/js/bootstrap.js");
-
+var $ = jQuery = require("jquery");
+require("../node_modules/bootstrap-sass/assets/javascripts/bootstrap-sprockets.js");
 
 
 $(function() {
@@ -23,13 +21,14 @@ $(function() {
 $(document).ready(function() {
 	//get the latest hosted version
 	if ($("#cdnDownload").length > 0) {
+		var name = "yasqe";
 		//only draw when we've got some place to print this info (might not be on all pages where we include this js file)
-		$.get("http://api.jsdelivr.com/v1/jsdelivr/libraries?name=yasqe&fields=lastversion", function(data) {
+		$.get("http://api.jsdelivr.com/v1/jsdelivr/libraries?name=" + name + "&fields=lastversion", function(data) {
 			if (data.length > 0) {
 				var version = data[0].lastversion;
-				$("#yasqeCss").text("<link href='//cdn.jsdelivr.net/yasqe/" + version + "/yasqe.min.css' rel='stylesheet' type='text/css'/>");
-				$("#yasqeJsBundled").text("<script src='//cdn.jsdelivr.net/yasqe/" + version + "/yasqe.bundled.min.js'></script" + ">");
-				$("#yasqeJs").text("<script src='//cdn.jsdelivr.net/yasqe/" + version + "/yasqe.min.js'></script" + ">");
+				$("#" + name + "Css").text("<link href='//cdn.jsdelivr.net/" + name + "/" + version + "/" + name + ".min.css' rel='stylesheet' type='text/css'/>");
+				$("#" + name + "JsBundled").text("<script src='//cdn.jsdelivr.net/" + name + "/" + version + "/" + name + ".bundled.min.js'></script" + ">");
+				$("#" + name + "Js").text("<script src='//cdn.jsdelivr.net/" + name + "/" + version + "/" + name + ".min.js'></script" + ">");
 			} else {
 				console.log("failed accessing jsdelivr api");
 				$("#cdnDownload").hide();
@@ -59,7 +58,7 @@ $(document).ready(function() {
 			};
 			data.forEach(function(gist) {
 				if (gist.description.indexOf("#YASQE") >= 0) {
-					var gistDiv = $("<div>").addClass("gist").appendTo(gistContainer);
+					var gistDiv = $("<div>").addClass("gist").addClass("well").appendTo(gistContainer);
 					$("<h4>").text(processLabel(gist.description)).appendTo(gistDiv);
 					if (gist.files["README.md"]) {
 						var description = $("<p>").appendTo(gistDiv);
@@ -73,14 +72,6 @@ $(document).ready(function() {
 				}
 			});
 		});
-		
-		
-//		<div class="gist">
-//		<h4>LABELLL</h4>
-//		<p>description</p>
-// 		<p><a class="btn btn-primary btn-sm" href="#" role="button">Demo</a> <a class="btn btn-default btn-sm" href="#" role="button">Code <img class="pull-right gistIcon" src="imgs/blacktocat_black.png"></a></p>
-//		</div>
-		
 	}
 });
 
