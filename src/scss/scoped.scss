@@ -3,6 +3,10 @@
 	@import "../../node_modules/codemirror/addon/display/fullscreen.css";
 	@import "../../node_modules/codemirror/addon/fold/foldgutter.css";
 	
+	.svgImg {
+		display:inline-block;
+	} 
+	
 	.CodeMirror {
 		line-height: 1.5em;
 		border: 1px solid #d1d1d1;
@@ -25,7 +29,8 @@
 		z-index: 5;
 	}
 	.yasqe_buttons div {
-		vertical-align: middle;
+		vertical-align: top;
+		margin-left: 5px;
 	}
 	.yasqe_queryButton {
 		display:inline-block;
@@ -33,7 +38,9 @@
 	}
 	.yasqe_share {
 		cursor:pointer;
-		margin-right: 5px;
+		height: 20px;
+		width: 20px;
+		margin-top: 3px;
 	}
 	.yasqe_sharePopup {
 		position:absolute;
@@ -58,6 +65,30 @@
 		bottom: 0px;
 		font-size: 90%;
 	}
+	.CodeMirror-fullscreen .fullscreenToggleBtns {
+		.yasqe_smallscreenBtn {
+			display: inline-block;
+		}
+		.yasqe_fullscreenBtn {
+			display:none;
+		}
+	}
+	.fullscreenToggleBtns {
+		display:inline-block;
+		margin-top: 3px;
+		div {
+			cursor:pointer;
+			width: 20px;
+			height: 20px;
+		}
+		.yasqe_smallscreenBtn {
+			display: none;
+		}
+	}
+	.parseErrorIcon {
+		width: 15px;
+		height: 15px;
+	}
 	
 	.yasqe_tooltip{
 		display: inline;
@@ -70,7 +101,6 @@
 	    left: 20%;
 	    padding: 5px 15px;
 	    position: absolute;
-/* 	    z-index: $zIndex-offset-modal; */
 	    width: 220px;
 	    white-space: -moz-pre-wrap !important;
 	    /* Mozilla, since 1999 */
@@ -81,5 +111,10 @@
 	    white-space: pre-wrap;
 	    /* css-3 */
 	    white-space: normal;
+	}
+	.notificationLoader {
+		width: 18px;
+		height: 18px;
+		vertical-align: middle;
 	}
 }

@@ -240,10 +240,7 @@ var clearError = null;
 var checkSyntax = function(yasqe, deepcheck) {
 	
 	yasqe.queryValid = true;
-	if (clearError) {
-		clearError();
-		clearError = null;
-	}
+
 	yasqe.clearGutter("gutterErrorBar");
 	
 	var state = null;
@@ -270,9 +267,9 @@ var checkSyntax = function(yasqe, deepcheck) {
 				return;
 			}
 			
-			var warningEl = yutils.svg.getElement(imgs.warning, {width: "15px", height: "15px"});
+			var warningEl = yutils.svg.getElement(imgs.warning);
 			if (state.possibleCurrent && state.possibleCurrent.length > 0) {
-				warningEl.style.zIndex = "99999999";
+//				warningEl.style.zIndex = "99999999";
 				require('./tooltip')(yasqe, warningEl, function() {
 					var expectedEncoded = [];
 					state.possibleCurrent.forEach(function(expected){
@@ -283,16 +280,9 @@ var checkSyntax = function(yasqe, deepcheck) {
 			}
 			warningEl.style.marginTop = "2px";
 			warningEl.style.marginLeft = "2px";
+			warningEl.className = 'parseErrorIcon';
 			yasqe.setGutterMarker(l, "gutterErrorBar", warningEl);
-			clearError = function() {
-				yasqe.markText({
-					line : l,
-					ch : state.errorStartPos
-				}, {
-					line : l,
-					ch : state.errorEndPos
-				}, "sp-error");
-			};
+			
 			yasqe.queryValid = false;
 			break;
 		}
@@ -378,9 +368,12 @@ root.consumeShareLink = function(yasqe, urlParams) {
 root.drawButtons = function(yasqe) {
 	yasqe.buttons = $("<div class='yasqe_buttons'></div>").appendTo($(yasqe.getWrapperElement()));
 	
+	/**
+	 * draw share link button
+	 */
 	if (yasqe.options.createShareLink) {
 		
-		var svgShare = $(yutils.svg.getElement(imgs.share, {width: "30px", height: "30px"}));
+		var svgShare = $(yutils.svg.getElement(imgs.share));
 		svgShare.click(function(event){
 			event.stopPropagation();
 			var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(yasqe.buttons);
@@ -415,6 +408,27 @@ root.drawButtons = function(yasqe) {
 		
 	}
 
+	
+	/**
+	 * draw fullscreen button
+	 */
+	
+	var toggleFullscreen = $('<div>', {class: 'fullscreenToggleBtns'})
+		.append($(yutils.svg.getElement(imgs.fullscreen))
+			.addClass("yasqe_fullscreenBtn")
+			.attr("title", "Set editor full screen")
+			.click(function() {
+				yasqe.setOption("fullScreen", true);
+			}))
+		.append($(yutils.svg.getElement(imgs.smallscreen))
+			.addClass("yasqe_smallscreenBtn")
+			.attr("title", "Set editor to normale size")
+			.click(function() {
+				yasqe.setOption("fullScreen", false);
+			}))
+	yasqe.buttons.append(toggleFullscreen);
+	
+	
 	if (yasqe.options.sparql.showQueryButton) {
 		var height = 40;
 		var width = 40;
@@ -467,7 +481,7 @@ root.updateQueryButton = function(yasqe, status) {
 				}).join(" ");
 			})
 			.addClass("query_" + status)
-			.append(yutils.svg.getElement(imgs[queryButtonIds[status]], {width: "100%", height: "100%"}));
+			.append(yutils.svg.getElement(imgs[queryButtonIds[status]]));
 		yasqe.queryStatus = status;
 	}
 };
