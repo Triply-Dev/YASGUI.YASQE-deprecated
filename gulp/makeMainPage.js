@@ -19,9 +19,10 @@ gulp.task('makeMainPageJs', function() {
 			});
 });
 gulp.task('makeMainPageCss', function() {
-	return gulp.src(['node_modules/twitter-bootstrap-3.0.0/dist/css/bootstrap.css', './doc/main.css'])
+	return gulp.src(['./doc/main.scss'])
+	.pipe(sass())
+	.pipe(minifyCSS())
   	.pipe(concat('doc.min.css'))
-  	.pipe(minifyCSS())
     .pipe(gulp.dest("doc"))
     ;
 	
