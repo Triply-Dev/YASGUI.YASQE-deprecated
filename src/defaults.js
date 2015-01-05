@@ -95,7 +95,7 @@ module.exports = {
 				 * @type function|string
 				 */
 				persistent : function(yasqe) {
-					return "queryVal_" + $(yasqe.getWrapperElement()).closest('[id]').attr('id');
+					return "yasqe_" + $(yasqe.getWrapperElement()).closest('[id]').attr('id') + "_queryVal";
 				},
 
 				
