@@ -336,7 +336,7 @@ root.positionButtons = function(yasqe) {
 	if (scrollBar.is(":visible")) {
 		offset = scrollBar.outerWidth();
 	}
-	if (yasqe.buttons.is(":visible")) yasqe.buttons.css("right", offset);
+	if (yasqe.buttons.is(":visible")) yasqe.buttons.css("right", offset + 6);
 };
 
 /**
@@ -430,9 +430,7 @@ root.drawButtons = function(yasqe) {
 	
 	
 	if (yasqe.options.sparql.showQueryButton) {
-		var height = 40;
-		var width = 40;
-		$("<div class='yasqe_queryButton'></div>")
+		$("<div>", {class:'yasqe_queryButton'})
 		 	.click(function(){
 		 		if ($(this).hasClass("query_busy")) {
 		 			if (yasqe.xhr) yasqe.xhr.abort();
@@ -441,8 +439,6 @@ root.drawButtons = function(yasqe) {
 		 			yasqe.query();
 		 		}
 		 	})
-		 	.height(height)
-		 	.width(width)
 		 	.appendTo(yasqe.buttons);
 		root.updateQueryButton(yasqe);
 	}
@@ -480,8 +476,8 @@ root.updateQueryButton = function(yasqe, status) {
 				    return c.indexOf("query_") == 0;
 				}).join(" ");
 			})
-			.addClass("query_" + status)
-			.append(yutils.svg.getElement(imgs[queryButtonIds[status]]));
+			.addClass("query_" + status);
+		yutils.svg.draw(queryButton, imgs[queryButtonIds[status]]);
 		yasqe.queryStatus = status;
 	}
 };
