@@ -114,6 +114,16 @@ var extendCmInstance = function(yasqe) {
 	yasqe.removePrefixes = function(prefixes) {
 		return require('./prefixUtils.js').removePrefixes(yasqe, prefixes);
 	};
+	
+	yasqe.getValueWithoutComments = function() {
+		var cleanedQuery = "";
+		root.runMode(yasqe.getValue(), "sparql11", function(stringVal, className) {
+			if (className != "comment") {
+				cleanedQuery += stringVal;
+			}
+		});
+		return cleanedQuery;
+	};
 	/**
 	 * Fetch the query type (e.g., SELECT||DESCRIBE||INSERT||DELETE||ASK||CONSTRUCT)
 	 * 
