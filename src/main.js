@@ -7,7 +7,6 @@ window.console = window.console || {"log":function(){}};
  */
 var $ = require("jquery"),
 	CodeMirror = require("codemirror"),
-	sparql = require('./sparql.js'),
 	utils = require('./utils.js'),
 	yutils = require('yasgui-utils'),
 	imgs = require('./imgs.js');
@@ -96,6 +95,10 @@ var extendCmInstance = function(yasqe) {
 	 */
 	yasqe.query = function(callbackOrConfig) {
 		root.executeQuery(yasqe, callbackOrConfig);
+	};
+	
+	yasqe.getUrlArguments = function(config) {
+		return root.getUrlArguments(yasqe, config);
 	};
 	
 	/**
@@ -672,8 +675,9 @@ var autoFormatLineBreaks = function(text, start, end) {
 	});
 	return $.trim(formattedQuery.replace(/\n\s*\n/g, '\n'));
 };
-require('./sparql.js').use(root);
-require('./defaults.js').use(root);
+
+require('./sparql.js'),
+require('./defaults.js');
 
 root.version = {
 	"CodeMirror" : CodeMirror.version,

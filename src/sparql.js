@@ -1,104 +1,112 @@
 'use strict';
-var $ = require('jquery');
-module.exports = {
-	use: function(YASQE) {
-		YASQE.executeQuery = function(yasqe, callbackOrConfig) {
-			var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
-			var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
-			var queryMode = yasqe.getQueryMode();
-			if (yasqe.options.sparql)
-				config = $.extend({}, yasqe.options.sparql, config);
-			
-			//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
-			if (config.handlers) 
-				$.extend(true, config.callbacks, config.handlers);
-			
-			
-			if (!config.endpoint || config.endpoint.length == 0)
-				return;// nothing to query!
+var $ = require('jquery'),
+	YASQE = require('./main.js');
+YASQE.executeQuery = function(yasqe, callbackOrConfig) {
+	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig: null);
+	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
+	
+	if (yasqe.options.sparql)
+		config = $.extend({}, yasqe.options.sparql, config);
+	
+	//for backwards compatability, make sure we copy sparql handlers to sparql callbacks
+	if (config.handlers) 
+		$.extend(true, config.callbacks, config.handlers);
+	
+	
+	if (!config.endpoint || config.endpoint.length == 0)
+		return;// nothing to query!
 
-			/**
-			 * initialize ajax config
-			 */
-			var ajaxConfig = {
-				url : (typeof config.endpoint == "function"? config.endpoint(yasqe): config.endpoint),
-				type : (typeof config.requestMethod == "function"? config.requestMethod(yasqe): config.requestMethod),
-				data : [{
-					name : queryMode,
-					value : yasqe.getValue()
-				}],
-				headers : {
-					Accept : getAcceptHeader(yasqe, config),
-				}
-			};
+	/**
+	 * initialize ajax config
+	 */
+	var ajaxConfig = {
+		url : (typeof config.endpoint == "function"? config.endpoint(yasqe): config.endpoint),
+		type : (typeof config.requestMethod == "function"? config.requestMethod(yasqe): config.requestMethod),
+		headers : {
+			Accept : getAcceptHeader(yasqe, config),
+		}
+	};
 
-			/**
-			 * add complete, beforesend, etc callbacks (if specified)
-			 */
-			var handlerDefined = false;
-			if (config.callbacks) {
-				for ( var handler in config.callbacks) {
-					if (config.callbacks[handler]) {
-						handlerDefined = true;
-						ajaxConfig[handler] = config.callbacks[handler];
-					}
-				}
+	/**
+	 * add complete, beforesend, etc callbacks (if specified)
+	 */
+	var handlerDefined = false;
+	if (config.callbacks) {
+		for ( var handler in config.callbacks) {
+			if (config.callbacks[handler]) {
+				handlerDefined = true;
+				ajaxConfig[handler] = config.callbacks[handler];
 			}
-			if (!handlerDefined && !callback)
-				return; // ok, we can query, but have no callbacks. just stop now
-			
-			// if only callback is passed as arg, add that on as 'onComplete' callback
-			if (callback)
-				ajaxConfig.complete = callback;
-
-			/**
-			 * add named graphs to ajax config
-			 */
-			if (config.namedGraphs && config.namedGraphs.length > 0) {
-				var argName = (queryMode == "query" ? "named-graph-uri": "using-named-graph-uri ");
-				for (var i = 0; i < config.namedGraphs.length; i++)
-					ajaxConfig.data.push({
-						name : argName,
-						value : config.namedGraphs[i]
-					});
-			}
-			/**
-			 * add default graphs to ajax config
-			 */
-			if (config.defaultGraphs && config.defaultGraphs.length > 0) {
-				var argName = (queryMode == "query" ? "default-graph-uri": "using-graph-uri ");
-				for (var i = 0; i < config.defaultGraphs.length; i++)
-					ajaxConfig.data.push({
-						name : argName,
-						value : config.defaultGraphs[i]
-					});
-			}
-
-			/**
-			 * merge additional request headers
-			 */
-			if (config.headers && !$.isEmptyObject(config.headers))
-				$.extend(ajaxConfig.headers, config.headers);
-			/**
-			 * add additional request args
-			 */
-			if (config.args && config.args.length > 0) $.merge(ajaxConfig.data, config.args);
-			YASQE.updateQueryButton(yasqe, "busy");
-			
-			var updateQueryButton = function() {
-				YASQE.updateQueryButton(yasqe);
-			};
-			//Make sure the query button is updated again on complete
-			if (ajaxConfig.complete) {
-				ajaxConfig.complete = [updateQueryButton, ajaxConfig.complete];
-			} else {
-				ajaxConfig.complete = updateQueryButton;
-			}
-			yasqe.xhr = $.ajax(ajaxConfig);
-		};
+		}
 	}
+	ajaxConfig.data = yasqe.getUrlArguments(yasqe, config);
+	if (!handlerDefined && !callback)
+		return; // ok, we can query, but have no callbacks. just stop now
+	
+	// if only callback is passed as arg, add that on as 'onComplete' callback
+	if (callback)
+		ajaxConfig.complete = callback;
+
+	
+
+	/**
+	 * merge additional request headers
+	 */
+	if (config.headers && !$.isEmptyObject(config.headers))
+		$.extend(ajaxConfig.headers, config.headers);
+	
+	YASQE.updateQueryButton(yasqe, "busy");
+	
+	var updateQueryButton = function() {
+		YASQE.updateQueryButton(yasqe);
+	};
+	//Make sure the query button is updated again on complete
+	if (ajaxConfig.complete) {
+		ajaxConfig.complete = [updateQueryButton, ajaxConfig.complete];
+	} else {
+		ajaxConfig.complete = updateQueryButton;
+	}
+	yasqe.xhr = $.ajax(ajaxConfig);
 };
 
+
+YASQE.getUrlArguments = function(yasqe, config) {
+	var queryMode = yasqe.getQueryMode();
+	var data = [{
+		name : 'query',
+		value : yasqe.getValue()
+	}];
+	
+	/**
+	 * add named graphs to ajax config
+	 */
+	if (config.namedGraphs && config.namedGraphs.length > 0) {
+		var argName = (queryMode == "query" ? "named-graph-uri": "using-named-graph-uri ");
+		for (var i = 0; i < config.namedGraphs.length; i++)
+			data.push({
+				name : argName,
+				value : config.namedGraphs[i]
+			});
+	}
+	/**
+	 * add default graphs to ajax config
+	 */
+	if (config.defaultGraphs && config.defaultGraphs.length > 0) {
+		var argName = (queryMode == "query" ? "default-graph-uri": "using-graph-uri ");
+		for (var i = 0; i < config.defaultGraphs.length; i++)
+			data.push({
+				name : argName,
+				value : config.defaultGraphs[i]
+			});
+	}
+	
+	/**
+	 * add additional request args
+	 */
+	if (config.args && config.args.length > 0) $.merge(data, config.args);
+	
+	return data;
+}
 var getAcceptHeader = function(yasqe, config) {
 	var acceptHeader = null;
 	if (config.acceptHeader && !config.acceptHeaderGraph && !config.acceptHeaderSelect && !config.acceptHeaderUpdate) {
