@@ -206,6 +206,12 @@ var postProcessCmElement = function(yasqe) {
 		root.updateQueryButton(yasqe);
 		root.positionButtons(yasqe);
 	});
+	yasqe.on('changes', function() {
+		//e.g. on paste
+		checkSyntax(yasqe);
+		root.updateQueryButton(yasqe);
+		root.positionButtons(yasqe);
+	});
 	
 	yasqe.on('cursorActivity', function(yasqe, eventInfo) {
 		updateButtonsTransparency(yasqe);
