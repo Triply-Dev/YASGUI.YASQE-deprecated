@@ -73,7 +73,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name : 'query',
+		name : yasqe.getQueryMode(),//either 'update' or 'query'
 		value : yasqe.getValue()
 	}];
 	
