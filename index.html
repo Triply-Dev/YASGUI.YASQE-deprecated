@@ -141,7 +141,16 @@
  <script src="dist/yasqe.bundled.min.js"></script>
 <script src="doc/doc.min.js"></script>
 <script type="text/javascript">
-	var yasqe = YASQE(document.getElementById("showcase"), {sparql:{showQueryButton: true, handlers:{success: function(data){console.log("success", data);}}}});
+	var yasqe = YASQE(document.getElementById("showcase"), {
+    sparql: {
+      showQueryButton: true, 
+      callbacks:{
+        success: function(data){
+          console.log("success", data);
+        }
+      }
+    }
+  });
 </script>
   </body>
 </html>
