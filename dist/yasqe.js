@@ -6450,7 +6450,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "main": "src/main.js",
   "licenses": [
     {
@@ -6471,7 +6471,7 @@ module.exports={
     "gulp-git": "^0.5.2",
     "gulp-jsvalidate": "^0.2.0",
     "gulp-livereload": "^1.3.1",
-    "gulp-minify-css": "^0.3.11",
+    "gulp-minify-css": "0.3.11",
     "gulp-notify": "^2.0.1",
     "gulp-rename": "^1.2.0",
     "gulp-streamify": "0.0.5",
