@@ -293,7 +293,7 @@
   .yasqe .CodeMirror span {
     *vertical-align: text-bottom; }
   .yasqe .cm-force-border {
-    padding-right: 0.1px; }
+    padding-right: .1px; }
   @media print {
     .yasqe {
       /* Hide the cursor when printing */ }
@@ -315,10 +315,10 @@
     color: blue;
     text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
     font-family: arial;
-    line-height: 0.3;
+    line-height: .3;
     cursor: pointer; }
   .yasqe .CodeMirror-foldgutter {
-    width: 0.7em; }
+    width: .7em; }
   .yasqe .CodeMirror-foldgutter-open, .yasqe .CodeMirror-foldgutter-folded {
     cursor: pointer; }
   .yasqe .CodeMirror-foldgutter-open:after {

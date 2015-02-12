@@ -4071,8 +4071,13 @@ return obj;
 			var DECIMAL_NEGATIVE = '-' + DECIMAL;
 			var DOUBLE_NEGATIVE  = '-' + DOUBLE;
 	
-			// var ECHAR = '\\\\[tbnrf\\"\\\']';
-			var ECHAR = '\\\\[tbnrf\\\\"\']';
+			//var ECHAR = '\\\\[tbnrf\\"\\\']';
+      //IMPORTANT: this rule deviates from the official grammar.
+      //Reason: https://github.com/YASGUI/YASQE/issues/49
+      //unicode escape sequences (which the sparql spec considers part of the pre-processing of sparql queries)
+      //are marked as invalid. We have little choice (other than adding a layer of complixity) than to modify the grammar accordingly
+      //however, for now only allow these escape sequences in literals (where actually, this should be allows in e.g. prefixes as well)
+			var ECHAR = '\\\\[tbnrfu\\\\"\']';
 	
 			var STRING_LITERAL1 = "'(([^\\x27\\x5C\\x0A\\x0D])|"+ECHAR+")*'";
 			var STRING_LITERAL2 = '"(([^\\x22\\x5C\\x0A\\x0D])|'+ECHAR+')*"';
@@ -6445,7 +6450,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "main": "src/main.js",
   "licenses": [
     {
@@ -8309,7 +8314,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name : 'query',
+		name : yasqe.getQueryMode(),//either 'update' or 'query'
 		value : yasqe.getValue()
 	}];
 	
