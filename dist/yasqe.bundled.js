@@ -4079,7 +4079,8 @@ return obj;
 		      //unicode escape sequences (which the sparql spec considers part of the pre-processing of sparql queries)
 		      //are marked as invalid. We have little choice (other than adding a layer of complixity) than to modify the grammar accordingly
 		      //however, for now only allow these escape sequences in literals (where actually, this should be allows in e.g. prefixes as well)
-			var unicode = '(\\\\u' + HEX +'{4}|\\\\U' + HEX + '{8})';
+			var hex4 = HEX + '{4}'
+			var unicode = '(\\\\u' + hex4 +'|\\\\U00(10|0' + HEX + ')'+ hex4 + ')';
 	
 			var STRING_LITERAL1 = "'(([^\\x27\\x5C\\x0A\\x0D])|"+ECHAR+"|" + unicode + ")*'";
 			var STRING_LITERAL2 = '"(([^\\x22\\x5C\\x0A\\x0D])|'+ECHAR+'|' + unicode + ')*"';
@@ -24847,7 +24848,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "main": "src/main.js",
   "licenses": [
     {
