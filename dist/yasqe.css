@@ -1,4 +1,5 @@
 .yasqe {
+  position: relative;
   /* BASICS */
   /* PADDING */
   /* GUTTER */
@@ -325,6 +326,16 @@
     content: "\25BE"; }
   .yasqe .CodeMirror-foldgutter-folded:after {
     content: "\25B8"; }
+  .yasqe .backdrop {
+    background-color: #000;
+    opacity: 0.5;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 5;
+    display: none; }
   .yasqe .svgImg {
     display: inline-block; }
   .yasqe .CodeMirror {

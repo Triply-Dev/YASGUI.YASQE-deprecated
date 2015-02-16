@@ -6453,7 +6453,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "main": "src/main.js",
   "licenses": [
     {
@@ -7250,7 +7250,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		tabMode : "indent",
 		lineNumbers : true,
 	    lineWrapping: true,
-	    
+	    backdrop: false,
 	    foldGutter: {rangeFinder:YASQE.fold.brace },
 	    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 //			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 
@@ -7494,7 +7494,35 @@ var extendCmInstance = function(yasqe) {
 	yasqe.getNextNonWsToken = function(lineNumber, charNumber) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
-
+	
+	var backdrop = null;
+	var animateSpeed = null;
+	yasqe.setBackdrop = function(show) {
+		
+		if (yasqe.options.backdrop || yasqe.options.backdrop === 0 || yasqe.options.backdrop === '0') {
+			if (animateSpeed === null) {
+				animateSpeed = +yasqe.options.backdrop;
+				if (animateSpeed === 1) {
+					//ah, yasqe.options.backdrop was 'true'. Set this to default animate speed 400
+					animateSpeed = 400;
+				}
+			}
+			
+			
+			if (!backdrop) {
+				backdrop = $('<div>', {class: 'backdrop'})
+					.click(function(){
+						$(this).hide();
+					})
+					.insertAfter($(yasqe.getWrapperElement()));
+			}
+			if (show) {
+				backdrop.show(animateSpeed);
+			} else {
+				backdrop.hide(animateSpeed);
+			}
+		}
+	};
 	/**
 	 * Execute query. Pass a callback function, or a configuration object (see
 	 * default settings below for possible values) I.e., you can change the
@@ -8300,15 +8328,17 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		$.extend(ajaxConfig.headers, config.headers);
 	
 	YASQE.updateQueryButton(yasqe, "busy");
+	yasqe.setBackdrop(true);
 	
-	var updateQueryButton = function() {
+	var updateYasqe = function() {
 		YASQE.updateQueryButton(yasqe);
+		yasqe.setBackdrop(false);
 	};
 	//Make sure the query button is updated again on complete
 	if (ajaxConfig.complete) {
-		ajaxConfig.complete = [updateQueryButton, ajaxConfig.complete];
+		ajaxConfig.complete = [updateYasqe, ajaxConfig.complete];
 	} else {
-		ajaxConfig.complete = updateQueryButton;
+		ajaxConfig.complete = updateYasqe;
 	}
 	yasqe.xhr = $.ajax(ajaxConfig);
 };
