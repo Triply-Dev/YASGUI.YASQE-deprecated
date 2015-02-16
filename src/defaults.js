@@ -18,7 +18,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		tabMode : "indent",
 		lineNumbers : true,
 	    lineWrapping: true,
-	    
+	    backdrop: false,
 	    foldGutter: {rangeFinder:YASQE.fold.brace },
 	    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 //			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 

@@ -56,15 +56,17 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		$.extend(ajaxConfig.headers, config.headers);
 	
 	YASQE.updateQueryButton(yasqe, "busy");
+	yasqe.setBackdrop(true);
 	
-	var updateQueryButton = function() {
+	var updateYasqe = function() {
 		YASQE.updateQueryButton(yasqe);
+		yasqe.setBackdrop(false);
 	};
 	//Make sure the query button is updated again on complete
 	if (ajaxConfig.complete) {
-		ajaxConfig.complete = [updateQueryButton, ajaxConfig.complete];
+		ajaxConfig.complete = [updateYasqe, ajaxConfig.complete];
 	} else {
-		ajaxConfig.complete = updateQueryButton;
+		ajaxConfig.complete = updateYasqe;
 	}
 	yasqe.xhr = $.ajax(ajaxConfig);
 };

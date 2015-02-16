@@ -83,7 +83,35 @@ var extendCmInstance = function(yasqe) {
 	yasqe.getNextNonWsToken = function(lineNumber, charNumber) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
-
+	
+	var backdrop = null;
+	var animateSpeed = null;
+	yasqe.setBackdrop = function(show) {
+		
+		if (yasqe.options.backdrop || yasqe.options.backdrop === 0 || yasqe.options.backdrop === '0') {
+			if (animateSpeed === null) {
+				animateSpeed = +yasqe.options.backdrop;
+				if (animateSpeed === 1) {
+					//ah, yasqe.options.backdrop was 'true'. Set this to default animate speed 400
+					animateSpeed = 400;
+				}
+			}
+			
+			
+			if (!backdrop) {
+				backdrop = $('<div>', {class: 'backdrop'})
+					.click(function(){
+						$(this).hide();
+					})
+					.insertAfter($(yasqe.getWrapperElement()));
+			}
+			if (show) {
+				backdrop.show(animateSpeed);
+			} else {
+				backdrop.hide(animateSpeed);
+			}
+		}
+	};
 	/**
 	 * Execute query. Pass a callback function, or a configuration object (see
 	 * default settings below for possible values) I.e., you can change the

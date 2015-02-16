@@ -1,8 +1,21 @@
 .yasqe {
+	position: relative;
 	@import "../../node_modules/codemirror/lib/codemirror.css";
 	@import "../../node_modules/codemirror/addon/display/fullscreen.css";
 	@import "../../node_modules/codemirror/addon/fold/foldgutter.css";
 	
+	
+	.backdrop {
+		background-color: #000;
+		opacity: 0.5;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+		z-index:5;
+		display:none;
+	}
 	.svgImg {
 		display:inline-block;
 	} 
