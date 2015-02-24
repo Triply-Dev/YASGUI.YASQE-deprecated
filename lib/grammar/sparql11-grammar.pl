@@ -33,7 +33,8 @@ queryAll ==>
 	[or(selectQuery,constructQuery,describeQuery,askQuery),valuesClause].
 	
 prologue ==> 
-	[?(baseDecl),*(prefixDecl)].
+	%[?(baseDecl),*(prefixDecl)].
+	[*(baseDecl or prefixDecl)].
 
 baseDecl ==> 
 	['BASE','IRI_REF'].
