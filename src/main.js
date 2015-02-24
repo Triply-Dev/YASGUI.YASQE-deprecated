@@ -21,7 +21,7 @@ require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
 require('codemirror/addon/runmode/runmode.js');
 require('codemirror/addon/display/fullscreen.js');
-require('../lib/flint.js');
+require('../lib/grammar/tokenizer.js');
 
 
 
