@@ -5,6 +5,7 @@ var gulp = require('gulp'),
 	embedlr = require('gulp-embedlr'),
 	minifyCSS = require('gulp-minify-css'),
 	uglify = require("gulp-uglify"),
+	sass = require('gulp-sass'),
 	buffer = require("vinyl-buffer"),
 	concat = require('gulp-concat');
 
