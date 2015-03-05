@@ -24,7 +24,7 @@ gulp.task('publish', function (done) {
 });
 
 gulp.task('push', function (done) {
-  git.push('origin', 'gh-pages', function (err) {
+  git.push('origin', 'gh-pages', {args: " --tags"}, function (err) {
     if (err) throw err;
   });
 });
