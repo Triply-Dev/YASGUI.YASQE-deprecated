@@ -252,11 +252,31 @@ var postProcessCmElement = function(yasqe) {
 	 * check url args and modify yasqe settings if needed
 	 */
 	if (yasqe.options.consumeShareLink) {
-		var urlParams = $.deparam(window.location.search.substring(1));
-		yasqe.options.consumeShareLink(yasqe, urlParams);
+		yasqe.options.consumeShareLink(yasqe, getUrlParams());
+		//and: add a hash listener!
+		window.addEventListener("hashchange", function() {
+			yasqe.options.consumeShareLink(yasqe, getUrlParams());
+		});
 	}
+	
 };
 
+/**
+ * get url params. first try fetching using hash. If it fails, try the regular query parameters (for backwards compatability)
+ */
+var getUrlParams = function() {
+	//first try hash
+	var urlParams = null;
+	if (window.location.hash.length > 1) {
+		urlParams = $.deparam(window.location.hash.substring(1))
+	}
+	if ((!urlParams || !('query' in urlParams))
+		&& window.location.search.length > 1) {
+		//ok, then just try regular url params
+		urlParams = $.deparam(window.location.search.substring(1));
+	}
+	return urlParams;
+};
 
 
 
@@ -396,7 +416,8 @@ root.positionButtons = function(yasqe) {
  */
 root.createShareLink = function(yasqe) {
 	//extend existing link, so first fetch current arguments
-	var urlParams = $.deparam(window.location.search.substring(1));
+	var urlParams = {};
+	if (window.location.hash.length > 1) urlParams = $.deparam(window.location.hash.substring(1));
 	urlParams['query'] = yasqe.getValue();
 	return urlParams;
 };
@@ -431,7 +452,7 @@ root.drawButtons = function(yasqe) {
 			popup.click(function(event) {
 				event.stopPropagation();
 			});
-			var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + "?" + $.param(yasqe.options.createShareLink(yasqe)));
+			var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + location.search + "#" + $.param(yasqe.options.createShareLink(yasqe)));
 			
 			textAreaLink.focus(function() {
 			    var $this = $(this);
