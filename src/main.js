@@ -429,7 +429,7 @@ root.createShareLink = function(yasqe) {
  * @param {doc} YASQE document
  */
 root.consumeShareLink = function(yasqe, urlParams) {
-	if (urlParams.query) {
+	if (urlParams && urlParams.query) {
 		yasqe.setValue(urlParams.query);
 	}
 };
