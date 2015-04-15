@@ -4219,14 +4219,15 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 			style:"string-2" }
 	];
 
-	function getPossibles(symbol)
-	{
+	function getPossibles(symbol) {
 		var possibles=[], possiblesOb=ll1_table[symbol];
-		if (possiblesOb!=undefined)
-			for (var property in possiblesOb)
+		if (possiblesOb!=undefined) {
+			for (var property in possiblesOb) {
 				possibles.push(property.toString());
-		else
+			}
+		} else {
 			possibles.push(symbol);
+		}
 		return possibles;
 	}
 
@@ -4248,11 +4249,12 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				
 				if (consumed && consumed[0].length > 0) {
 					//some string content here. 
-					 var returnObj = { 
+					 var returnObj = {
 						quotePos: (closingQuotes? 'end': 'content'),
 						cat: STRING_LITERAL_LONG[state.inLiteral].CAT,
 						style: stringLiteralLongRegex[state.inLiteral].complete.style,
-						text: consumed[0]
+						text: consumed[0],
+						start: stream.start
 					};
 					 if (closingQuotes) state.inLiteral = false;
 					 return returnObj;
@@ -4276,7 +4278,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 						cat: STRING_LITERAL_LONG[quoteType].CAT,
 						style: stringLiteralLongRegex[quoteType].quotes.style,
 						text: consumed[0],
-						quotePos: quotePos
+						quotePos: quotePos,
+						start: stream.start
 					};
 				}
 			}
@@ -4290,7 +4293,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 					return {
 						cat: terminals[i].name,
 						style: terminals[i].style,
-						text: consumed[0]
+						text: consumed[0],
+						start: stream.start
 					};
 				}
 			}
@@ -4300,7 +4304,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 			if (consumed)
 				return { cat: stream.current().toUpperCase(),
 								 style: "keyword",
-								 text: consumed[0]
+								 text: consumed[0],
+								 start: stream.start
 							 };
 
 			// Punctuation
@@ -4308,7 +4313,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 			if (consumed)
 				return { cat: stream.current(),
 								 style: "punc",
-								 text: consumed[0]
+								 text: consumed[0],
+								 start: stream.start
 							 };
 
 			// Token is invalid
@@ -4316,7 +4322,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 			consumed= stream.match(/^.[A-Za-z0-9]*/,true,false);
 			return { cat:"<invalid_token>",
 							 style: "error",
-							 text: consumed[0]
+							 text: consumed[0],
+							 start: stream.start
 						 };
 		}
 
@@ -4405,7 +4412,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 								allNillable=false;
 						}
 						state.complete= allNillable;
-						if (state.storeProperty && token.cat!="punc") {
+						if (state.storeProperty && token.cat != "punc") {
 							state.lastProperty = tokenOb.text;
 							state.storeProperty = false;
 						}
@@ -4415,37 +4422,38 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 						recordFailurePos();
 					}
 				} else {
-	//				if (!tokenOb.quotePos || tokenOb.quotePos == 'end') {
-						// topSymbol is nonterminal
-						// - see if there is an entry for topSymbol
-						// and nextToken in table
-						var nextSymbols= ll1_table[topSymbol][token];
-						if (nextSymbols!=undefined && checkSideConditions(topSymbol)) {
-							// Match - copy RHS of rule to stack
-							for (var i=nextSymbols.length-1; i>=0; --i) {
-								state.stack.push(nextSymbols[i]);
-							}
-							// Peform any non-grammatical side-effects
-							setSideConditions(topSymbol);
-						} else {
-							// No match in table - fail
-							state.OK=false;
-							state.complete=false;
-							recordFailurePos();
-							state.stack.push(topSymbol);  // Shove topSymbol back on stack
+					// topSymbol is nonterminal
+					// - see if there is an entry for topSymbol
+					// and nextToken in table
+					var nextSymbols= ll1_table[topSymbol][token];
+					if (nextSymbols!=undefined && checkSideConditions(topSymbol)) {
+						// Match - copy RHS of rule to stack
+						for (var i=nextSymbols.length-1; i>=0; --i) {
+							state.stack.push(nextSymbols[i]);
 						}
-	//				}
+						// Peform any non-grammatical side-effects
+						setSideConditions(topSymbol);
+					} else {
+						// No match in table - fail
+						state.OK=false;
+						state.complete=false;
+						recordFailurePos();
+						state.stack.push(topSymbol);  // Shove topSymbol back on stack
+					}
 				}
 			}
 		}
 		if (!finished && state.OK) { 
 			state.OK=false; state.complete=false; recordFailurePos(); 
 		}
+		
+		if (state.possibleCurrent.indexOf('a') >= 0){
+			state.lastPredicateOffset = tokenOb.start;
+		}
+		state.possibleCurrent = state.possibleNext;
+		
+		state.possibleNext = getPossibles(state.stack[state.stack.length-1]);
 
-		state.possibleCurrent= state.possibleNext;
-		state.possibleNext= getPossibles(state.stack[state.stack.length-1]);
-
-		// alert(token+"="+tokenOb.style+'\n'+state.stack);
 		return tokenOb.style;
 	}
 
@@ -4466,7 +4474,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		"propertyListPath": 1,
 		"propertyListPathNotEmpty": 1,
 		"?[verb,objectList]": 1,
-		"?[or([verbPath, verbSimple]),objectList]": 1,
+//		"?[or([verbPath, verbSimple]),objectList]": 1,
 	};
 
 	var indentTable={
@@ -4475,37 +4483,44 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		")":1,
 		"{":-1,
 		"(":-1,
-		"*[;,?[or([verbPath,verbSimple]),objectList]]": 1,
+//		"*[;,?[or([verbPath,verbSimple]),objectList]]": 1,
 	};
 	
 
 	function indent(state, textAfter) {
-		var n = 0; // indent level
-		var i=state.stack.length-1;
-
-		if (/^[\}\]\)]/.test(textAfter)) {
-			// Skip stack items until after matching bracket
-			var closeBracket=textAfter.substr(0,1);
-			for( ;i>=0;--i)
-			{
-				if (state.stack[i]==closeBracket)
-				{--i; break;};
-			}
+		//just avoid we don't indent multi-line  literals
+		if (state.inLiteral) return 0;
+		if (state.stack.length && state.stack[state.stack.length-1] == "?[or([verbPath,verbSimple]),objectList]") {
+			//we are after a semi-colon. I.e., nicely align this line with predicate position of previous line
+			return state.lastPredicateOffset;
 		} else {
-			// Consider nullable non-terminals if at top of stack
-			var dn=indentTop[state.stack[i]];
-			if (dn) { 
-				n+=dn; --i;
+			var n = 0; // indent level
+			var i = state.stack.length-1;
+			if (/^[\}\]\)]/.test(textAfter)) {
+				// Skip stack items until after matching bracket
+				var closeBracket=textAfter.substr(0,1);
+				for( ;i>=0;--i)	{
+					if (state.stack[i]==closeBracket) {
+						--i; 
+						break;
+					};
+				}
+			} else {
+				// Consider nullable non-terminals if at top of stack
+				var dn = indentTop[state.stack[i]];
+				if (dn) { 
+					n += dn; 
+					--i;
+				}
 			}
-		}
-		for( ;i>=0;--i)
-		{
-			var dn=indentTable[state.stack[i]];
-			if (dn) {
-				n+=dn;
+			for( ;i>=0;--i)	{
+				var dn = indentTable[state.stack[i]];
+				if (dn) {
+					n+=dn;
+				}
 			}
+			return n * config.indentUnit;
 		}
-		return n * config.indentUnit;
 	};
 
 	return {
@@ -4525,7 +4540,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				storeProperty : false,
 				lastProperty : "",
 				inLiteral: false,
-				stack: [grammar.startSymbol]
+				stack: [grammar.startSymbol],
+				lastPredicateOffset: config.indentUnit,
 			}; 
 		},
 		indent: indent,
@@ -6536,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "main": "src/main.js",
   "licenses": [
     {
