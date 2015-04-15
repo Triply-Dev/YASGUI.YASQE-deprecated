@@ -1,7 +1,7 @@
 {
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "main": "src/main.js",
   "licenses": [
     {
