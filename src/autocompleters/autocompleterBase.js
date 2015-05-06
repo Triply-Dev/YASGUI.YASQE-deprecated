@@ -2,7 +2,8 @@
 var $ = require('jquery'),
 	utils = require('../utils.js'),
 	yutils = require('yasgui-utils'),
-	Trie = require('../../lib/trie.js');
+	Trie = require('../../lib/trie.js'),
+	YASQE = require('../main.js');
 
 module.exports = function(YASQE, yasqe) {
 	var completionNotifications = {};
@@ -214,8 +215,9 @@ module.exports = function(YASQE, yasqe) {
 		//if we have some autocompletion handlers specified, add these these to the object. Codemirror will take care of firing these
 		if (completer.callbacks) {
 			for ( var callbackName in completer.callbacks) {
-				if (completer.callbacks[callbackName]) 
-					yasqe.on(returnObj, callbackName, completer.callbacks[callbackName]);
+				if (completer.callbacks[callbackName]) {
+					YASQE.on(returnObj, callbackName, completer.callbacks[callbackName]);
+				}
 			}
 		}
 		return returnObj;
