@@ -16,6 +16,7 @@ var addPrefixes = function(yasqe, prefixes) {
 			addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
 		}
 	}
+	yasqe.collapsePrefixes(false);
 };
 
 var addPrefixAsString = function(yasqe, prefixString) {
@@ -42,6 +43,7 @@ var addPrefixAsString = function(yasqe, prefixString) {
 			line : lastPrefixLine
 		});
 	}
+	yasqe.collapsePrefixes(false);
 };
 var removePrefixes = function(yasqe, prefixes) {
 	var escapeRegex = function(string) {
@@ -51,6 +53,7 @@ var removePrefixes = function(yasqe, prefixes) {
 	for (var pref in prefixes) {
 		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), ''));
 	}
+	yasqe.collapsePrefixes(false);
 	
 };
 

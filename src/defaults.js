@@ -19,9 +19,9 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		lineNumbers : true,
 	    lineWrapping: true,
 	    backdrop: false,
-	    foldGutter: {rangeFinder:YASQE.fold.brace },
+	    foldGutter: {rangeFinder:new YASQE.fold.combine(YASQE.fold.brace, YASQE.fold.prefix) },
+	    collapsePrefixesOnLoad: false,
 	    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-//			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 
 		matchBrackets : true,
 		fixedGutter : true,
 		syntaxErrorCheck: true,

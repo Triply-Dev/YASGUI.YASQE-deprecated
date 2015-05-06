@@ -104,9 +104,13 @@
 			<code>yasqe.storeBulkCompletions(type: String)</code>
 			<p>Store bulk completions in memory as trie, and in localstorage as well (if enabled). The argument should be a key from the <a href="#autocompletions">autocompletion</a> settings</p>
 		</div>
-   <div class="doc">
+   		<div class="doc">
 			<code>yasqe.setBackdrop(show: boolean)</code>
 			<p>Hide or show gray backdrop</p>
+		</div>
+   		<div class="doc">
+			<code>yasqe.collapsePrefixes(collapse: boolean)</code>
+			<p>Collapsing prefixes if there are any. Use false to expand them.</p>
 		</div>
 		
 		<h2 id="statics">Statics</h2>
@@ -178,10 +182,14 @@
 			<code>syntaxErrorCheck: boolean (default: true)</code>
 			<p>Whether to validate the SPARQL syntax</p>
 		</div>
-    <div class="doc">
-      <code>backdrop: boolean|integer (default: false)</code>
-      <p>Enable a gray backdrop on the YASQE instance when a query is being executed. Setting the value to an integer will influence the 'hide' and 'show' animation of the backdrop (set to zero to disable animation)</p>
-    </div>
+		<div class="doc">
+			<code>collapsePrefixesOnLoad: boolean (default: false)</code>
+			<p>Collapse prefixes on page load</p>
+		</div>
+	    <div class="doc">
+	      <code>backdrop: boolean|integer (default: false)</code>
+	      <p>Enable a gray backdrop on the YASQE instance when a query is being executed. Setting the value to an integer will influence the 'hide' and 'show' animation of the backdrop (set to zero to disable animation)</p>
+	    </div>
 		<div class="doc" id="keyboardShortcuts">
 			<code>extraKeys: object</code>
 			<p>Extra shortcut keys. Check the <a href="http://codemirror.net" target="_blank">CodeMirror</a> manual on how to add your own</p>

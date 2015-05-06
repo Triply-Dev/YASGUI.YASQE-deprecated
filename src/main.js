@@ -16,6 +16,7 @@ require('codemirror/addon/fold/foldcode.js');
 require('codemirror/addon/fold/foldgutter.js');
 require('codemirror/addon/fold/xml-fold.js');
 require('codemirror/addon/fold/brace-fold.js');
+require('./prefixFold.js');
 require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
@@ -83,7 +84,9 @@ var extendCmInstance = function(yasqe) {
 	yasqe.getNextNonWsToken = function(lineNumber, charNumber) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
-	
+	yasqe.collapsePrefixes = function(collapse) {
+		yasqe.foldCode(require('./prefixFold.js').findFirstPrefixLine(yasqe), YASQE.fold.prefix, (collapse? "fold": "unfold"));
+	};
 	var backdrop = null;
 	var animateSpeed = null;
 	yasqe.setBackdrop = function(show) {
@@ -258,7 +261,7 @@ var postProcessCmElement = function(yasqe) {
 			yasqe.options.consumeShareLink(yasqe, getUrlParams());
 		});
 	}
-	
+	if (yasqe.options.collapsePrefixesOnLoad) yasqe.collapsePrefixes(true);
 };
 
 /**

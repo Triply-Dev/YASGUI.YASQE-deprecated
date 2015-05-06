@@ -34,6 +34,11 @@ module.exports = function(yasqe, completerName) {
 		bulk : true,
 		autoShow: true,
 		persistent : completerName,
+		callbacks: {
+			pick: function() {
+				yasqe.collapsePrefixes(false);
+			}
+		}
 	};
 };
 module.exports.isValidCompletionPosition = function(yasqe) {
