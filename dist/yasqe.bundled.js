@@ -24947,7 +24947,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "main": "src/main.js",
   "licenses": [
     {
@@ -25032,7 +25032,8 @@ module.exports={
 var $ = require('jquery'),
 	utils = require('../utils.js'),
 	yutils = require('yasgui-utils'),
-	Trie = require('../../lib/trie.js');
+	Trie = require('../../lib/trie.js'),
+	YASQE = require('../main.js');
 
 module.exports = function(YASQE, yasqe) {
 	var completionNotifications = {};
@@ -25244,8 +25245,9 @@ module.exports = function(YASQE, yasqe) {
 		//if we have some autocompletion handlers specified, add these these to the object. Codemirror will take care of firing these
 		if (completer.callbacks) {
 			for ( var callbackName in completer.callbacks) {
-				if (completer.callbacks[callbackName]) 
-					yasqe.on(returnObj, callbackName, completer.callbacks[callbackName]);
+				if (completer.callbacks[callbackName]) {
+					YASQE.on(returnObj, callbackName, completer.callbacks[callbackName]);
+				}
 			}
 		}
 		return returnObj;
@@ -25320,7 +25322,7 @@ var selectHint = function(yasqe, data, completion) {
 //	loadBulkCompletions: loadBulkCompletions,
 //};
 
-},{"../../lib/trie.js":5,"../utils.js":36,"jquery":16,"yasgui-utils":19}],24:[function(require,module,exports){
+},{"../../lib/trie.js":5,"../main.js":31,"../utils.js":37,"jquery":16,"yasgui-utils":19}],24:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
 module.exports = function(yasqe, name) {
@@ -25401,6 +25403,11 @@ module.exports = function(yasqe, completerName) {
 		bulk : true,
 		autoShow: true,
 		persistent : completerName,
+		callbacks: {
+			pick: function() {
+				yasqe.collapsePrefixes(false);
+			}
+		}
 	};
 };
 module.exports.isValidCompletionPosition = function(yasqe) {
@@ -25745,9 +25752,9 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		lineNumbers : true,
 	    lineWrapping: true,
 	    backdrop: false,
-	    foldGutter: {rangeFinder:YASQE.fold.brace },
+	    foldGutter: {rangeFinder:new YASQE.fold.combine(YASQE.fold.brace, YASQE.fold.prefix) },
+	    collapsePrefixesOnLoad: false,
 	    gutters: [ "gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-//			    cell.code_mirror.setOption('foldGutter',{rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.firstline, CodeMirror.fold.brace) }); 
 		matchBrackets : true,
 		fixedGutter : true,
 		syntaxErrorCheck: true,
@@ -25921,6 +25928,7 @@ require('codemirror/addon/fold/foldcode.js');
 require('codemirror/addon/fold/foldgutter.js');
 require('codemirror/addon/fold/xml-fold.js');
 require('codemirror/addon/fold/brace-fold.js');
+require('./prefixFold.js');
 require('codemirror/addon/hint/show-hint.js');
 require('codemirror/addon/search/searchcursor.js');
 require('codemirror/addon/edit/matchbrackets.js');
@@ -25988,7 +25996,9 @@ var extendCmInstance = function(yasqe) {
 	yasqe.getNextNonWsToken = function(lineNumber, charNumber) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
-	
+	yasqe.collapsePrefixes = function(collapse) {
+		yasqe.foldCode(require('./prefixFold.js').findFirstPrefixLine(yasqe), YASQE.fold.prefix, (collapse? "fold": "unfold"));
+	};
 	var backdrop = null;
 	var animateSpeed = null;
 	yasqe.setBackdrop = function(show) {
@@ -26163,7 +26173,7 @@ var postProcessCmElement = function(yasqe) {
 			yasqe.options.consumeShareLink(yasqe, getUrlParams());
 		});
 	}
-	
+	if (yasqe.options.collapsePrefixesOnLoad) yasqe.collapsePrefixes(true);
 };
 
 /**
@@ -26646,7 +26656,133 @@ root.version = {
 	"yasgui-utils": yutils.version
 };
 
-},{"../lib/deparam.js":2,"../lib/grammar/tokenizer.js":4,"../package.json":22,"./autocompleters/autocompleterBase.js":23,"./autocompleters/classes.js":24,"./autocompleters/prefixes.js":25,"./autocompleters/properties.js":26,"./autocompleters/variables.js":28,"./defaults.js":29,"./imgs.js":30,"./prefixUtils.js":32,"./sparql.js":33,"./tokenUtils.js":34,"./tooltip":35,"./utils.js":36,"codemirror":15,"codemirror/addon/display/fullscreen.js":6,"codemirror/addon/edit/matchbrackets.js":7,"codemirror/addon/fold/brace-fold.js":8,"codemirror/addon/fold/foldcode.js":9,"codemirror/addon/fold/foldgutter.js":10,"codemirror/addon/fold/xml-fold.js":11,"codemirror/addon/hint/show-hint.js":12,"codemirror/addon/runmode/runmode.js":13,"codemirror/addon/search/searchcursor.js":14,"jquery":16,"yasgui-utils":19}],32:[function(require,module,exports){
+},{"../lib/deparam.js":2,"../lib/grammar/tokenizer.js":4,"../package.json":22,"./autocompleters/autocompleterBase.js":23,"./autocompleters/classes.js":24,"./autocompleters/prefixes.js":25,"./autocompleters/properties.js":26,"./autocompleters/variables.js":28,"./defaults.js":29,"./imgs.js":30,"./prefixFold.js":32,"./prefixUtils.js":33,"./sparql.js":34,"./tokenUtils.js":35,"./tooltip":36,"./utils.js":37,"codemirror":15,"codemirror/addon/display/fullscreen.js":6,"codemirror/addon/edit/matchbrackets.js":7,"codemirror/addon/fold/brace-fold.js":8,"codemirror/addon/fold/foldcode.js":9,"codemirror/addon/fold/foldgutter.js":10,"codemirror/addon/fold/xml-fold.js":11,"codemirror/addon/hint/show-hint.js":12,"codemirror/addon/runmode/runmode.js":13,"codemirror/addon/search/searchcursor.js":14,"jquery":16,"yasgui-utils":19}],32:[function(require,module,exports){
+var CodeMirror = require('codemirror'),
+	tokenUtils = require('./tokenUtils.js');
+
+"use strict";
+var lookFor = "PREFIX";
+module.exports = {
+	findFirstPrefixLine: function(cm) {
+		var lastLine = cm.lastLine();
+		for (var i = 0; i <= lastLine; ++i) {
+			if (findFirstPrefix(cm, i) >= 0) {
+				return i;
+			}
+		}
+	}
+}
+function findFirstPrefix(cm, line, ch, lineText) {
+	if (!ch) ch = 0;
+	if (!lineText) lineText = cm.getLine(line);
+	lineText = lineText.toUpperCase();
+	for (var at = ch, pass = 0;;) {
+		var found = lineText.indexOf(lookFor, at);
+		if (found == -1) {
+			if (pass == 1)
+				break;
+			pass = 1;
+			at = lineText.length;
+			continue;
+		}
+		if (pass == 1 && found < ch)
+			break;
+		tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+		if (!/^(comment|string)/.test(tokenType))
+			return found + 1;
+		at = found - 1;
+	}
+}
+
+CodeMirror.registerHelper("fold", "prefix", function(cm, start) {
+	var line = start.line, lineText = cm.getLine(line);
+	
+	var startCh, tokenType;
+
+	function hasPreviousPrefix() {
+		var hasPreviousPrefix = false;
+		for (var i = line - 1; i >= 0; i--) {
+			if (cm.getLine(i).toUpperCase().indexOf(lookFor) >= 0) {
+				hasPreviousPrefix = true;
+				break;
+			}
+		}
+		return hasPreviousPrefix;
+	}
+	
+	
+	function findOpening(openCh) {
+		for (var at = start.ch, pass = 0;;) {
+			var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+			if (found == -1) {
+				if (pass == 1)
+					break;
+				pass = 1;
+				at = lineText.length;
+				continue;
+			}
+			if (pass == 1 && found < start.ch)
+				break;
+			tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+			if (!/^(comment|string)/.test(tokenType))
+				return found + 1;
+			at = found - 1;
+		}
+	}
+	var getLastPrefixPos = function(line, ch) {
+		var prefixKeywordToken = cm.getTokenAt(CodeMirror.Pos(line, ch + 1));
+		if (!prefixKeywordToken || prefixKeywordToken.type != "keyword") return -1;
+		var prefixShortname = tokenUtils.getNextNonWsToken(cm, line, prefixKeywordToken.end + 1);
+		if (!prefixShortname || prefixShortname.type != "string-2")	return -1;//missing prefix keyword shortname
+		var prefixUri = tokenUtils.getNextNonWsToken(cm, line, prefixShortname.end + 1);
+		if (!prefixUri || prefixUri.type != "variable-3") return -1;//missing prefix uri
+		return prefixUri.end;
+	}
+
+	//only use opening prefix declaration
+	if (hasPreviousPrefix())
+		return;
+	var prefixStart = findFirstPrefix(cm, line, start.ch, lineText);
+
+	if (prefixStart == null)
+		return;
+	var stopAt = '{'; //if this char is there, we won't have a chance of finding more prefixes
+	var stopAtNextLine = false;
+	var count = 1, lastLine = cm.lastLine(), end, endCh;
+	var prefixEndChar = getLastPrefixPos(line, prefixStart);
+	var prefixEndLine = line;
+
+	outer: for (var i = line; i <= lastLine; ++i) {
+		if (stopAtNextLine)
+			break;
+		var text = cm.getLine(i), pos = i == line ? prefixStart + 1 : 0;
+
+		for (;;) {
+			if (!stopAtNextLine && text.indexOf(stopAt) >= 0)
+				stopAtNextLine = true;
+
+			var nextPrefixDeclaration = text.toUpperCase()
+					.indexOf(lookFor, pos);
+
+			if (nextPrefixDeclaration >= 0) {
+				if ((endCh = getLastPrefixPos(i, nextPrefixDeclaration)) > 0) {
+					prefixEndChar = endCh;
+					prefixEndLine = i;
+					pos = prefixEndChar;
+				}
+				pos++;
+			} else {
+				break;
+			}
+		}
+	}
+	return {
+		from : CodeMirror.Pos(line, prefixStart + lookFor.length),
+		to : CodeMirror.Pos(prefixEndLine, prefixEndChar)
+	};
+});
+
+},{"./tokenUtils.js":35,"codemirror":15}],33:[function(require,module,exports){
 'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
@@ -26665,6 +26801,7 @@ var addPrefixes = function(yasqe, prefixes) {
 			addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
 		}
 	}
+	yasqe.collapsePrefixes(false);
 };
 
 var addPrefixAsString = function(yasqe, prefixString) {
@@ -26691,6 +26828,7 @@ var addPrefixAsString = function(yasqe, prefixString) {
 			line : lastPrefixLine
 		});
 	}
+	yasqe.collapsePrefixes(false);
 };
 var removePrefixes = function(yasqe, prefixes) {
 	var escapeRegex = function(string) {
@@ -26700,6 +26838,7 @@ var removePrefixes = function(yasqe, prefixes) {
 	for (var pref in prefixes) {
 		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), ''));
 	}
+	yasqe.collapsePrefixes(false);
 	
 };
 
@@ -26784,7 +26923,7 @@ module.exports = {
 	removePrefixes: removePrefixes
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 var $ = require('jquery'),
 	YASQE = require('./main.js');
@@ -26920,7 +27059,7 @@ var getAcceptHeader = function(yasqe, config) {
 	return acceptHeader;
 };
 
-},{"./main.js":31,"jquery":16}],34:[function(require,module,exports){
+},{"./main.js":31,"jquery":16}],35:[function(require,module,exports){
 'use strict';
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
@@ -26998,7 +27137,7 @@ module.exports = {
 };
 
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 var $ = require('jquery'),
 	utils = require('./utils.js');
@@ -27036,7 +27175,7 @@ module.exports = function(yasqe, parent, html) {
 };
 
 
-},{"./utils.js":36,"jquery":16}],36:[function(require,module,exports){
+},{"./utils.js":37,"jquery":16}],37:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
 
