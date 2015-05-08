@@ -251,6 +251,11 @@ var postProcessCmElement = function(yasqe) {
 	checkSyntax(yasqe);// on first load, check as well (our stored or default query might be incorrect)
 	root.positionButtons(yasqe);
 	
+	$(yasqe.getWrapperElement()).on('mouseenter', '.cm-atom', function() {
+		$(yasqe.getWrapperElement()).find('.cm-atom:contains(' + $(this).text() +')').addClass('matchingVar');
+	}).on('mouseleave', '.cm-atom', function() {
+		$(yasqe.getWrapperElement()).find('.matchingVar').removeClass('matchingVar');
+	});
 	/**
 	 * check url args and modify yasqe settings if needed
 	 */
