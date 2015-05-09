@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "main": "src/main.js",
   "licenses": [
     {
@@ -7769,7 +7769,10 @@ var postProcessCmElement = function(yasqe) {
 	root.positionButtons(yasqe);
 	
 	$(yasqe.getWrapperElement()).on('mouseenter', '.cm-atom', function() {
-		$(yasqe.getWrapperElement()).find('.cm-atom:contains(' + $(this).text() +')').addClass('matchingVar');
+		var matchText = $(this).text();
+		$(yasqe.getWrapperElement()).find('.cm-atom').filter(function() {
+		    return $(this).text() === matchText;
+		}).addClass('matchingVar');
 	}).on('mouseleave', '.cm-atom', function() {
 		$(yasqe.getWrapperElement()).find('.matchingVar').removeClass('matchingVar');
 	});
