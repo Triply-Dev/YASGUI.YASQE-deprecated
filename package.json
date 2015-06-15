@@ -3,12 +3,7 @@
   "description": "Yet Another SPARQL Query Editor",
   "version": "2.5.2",
   "main": "src/main.js",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://yasqe.yasgui.org/license.txt"
-    }
-  ],
+  "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
   "devDependencies": {
