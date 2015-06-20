@@ -2,6 +2,7 @@
 var $ = require('jquery'),
 	YASQE = require('./main.js');
 YASQE.executeQuery = function(yasqe, callbackOrConfig) {
+	YASQE.signal(yasqe, 'query', yasqe, callbackOrConfig);
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig : null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
 
@@ -63,11 +64,15 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		yasqe.setBackdrop(false);
 	};
 	//Make sure the query button is updated again on complete
+	var completeCallbacks = [
+		function(){require('./main.js').signal(yasqe, 'queryFinish', arguments)},
+		updateYasqe
+	];
+
 	if (ajaxConfig.complete) {
-		ajaxConfig.complete = [updateYasqe, ajaxConfig.complete];
-	} else {
-		ajaxConfig.complete = updateYasqe;
+		completeCallbacks.push(ajaxConfig.complete);
 	}
+	ajaxConfig.complete = completeCallbacks;
 	yasqe.xhr = $.ajax(ajaxConfig);
 };
 
