@@ -2,7 +2,7 @@
 var $ = require('jquery');
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
 var tokenTypes = {
-	"string-2" : "prefixed",
+	"string-2": "prefixed",
 	"atom": "var"
 };
 
@@ -11,29 +11,33 @@ module.exports = function(yasqe, completerName) {
 	yasqe.on("change", function() {
 		module.exports.appendPrefixIfNeeded(yasqe, completerName);
 	});
-	
-	
+
+
 	return {
-		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
-		get : function(token, callback) {
+		isValidCompletionPosition: function() {
+			return module.exports.isValidCompletionPosition(yasqe);
+		},
+		get: function(token, callback) {
 			$.get("http://prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
-				for ( var prefix in data) {
+				for (var prefix in data) {
 					if (prefix == "bif")
-						continue;// skip this one! see #231
+						continue; // skip this one! see #231
 					var completeString = prefix + ": <" + data[prefix] + ">";
-					prefixArray.push(completeString);// the array we want to store in localstorage
+					prefixArray.push(completeString); // the array we want to store in localstorage
 				}
-				
+
 				prefixArray.sort();
 				callback(prefixArray);
 			});
 		},
-		preProcessToken: function(token) {return module.exports.preprocessPrefixTokenForCompletion(yasqe, token)},
-		async : true,
-		bulk : true,
+		preProcessToken: function(token) {
+			return module.exports.preprocessPrefixTokenForCompletion(yasqe, token)
+		},
+		async: true,
+		bulk: true,
 		autoShow: true,
-		persistent : completerName,
+		persistent: completerName,
 		callbacks: {
 			pick: function() {
 				yasqe.collapsePrefixes(false);
@@ -42,7 +46,8 @@ module.exports = function(yasqe, completerName) {
 	};
 };
 module.exports.isValidCompletionPosition = function(yasqe) {
-	var cur = yasqe.getCursor(), token = yasqe.getTokenAt(cur);
+	var cur = yasqe.getCursor(),
+		token = yasqe.getTokenAt(cur);
 
 	// not at end of line
 	if (yasqe.getLine(cur.line).length > cur.ch)
@@ -59,8 +64,7 @@ module.exports.isValidCompletionPosition = function(yasqe) {
 	// we shouldnt be at the uri part the prefix declaration
 	// also check whether current token isnt 'a' (that makes codemirror
 	// thing a namespace is a possiblecurrent
-	if (!token.string.indexOf("a") == 0
-			&& $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
+	if (!token.string.indexOf("a") == 0 && $.inArray("PNAME_NS", token.state.possibleCurrent) == -1)
 		return false;
 
 	// First token of line needs to be PREFIX,
@@ -92,8 +96,8 @@ module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
  */
 module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 	if (!yasqe.autocompleters.getTrie(completerName))
-		return;// no prefixed defined. just stop
-	if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf(completerName) == -1) return;//this autocompleter is disabled
+		return; // no prefixed defined. just stop
+	if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf(completerName) == -1) return; //this autocompleter is disabled
 	var cur = yasqe.getCursor();
 
 	var token = yasqe.getTokenAt(cur);
@@ -101,19 +105,18 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		var colonIndex = token.string.indexOf(":");
 		if (colonIndex !== -1) {
 			// check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
-//			var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
+			//			var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
 			var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
 			var previousToken = yasqe.getTokenAt({
-				line : cur.line,
-				ch : token.start
-			});// needs to be null (beginning of line), or whitespace
-			if (lastNonWsTokenString != "PREFIX"
-					&& (previousToken.type == "ws" || previousToken.type == null)) {
+				line: cur.line,
+				ch: token.start
+			}); // needs to be null (beginning of line), or whitespace
+			if (lastNonWsTokenString != "PREFIX" && (previousToken.type == "ws" || previousToken.type == null)) {
 				// check whether it isnt defined already (saves us from looping
 				// through the array)
 				var currentPrefix = token.string.substring(0, colonIndex + 1);
 				var queryPrefixes = yasqe.getPrefixesFromQuery();
-				if (queryPrefixes[currentPrefix.slice(0,-1)] == null) {
+				if (queryPrefixes[currentPrefix.slice(0, -1)] == null) {
 					// ok, so it isnt added yet!
 					var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
 					if (completions.length > 0) {
@@ -124,4 +127,3 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		}
 	}
 };
-

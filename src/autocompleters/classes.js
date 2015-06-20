@@ -2,19 +2,25 @@
 var $ = require('jquery');
 module.exports = function(yasqe, name) {
 	return {
-		isValidCompletionPosition : function(){return module.exports.isValidCompletionPosition(yasqe);},
-		get : function(token, callback) {
+		isValidCompletionPosition: function() {
+			return module.exports.isValidCompletionPosition(yasqe);
+		},
+		get: function(token, callback) {
 			return require('./utils').fetchFromLov(yasqe, this, token, callback);
 		},
-		preProcessToken: function(token) {return module.exports.preProcessToken(yasqe, token)},
-		postProcessToken: function(token, suggestedString) {return module.exports.postProcessToken(yasqe, token, suggestedString);},
-		async : true,
-		bulk : false,
-		autoShow : false,
-		persistent : name,
-		callbacks : {
-			validPosition : yasqe.autocompleters.notifications.show,
-			invalidPosition : yasqe.autocompleters.notifications.hide,
+		preProcessToken: function(token) {
+			return module.exports.preProcessToken(yasqe, token)
+		},
+		postProcessToken: function(token, suggestedString) {
+			return module.exports.postProcessToken(yasqe, token, suggestedString);
+		},
+		async: true,
+		bulk: false,
+		autoShow: false,
+		persistent: name,
+		callbacks: {
+			validPosition: yasqe.autocompleters.notifications.show,
+			invalidPosition: yasqe.autocompleters.notifications.hide,
 		}
 	}
 };

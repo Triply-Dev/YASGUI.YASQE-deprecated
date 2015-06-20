@@ -9,7 +9,7 @@ module.exports = function(YASQE, yasqe) {
 	var completionNotifications = {};
 	var completers = {};
 	var tries = {};
-	
+
 	yasqe.on('cursorActivity', function(yasqe, eventInfo) {
 		autoComplete(true);
 	});
@@ -27,11 +27,13 @@ module.exports = function(YASQE, yasqe) {
 			if (scrollBar.is(":visible")) {
 				offset = scrollBar.outerWidth();
 			}
-			needPossibleAdjustment.forEach(function(notification){notification.css("right", offset)});
+			needPossibleAdjustment.forEach(function(notification) {
+				notification.css("right", offset)
+			});
 		}
 	});
 
-	
+
 
 	/**
 	 * Store bulk completions in memory as trie, and store these in localstorage as well (if enabled)
@@ -49,7 +51,7 @@ module.exports = function(YASQE, yasqe) {
 		var storageId = utils.getPersistencyId(yasqe, completer.persistent);
 		if (storageId) yutils.storage.set(storageId, completions, "month");
 	};
-	
+
 	var initCompleter = function(name, completionInit) {
 		var completer = completers[name] = new completionInit(yasqe, name);
 		completer.name = name;
@@ -92,14 +94,14 @@ module.exports = function(YASQE, yasqe) {
 			return;
 		var tryHintType = function(completer) {
 			if (fromAutoShow // from autoShow, i.e. this gets called each time the editor content changes
-					&& (!completer.autoShow // autoshow for  this particular type of autocompletion is -not- enabled
+				&& (!completer.autoShow // autoshow for  this particular type of autocompletion is -not- enabled
 					|| (!completer.bulk && completer.async)) // async is enabled (don't want to re-do ajax-like request for every editor change)
 			) {
 				return false;
 			}
 
 			var hintConfig = {
-				closeCharacters : /(?=a)b/,
+				closeCharacters: /(?=a)b/,
 				completeSingle: false
 			};
 			if (!completer.bulk && completer.async) {
@@ -111,11 +113,11 @@ module.exports = function(YASQE, yasqe) {
 			var result = YASQE.showHint(yasqe, wrappedHintCallback, hintConfig);
 			return true;
 		};
-		for ( var completerName in completers) {
-			if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue;//this completer is disabled
+		for (var completerName in completers) {
+			if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue; //this completer is disabled
 			var completer = completers[completerName];
 			if (!completer.isValidCompletionPosition) continue; //no way to check whether we are in a valid position
-			
+
 			if (!completer.isValidCompletionPosition()) {
 				//if needed, fire callbacks for when we are -not- in valid completion position
 				if (completer.callbacks && completer.callbacks.invalidPosition) {
@@ -134,8 +136,8 @@ module.exports = function(YASQE, yasqe) {
 				break;
 		}
 	};
-	
-	
+
+
 
 	var getCompletionHintsObject = function(completer, callback) {
 		var getSuggestionsFromToken = function(partialToken) {
@@ -155,15 +157,15 @@ module.exports = function(YASQE, yasqe) {
 				}
 			}
 			return getSuggestionsAsHintObject(suggestions, completer, partialToken);
-			
+
 		};
-		
-		
+
+
 		var token = yasqe.getCompleteToken();
 		if (completer.preProcessToken) {
 			token = completer.preProcessToken(token);
 		}
-		
+
 		if (token) {
 			// use custom completionhint function, to avoid reaching a loop when the
 			// completionhint is the same as the current token
@@ -180,7 +182,7 @@ module.exports = function(YASQE, yasqe) {
 			}
 		}
 	};
-	
+
 
 	/**
 	 *  get our array of suggestions (strings) in the codemirror hint format
@@ -193,28 +195,28 @@ module.exports = function(YASQE, yasqe) {
 				suggestedString = completer.postProcessToken(token, suggestedString);
 			}
 			hintList.push({
-				text : suggestedString,
-				displayText : suggestedString,
-				hint : selectHint,
+				text: suggestedString,
+				displayText: suggestedString,
+				hint: selectHint,
 			});
 		}
-		
+
 		var cur = yasqe.getCursor();
 		var returnObj = {
-			completionToken : token.string,
-			list : hintList,
-			from : {
-				line : cur.line,
-				ch : token.start
+			completionToken: token.string,
+			list: hintList,
+			from: {
+				line: cur.line,
+				ch: token.start
 			},
-			to : {
-				line : cur.line,
-				ch : token.end
+			to: {
+				line: cur.line,
+				ch: token.end
 			}
 		};
 		//if we have some autocompletion handlers specified, add these these to the object. Codemirror will take care of firing these
 		if (completer.callbacks) {
-			for ( var callbackName in completer.callbacks) {
+			for (var callbackName in completer.callbacks) {
 				if (completer.callbacks[callbackName]) {
 					YASQE.on(returnObj, callbackName, completer.callbacks[callbackName]);
 				}
@@ -222,7 +224,7 @@ module.exports = function(YASQE, yasqe) {
 		}
 		return returnObj;
 	};
-	
+
 	return {
 		init: initCompleter,
 		completers: completers,
@@ -236,7 +238,7 @@ module.exports = function(YASQE, yasqe) {
 					if (!completionNotifications[completer.name]) completionNotifications[completer.name] = $("<div class='completionNotification'></div>");
 					completionNotifications[completer.name]
 						.show()
-						.text("Press " + (navigator.userAgent.indexOf('Mac OS X') != -1? "CMD": "CTRL") + " - <spacebar> to autocomplete")
+						.text("Press " + (navigator.userAgent.indexOf('Mac OS X') != -1 ? "CMD" : "CTRL") + " - <spacebar> to autocomplete")
 						.appendTo($(yasqe.getWrapperElement()));
 				}
 			},
@@ -245,16 +247,14 @@ module.exports = function(YASQE, yasqe) {
 					completionNotifications[completer.name].hide();
 				}
 			}
-			
+
 		},
 		autoComplete: autoComplete,
-		getTrie: function(completer) {return (typeof completer == "string"? tries[completer]: tries[completer.name]);}
+		getTrie: function(completer) {
+			return (typeof completer == "string" ? tries[completer] : tries[completer.name]);
+		}
 	}
 };
-
-
-
-
 
 
 

@@ -19,20 +19,19 @@ var getCompleteToken = function(yasqe, token, cur) {
 		token = yasqe.getTokenAt(cur);
 	}
 	var prevToken = yasqe.getTokenAt({
-		line : cur.line,
-		ch : token.start
+		line: cur.line,
+		ch: token.start
 	});
 	// not start of line, and not whitespace
 	if (
-			prevToken.type != null && prevToken.type != "ws"
-			&& token.type != null && token.type != "ws"
-		) {
+		prevToken.type != null && prevToken.type != "ws" && token.type != null && token.type != "ws"
+	) {
 		token.start = prevToken.start;
 		token.string = prevToken.string + token.string;
 		return getCompleteToken(yasqe, token, {
-			line : cur.line,
-			ch : prevToken.start
-		});// recursively, might have multiple tokens which it should include
+			line: cur.line,
+			ch: prevToken.start
+		}); // recursively, might have multiple tokens which it should include
 	} else if (token.type != null && token.type == "ws") {
 		//always keep 1 char of whitespace between tokens. Otherwise, autocompletions might end up next to the previous node, without whitespace between them
 		token.start = token.start + 1;
@@ -44,8 +43,8 @@ var getCompleteToken = function(yasqe, token, cur) {
 };
 var getPreviousNonWsToken = function(yasqe, line, token) {
 	var previousToken = yasqe.getTokenAt({
-		line : line,
-		ch : token.start
+		line: line,
+		ch: token.start
 	});
 	if (previousToken != null && previousToken.type == "ws") {
 		previousToken = getPreviousNonWsToken(yasqe, line, previousToken);
@@ -56,8 +55,8 @@ var getNextNonWsToken = function(yasqe, lineNumber, charNumber) {
 	if (charNumber == undefined)
 		charNumber = 1;
 	var token = yasqe.getTokenAt({
-		line : lineNumber,
-		ch : charNumber
+		line: lineNumber,
+		ch: charNumber
 	});
 	if (token == null || token == undefined || token.end < charNumber) {
 		return null;
@@ -73,4 +72,3 @@ module.exports = {
 	getCompleteToken: getCompleteToken,
 	getNextNonWsToken: getNextNonWsToken,
 };
-

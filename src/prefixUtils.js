@@ -13,7 +13,7 @@ var addPrefixes = function(yasqe, prefixes) {
 	} else {
 		for (var pref in prefixes) {
 			if (!(pref in existingPrefixes))
-			addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
+				addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
 		}
 	}
 	yasqe.collapsePrefixes(false);
@@ -25,8 +25,7 @@ var addPrefixAsString = function(yasqe, prefixString) {
 	var numLines = yasqe.lineCount();
 	for (var i = 0; i < numLines; i++) {
 		var firstToken = yasqe.getNextNonWsToken(i);
-		if (firstToken != null
-				&& (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
+		if (firstToken != null && (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
 			lastPrefix = firstToken;
 			lastPrefixLine = i;
 		}
@@ -34,13 +33,13 @@ var addPrefixAsString = function(yasqe, prefixString) {
 
 	if (lastPrefix == null) {
 		yasqe.replaceRange("PREFIX " + prefixString + "\n", {
-			line : 0,
-			ch : 0
+			line: 0,
+			ch: 0
 		});
 	} else {
 		var previousIndent = getIndentFromLine(yasqe, lastPrefixLine);
 		yasqe.replaceRange("\n" + previousIndent + "PREFIX " + prefixString, {
-			line : lastPrefixLine
+			line: lastPrefixLine
 		});
 	}
 	yasqe.collapsePrefixes(false);
@@ -54,7 +53,7 @@ var removePrefixes = function(yasqe, prefixes) {
 		yasqe.setValue(yasqe.getValue().replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), ''));
 	}
 	yasqe.collapsePrefixes(false);
-	
+
 };
 
 /**
@@ -71,7 +70,7 @@ var getPrefixesFromQuery = function(yasqe) {
 		if (!colOffset) colOffset = 1;
 		var token = yasqe.getNextNonWsToken(i, colOffset);
 		if (token) {
-			if (token.state.possibleCurrent.indexOf("PREFIX") == -1 && token.state.possibleNext.indexOf("PREFIX") == -1) shouldContinue = false;//we are beyond the place in the query where we can enter prefixes
+			if (token.state.possibleCurrent.indexOf("PREFIX") == -1 && token.state.possibleNext.indexOf("PREFIX") == -1) shouldContinue = false; //we are beyond the place in the query where we can enter prefixes
 			if (token.string.toUpperCase() == "PREFIX") {
 				var prefix = yasqe.getNextNonWsToken(i, token.end + 1);
 				if (prefix) {
@@ -82,29 +81,29 @@ var getPrefixesFromQuery = function(yasqe) {
 							uriString = uriString.substring(1);
 						if (uriString.slice(-1) == ">")
 							uriString = uriString
-									.substring(0, uriString.length - 1);
-						queryPrefixes[prefix.string.slice(0,-1)] = uriString;
-						
-						getPrefixesFromLine(lineOffset, uri.end+1);
+							.substring(0, uriString.length - 1);
+						queryPrefixes[prefix.string.slice(0, -1)] = uriString;
+
+						getPrefixesFromLine(lineOffset, uri.end + 1);
 					} else {
-						getPrefixesFromLine(lineOffset, prefix.end+1);
+						getPrefixesFromLine(lineOffset, prefix.end + 1);
 					}
-					
+
 				} else {
-					getPrefixesFromLine(lineOffset, token.end+1);
+					getPrefixesFromLine(lineOffset, token.end + 1);
 				}
 			} else {
-				getPrefixesFromLine(lineOffset, token.end+1);
+				getPrefixesFromLine(lineOffset, token.end + 1);
 			}
 		}
 	};
-	
-	
+
+
 	var numLines = yasqe.lineCount();
 	for (var i = 0; i < numLines; i++) {
 		if (!shouldContinue) break;
 		getPrefixesFromLine(i);
-		
+
 	}
 	return queryPrefixes;
 };
@@ -121,15 +120,14 @@ var getIndentFromLine = function(yasqe, line, charNumber) {
 	if (charNumber == undefined)
 		charNumber = 1;
 	var token = yasqe.getTokenAt({
-		line : line,
-		ch : charNumber
+		line: line,
+		ch: charNumber
 	});
 	if (token == null || token == undefined || token.type != "ws") {
 		return "";
 	} else {
 		return token.string + getIndentFromLine(yasqe, line, token.end + 1);
-	}
-	;
+	};
 };
 
 module.exports = {

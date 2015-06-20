@@ -15,10 +15,10 @@ var $ = require('jquery'),
 var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	var queryPrefixes = yasqe.getPrefixesFromQuery();
 	if (!token.string.indexOf("<") == 0) {
-		token.tokenPrefix = token.string.substring(0,	token.string.indexOf(":") + 1);
+		token.tokenPrefix = token.string.substring(0, token.string.indexOf(":") + 1);
 
-		if (queryPrefixes[token.tokenPrefix.slice(0,-1)] != null) {
-			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix.slice(0,-1)];
+		if (queryPrefixes[token.tokenPrefix.slice(0, -1)] != null) {
+			token.tokenPrefixUri = queryPrefixes[token.tokenPrefix.slice(0, -1)];
 		}
 	}
 
@@ -34,8 +34,8 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 		}
 	}
 
-	if (token.autocompletionString.indexOf("<") == 0)	token.autocompletionString = token.autocompletionString.substring(1);
-	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0,	token.autocompletionString.length - 1);
+	if (token.autocompletionString.indexOf("<") == 0) token.autocompletionString = token.autocompletionString.substring(1);
+	if (token.autocompletionString.indexOf(">", token.length - 1) !== -1) token.autocompletionString = token.autocompletionString.substring(0, token.autocompletionString.length - 1);
 	return token;
 };
 
@@ -60,8 +60,8 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
 	var maxResults = 50;
 
 	var args = {
-		q : token.autocompletionString,
-		page : 1
+		q: token.autocompletionString,
+		page: 1
 	};
 	if (completer.name == "classes") {
 		args.type = "class";
@@ -71,8 +71,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
 	var results = [];
 	var url = "";
 	var updateUrl = function() {
-		url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?"
-				+ $.param(args);
+		url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
 	};
 	updateUrl();
 	var increasePage = function() {
@@ -81,35 +80,34 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
 	};
 	var doRequests = function() {
 		$.get(
-				url,
-				function(data) {
-					for (var i = 0; i < data.results.length; i++) {
-						if ($.isArray(data.results[i].uri) && data.results[i].uri.length > 0) {
-							results.push(data.results[i].uri[0]);
-						} else {
-							results.push(data.results[i].uri);
-						}
-						
-					}
-					if (results.length < data.total_results
-							&& results.length < maxResults) {
-						increasePage();
-						doRequests();
+			url,
+			function(data) {
+				for (var i = 0; i < data.results.length; i++) {
+					if ($.isArray(data.results[i].uri) && data.results[i].uri.length > 0) {
+						results.push(data.results[i].uri[0]);
 					} else {
-						//if notification bar is there, show feedback, or close
-						if (results.length > 0) {
-							yasqe.autocompleters.notifications.hide(yasqe, completer)
-						} else {
-							yasqe.autocompleters.notifications.getEl(completer).text("0 matches found...");
-						}
-						callback(results);
-						// requests done! Don't call this function again
+						results.push(data.results[i].uri);
 					}
-				}).fail(function(jqXHR, textStatus, errorThrown) {
-					yasqe.autocompleters.notifications.getEl(completer)
-						.empty()
-						.append("Failed fetching suggestions..");
-					
+
+				}
+				if (results.length < data.total_results && results.length < maxResults) {
+					increasePage();
+					doRequests();
+				} else {
+					//if notification bar is there, show feedback, or close
+					if (results.length > 0) {
+						yasqe.autocompleters.notifications.hide(yasqe, completer)
+					} else {
+						yasqe.autocompleters.notifications.getEl(completer).text("0 matches found...");
+					}
+					callback(results);
+					// requests done! Don't call this function again
+				}
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+			yasqe.autocompleters.notifications.getEl(completer)
+				.empty()
+				.append("Failed fetching suggestions..");
+
 		});
 	};
 	//if notification bar is there, show a loader

@@ -2,7 +2,7 @@
 var $ = require('jquery');
 module.exports = function(yasqe) {
 	return {
-		isValidCompletionPosition : function() {
+		isValidCompletionPosition: function() {
 			var token = yasqe.getTokenAt(yasqe.getCursor());
 			if (token.type != "ws") {
 				token = yasqe.getCompleteToken(token);
@@ -12,8 +12,8 @@ module.exports = function(yasqe) {
 			}
 			return false;
 		},
-		get : function(token) {
-			if (token.trim().length == 0) return [];//nothing to autocomplete
+		get: function(token) {
+			if (token.trim().length == 0) return []; //nothing to autocomplete
 			var distinctVars = {};
 			//do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
 			$(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
@@ -23,22 +23,22 @@ module.exports = function(yasqe) {
 					var nextEl = $(this).next();
 					var nextElClass = nextEl.attr('class');
 					if (nextElClass && nextEl.attr('class').indexOf("cm-atom") >= 0) {
-						variable += nextEl.text();			
+						variable += nextEl.text();
 					}
-					
+
 					//skip single questionmarks
 					if (variable.length <= 1) return;
-					
+
 					//it should match our token ofcourse
 					if (variable.indexOf(token) !== 0) return;
-					
+
 					//skip exact matches
 					if (variable == token) return;
-					
+
 					//store in map so we have a unique list 
 					distinctVars[variable] = true;
-					
-					
+
+
 				}
 			});
 			var variables = [];
@@ -48,8 +48,8 @@ module.exports = function(yasqe) {
 			variables.sort();
 			return variables;
 		},
-		async : false,
-		bulk : false,
-		autoShow : true,
+		async: false,
+		bulk: false,
+		autoShow: true,
 	}
 };

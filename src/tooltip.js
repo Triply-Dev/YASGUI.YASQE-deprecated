@@ -12,16 +12,16 @@ module.exports = function(yasqe, parent, html) {
 	var parent = $(parent);
 	var tooltip;
 	parent.hover(function() {
-		if (typeof html == "function") html = html();
-		tooltip = $("<div>").addClass('yasqe_tooltip').html(html).appendTo(parent);
-		repositionTooltip();
-	},
-	function() {
-		$(".yasqe_tooltip").remove();
-	});
-	
-	
-	
+			if (typeof html == "function") html = html();
+			tooltip = $("<div>").addClass('yasqe_tooltip').html(html).appendTo(parent);
+			repositionTooltip();
+		},
+		function() {
+			$(".yasqe_tooltip").remove();
+		});
+
+
+
 	/**
 	 * only need to take into account top and bottom offset for this usecase
 	 */
@@ -33,4 +33,3 @@ module.exports = function(yasqe, parent, html) {
 		}
 	};
 };
-
