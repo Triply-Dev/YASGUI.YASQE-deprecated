@@ -58,8 +58,9 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 
 	YASQE.updateQueryButton(yasqe, "busy");
 	yasqe.setBackdrop(true);
-
+	var queryStart = new Date();
 	var updateYasqe = function() {
+		yasqe.lastQueryDuration = new Date() - queryStart;
 		YASQE.updateQueryButton(yasqe);
 		yasqe.setBackdrop(false);
 	};
@@ -73,6 +74,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		completeCallbacks.push(ajaxConfig.complete);
 	}
 	ajaxConfig.complete = completeCallbacks;
+
 	yasqe.xhr = $.ajax(ajaxConfig);
 };
 

@@ -80,7 +80,7 @@ var extendCmInstance = function(yasqe) {
 			if (root.Autocompleters[name]) yasqe.autocompleters.init(name, root.Autocompleters[name]);
 		})
 	}
-
+	yasqe.lastQueryDuration = null;
 	yasqe.getCompleteToken = function(token, cur) {
 		return require('./tokenUtils.js').getCompleteToken(yasqe, token, cur);
 	};
