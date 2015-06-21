@@ -5,36 +5,6 @@
   /* GUTTER */
   /* CURSOR */
   /* Shown when moving in bi-directional text */
-  @-moz-keyframes blink {
-    0% {
-      background: #7e7; }
-
-    50% {
-      background: none; }
-
-    100% {
-      background: #7e7; } }
-
-  @-webkit-keyframes blink {
-    0% {
-      background: #7e7; }
-
-    50% {
-      background: none; }
-
-    100% {
-      background: #7e7; } }
-
-  @keyframes blink {
-    0% {
-      background: #7e7; }
-
-    50% {
-      background: none; }
-
-    100% {
-      background: #7e7; } }
-
   /* Can style cursor different in overwrite (non-insert) mode */
   /* DEFAULT THEME */
   /* Default styles for common addons */
@@ -92,6 +62,30 @@
     -webkit-animation: blink 1.06s steps(1) infinite;
     -moz-animation: blink 1.06s steps(1) infinite;
     animation: blink 1.06s steps(1) infinite; }
+
+@-moz-keyframes blink {
+  0% {
+    background: #7e7; }
+  50% {
+    background: none; }
+  100% {
+    background: #7e7; } }
+
+@-webkit-keyframes blink {
+  0% {
+    background: #7e7; }
+  50% {
+    background: none; }
+  100% {
+    background: #7e7; } }
+
+@keyframes blink {
+  0% {
+    background: #7e7; }
+  50% {
+    background: none; }
+  100% {
+    background: #7e7; } }
   .yasqe .cm-tab {
     display: inline-block;
     text-decoration: inherit; }
@@ -320,7 +314,8 @@
     cursor: pointer; }
   .yasqe .CodeMirror-foldgutter {
     width: .7em; }
-  .yasqe .CodeMirror-foldgutter-open, .yasqe .CodeMirror-foldgutter-folded {
+  .yasqe .CodeMirror-foldgutter-open,
+  .yasqe .CodeMirror-foldgutter-folded {
     cursor: pointer; }
   .yasqe .CodeMirror-foldgutter-open:after {
     content: "\25BE"; }
