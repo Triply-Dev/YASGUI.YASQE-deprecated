@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7371,7 +7371,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	syntaxErrorCheck: true,
 	/**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
-	 * 
+	 *
 	 * @property extraKeys
 	 * @type object
 	 */
@@ -7419,6 +7419,8 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 */
 	createShareLink: YASQE.createShareLink,
 
+	createShortLink: null,
+
 	/**
 	 * Consume links shared by others, by checking the url for arguments coming from a query link. Defaults by only checking the 'query=' argument in the url
 	 */
@@ -7434,7 +7436,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * string), will store the query in localstorage using the specified string.
 	 * By default, the ID is dynamically generated using the closest dom ID, to avoid collissions when using multiple YASQE items on one
 	 * page
-	 * 
+	 *
 	 * @type function|string
 	 */
 	persistent: function(yasqe) {
@@ -7450,14 +7452,14 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 
 		/**f
 		 * Endpoint to query
-		 * 
+		 *
 		 * @property sparql.endpoint
 		 * @type String|function
 		 */
 		endpoint: "http://dbpedia.org/sparql",
 		/**
 		 * Request method via which to access SPARQL endpoint
-		 * 
+		 *
 		 * @property sparql.requestMethod
 		 * @type String|function
 		 */
@@ -7507,6 +7509,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		handlers: {} //keep here for backwards compatability
 	},
 });
+
 },{"./main.js":29,"jquery":undefined}],28:[function(require,module,exports){
 'use strict';
 module.exports = {
@@ -7992,9 +7995,9 @@ root.drawButtons = function(yasqe) {
 				popup.click(function(event) {
 					event.stopPropagation();
 				});
-				var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + location.search + "#" + $.param(yasqe.options.createShareLink(yasqe)));
+				var $input = $("<input>").val(location.protocol + '//' + location.host + location.pathname + location.search + "#" + $.param(yasqe.options.createShareLink(yasqe)));
 
-				textAreaLink.focus(function() {
+				$input.focus(function() {
 					var $this = $(this);
 					$this.select();
 
@@ -8006,9 +8009,26 @@ root.drawButtons = function(yasqe) {
 					});
 				});
 
-				popup.empty().append(textAreaLink);
+				popup.empty().append($('<div>', {class:'inputWrapper'}).append($input));
+				if (yasqe.options.createShortLink) {
+					popup.addClass('enableShort');
+					$('<button>Shorten</button>')
+						.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
+						.click(function() {
+							$(this).attr('disabled', 'disabled');
+							yasqe.options.createShortLink($input.val(), function(errString, shortLink) {
+								if (errString) {
+									$input.remove();
+									popup.find('.inputWrapper').append($('<span>', {class:"shortlinkErr"}).text(errString));
+								} else {
+									$input.val(shortLink).focus();
+								}
+							})
+						}).appendTo(popup);
+				}
 				var positions = svgShare.position();
-				popup.css("top", (positions.top + svgShare.outerHeight()) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+				popup.css("top", (positions.top + svgShare.outerHeight() + parseInt(popup.css('padding-top')) ) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+				$input.focus();
 			})
 			.addClass("yasqe_share")
 			.attr("title", "Share your query")
