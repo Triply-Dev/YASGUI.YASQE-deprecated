@@ -470,9 +470,9 @@ root.drawButtons = function(yasqe) {
 				popup.click(function(event) {
 					event.stopPropagation();
 				});
-				var textAreaLink = $("<textarea></textarea>").val(location.protocol + '//' + location.host + location.pathname + location.search + "#" + $.param(yasqe.options.createShareLink(yasqe)));
+				var $input = $("<input>").val(location.protocol + '//' + location.host + location.pathname + location.search + "#" + $.param(yasqe.options.createShareLink(yasqe)));
 
-				textAreaLink.focus(function() {
+				$input.focus(function() {
 					var $this = $(this);
 					$this.select();
 
@@ -484,9 +484,9 @@ root.drawButtons = function(yasqe) {
 					});
 				});
 
-				popup.empty().append(textAreaLink);
+				popup.empty().append($input);
 				var positions = svgShare.position();
-				popup.css("top", (positions.top + svgShare.outerHeight()) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+				popup.css("top", (positions.top + svgShare.outerHeight() + parseInt(popup.css('padding-top')) ) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
 			})
 			.addClass("yasqe_share")
 			.attr("title", "Share your query")
