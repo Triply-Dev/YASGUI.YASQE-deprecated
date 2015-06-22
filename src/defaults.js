@@ -29,7 +29,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	syntaxErrorCheck: true,
 	/**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
-	 * 
+	 *
 	 * @property extraKeys
 	 * @type object
 	 */
@@ -77,6 +77,8 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 */
 	createShareLink: YASQE.createShareLink,
 
+	createShortLink: null,
+
 	/**
 	 * Consume links shared by others, by checking the url for arguments coming from a query link. Defaults by only checking the 'query=' argument in the url
 	 */
@@ -92,7 +94,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * string), will store the query in localstorage using the specified string.
 	 * By default, the ID is dynamically generated using the closest dom ID, to avoid collissions when using multiple YASQE items on one
 	 * page
-	 * 
+	 *
 	 * @type function|string
 	 */
 	persistent: function(yasqe) {
@@ -108,14 +110,14 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 
 		/**f
 		 * Endpoint to query
-		 * 
+		 *
 		 * @property sparql.endpoint
 		 * @type String|function
 		 */
 		endpoint: "http://dbpedia.org/sparql",
 		/**
 		 * Request method via which to access SPARQL endpoint
-		 * 
+		 *
 		 * @property sparql.requestMethod
 		 * @type String|function
 		 */

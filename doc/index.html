@@ -12,7 +12,7 @@
   </style>
   </head>
   <body data-spy="scroll" data-target="#sidebarmenu">
-  
+
   <a href="https://github.com/YASGUI/YASQE" target="_blank"><img style="z-index: 11111; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     <div class="navbar navbar-inverse navbar-static-top" role="navigation">
       <div class="container">
@@ -29,19 +29,19 @@
    <div class="container" role="main">
    <div class="row">
    <div class="col-md-9">
-   		
+
 		<h1>Documentation</h1>
 		YASQE extends the <a href="http://codemirror.net/" target="_blank">CodeMirror Library</a>. For a complete overview of the functionality they offer (such as event hooks), check out the  <a href="http://codemirror.net/4/doc/manual.html" target="_blank">CodeMirror Documentation</a>.
 		Below we elaborate on the functionality YASQE offers (in addition to the CodeMiror API).
 		<br><small>Note: Where CodeMirror provides <code>CodeMirror</code> in the global namespace, we provide <code>YASQE</code>.</small>
-      
-     	
+
+
      	<h2 id="gettingStarted">Getting Started</h2>
      	<p>Initialize YASQE via its constructor, or via the command <code>fromTextArea</code>. Both return in instance of YASQE, from now on referred to as <code>yasqe</code> (lowercase). Both function take as argument a config object. See the section on <a href="#config">defaults</a> for more information on this config object.</p>
      	<div class="doc">
      		<code>YASQE(parent: DOM-Element, settings: Object) → YASQE instance: yasqe</code>
      		<p>Main YASQE constructor. Pass a DOM element as argument to append the editor to, and (optionally) pass along config settings (see the YASQE.defaults object below, as well as the regular CodeMirror documentation, for more information on configurability)</p>
-     		
+
      	</div>
      	<div class="doc">
      		<code>YASQE.fromTextArea(textArea: DOM element, config: Object) → YASQE instance: yasqe</code>
@@ -49,7 +49,7 @@
    		</div>
      	<h3 id="gists">Examples</h3>
      	<div id="gistContainer">
-     		
+
      	</div>
      	<h2 id="api">API</h2>
      	API methods accessible via the <code>yasqe</code> instance
@@ -112,7 +112,7 @@
 			<code>yasqe.collapsePrefixes(collapse: boolean)</code>
 			<p>Collapsing prefixes if there are any. Use false to expand them.</p>
 		</div>
-		
+
 		<h2 id="statics">Statics</h2>
      	Static functions YASQE
    		<div class="doc" id="registerAutocompleter">
@@ -165,11 +165,11 @@
 			<p>Show notification</p>
 		</div>
 
-		
+
      	<h2 id="config">Configuration</h2>
      	This configuration object is accessible/changeable via <code>YASQE.defaults</code> and <code>yasqe.options</code>, and you can pass these along when initializing YASQE as well.
      	Other than the configuration we describe here, check the <a href="http://codemirror.net" target="_blank">CodeMirror</a> documentation for even more options you can set, such as disabling line numbers, or changing keyboard shortcut keys.
-     	<h3 id="defaults">Defaults</h3> 
+     	<h3 id="defaults">Defaults</h3>
 		<div class="doc">
 			<code>value: String (default: "SELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10")</code>
 			<p>Query string</p>
@@ -193,7 +193,7 @@
 		<div class="doc" id="keyboardShortcuts">
 			<code>extraKeys: object</code>
 			<p>Extra shortcut keys. Check the <a href="http://codemirror.net" target="_blank">CodeMirror</a> manual on how to add your own</p>
-			
+
 			<p>Note: To avoid colissions with other browser shortcuts, these shortcuts <i>only</i> work when the YASQE editor is selected (has 'focus').<br>The list of shortcuts provided by YASQE:</p>
 			<ul>
 			<li><code>[Ctrl|Cmd]-Space</code>: Trigger Autocompletion</li>
@@ -216,6 +216,10 @@
 			By default, this feature is enabled, and only the query value is appended to the link.
 			This function should return an object which is parseable by <a href="http://api.jquery.com/jQuery.param/" target="_blank">jQuery.param</a></p>
 		</div>
+    <div class="doc">
+      <code>createShortLink: function(string:url, function:callback) (default: null)</code>
+      <p>Allow users to create a short-link, for the URL generated in the previous function. The callback takes as argument a possible error string, and the shortened URL</p>
+    </div>
 		<div class="doc">
 			<code>consumeShareLink: function (default: YASQE.consumeShareLink)</code>
 			<p>The callback for consuming the arguments of the current URL</p>
@@ -295,14 +299,14 @@
 			<p>See <a href="https://api.jquery.com/jQuery.ajax/" target="_blank">jQuery.ajax</a> for more information</p>
 		</div>
 		<h3 id="autocompletions">Writing an Autocompletion Plugin</h3>
-		To register an autocompletion, one needs to execute the <code>YASQE.registerAutocompleter</code> <a href="#registerAutocompleter">function</a>. 
+		To register an autocompletion, one needs to execute the <code>YASQE.registerAutocompleter</code> <a href="#registerAutocompleter">function</a>.
 		Below, we describe the autocompletion function in more detail, and the object it should return.
-		
+
 		<div class="doc" >
 			<code>constructor(doc: yasqe) → configurationObject: Object</code>
 			<p>Autocompleter constructor, which should return the object described below</p>
 		</div>
-		<div class="doc" style="margin-left: 30px;"> 
+		<div class="doc" style="margin-left: 30px;">
 			<code>get: function|array</code> <span class="label label-primary">Required</span>
 			<p>Get the autocompletions. Either a function which returns an
 			array, or an actual array. The array should be in the form ["&lt;completionsString1&gt;", "&lt;completionsString2&gt;"].</p>
@@ -316,7 +320,7 @@
 			<code>isValidCompletionPosition: function() → boolean</code> <span class="label label-primary">Required</span>
 			<p>Check whether the cursor is in a proper position for this autocompletion.</p>
 		</div>
-		<div style="margin-left: 30px"  class="doc" > 
+		<div style="margin-left: 30px"  class="doc" >
 			<code>preProcessToken: function(token: object|string)  → token: object</code> <span class="label label-default">Optional</span>
 			<p>Preprocesses the codemirror token before matching it with the autocompletions list.
 			Use this for e.g. autocompleting prefixed resources when your autocompletion list contains only full-length URIs
@@ -389,11 +393,11 @@
 			<code>close: function</code> <span class="label label-default">Optional</span>
 			<p>See <a href="http://codemirror.net/doc/manual.html#addon_show-hint" target="_blank">CodeMirror manual</a></p>
 		</div>
-     	
-     	
-     	
-     	
-		
+
+
+
+
+
 </div><!-- col -->
 <div class="col-md-3" id="sidebarmenu">
 	<div class="bs-docs-sidebar hidden-xs hidden-sm" data-spy="affix" data-offset-top="60">
@@ -418,9 +422,3 @@
 <script src="doc.min.js"></script>
 </body>
 </html>
-
-
-
-
-
-

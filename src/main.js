@@ -484,9 +484,26 @@ root.drawButtons = function(yasqe) {
 					});
 				});
 
-				popup.empty().append($input);
+				popup.empty().append($('<div>', {class:'inputWrapper'}).append($input));
+				if (yasqe.options.createShortLink) {
+					popup.addClass('enableShort');
+					$('<button>Shorten</button>')
+						.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
+						.click(function() {
+							$(this).attr('disabled', 'disabled');
+							yasqe.options.createShortLink($input.val(), function(errString, shortLink) {
+								if (errString) {
+									$input.remove();
+									popup.find('.inputWrapper').append($('<span>', {class:"shortlinkErr"}).text(errString));
+								} else {
+									$input.val(shortLink).focus();
+								}
+							})
+						}).appendTo(popup);
+				}
 				var positions = svgShare.position();
 				popup.css("top", (positions.top + svgShare.outerHeight() + parseInt(popup.css('padding-top')) ) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
+				$input.focus();
 			})
 			.addClass("yasqe_share")
 			.attr("title", "Share your query")
