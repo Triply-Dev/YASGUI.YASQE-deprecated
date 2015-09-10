@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7813,7 +7813,9 @@ var getUrlParams = function() {
 	//first try hash
 	var urlParams = null;
 	if (window.location.hash.length > 1) {
-		urlParams = $.deparam(window.location.hash.substring(1))
+		//firefox does some decoding if we're using window.location.hash (e.g. the + sign in contentType settings)
+		//Don't want this. So simply get the hash string ourselves
+		urlParams = $.deparam(location.href.split("#")[1])
 	}
 	if ((!urlParams || !('query' in urlParams)) && window.location.search.length > 1) {
 		//ok, then just try regular url params
@@ -8299,7 +8301,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 
 require('./sparql.js'),
 	require('./defaults.js');
-
+root.$ = $;
 root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASQE": require("../package.json").version,
