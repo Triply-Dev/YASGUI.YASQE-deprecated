@@ -774,7 +774,7 @@ var autoFormatLineBreaks = function(text, start, end) {
 
 require('./sparql.js'),
 	require('./defaults.js');
-
+root.$ = $;
 root.version = {
 	"CodeMirror": CodeMirror.version,
 	"YASQE": require("../package.json").version,
