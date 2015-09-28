@@ -27,7 +27,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 			Accept: getAcceptHeader(yasqe, config),
 		}
 	};
-
+	if (config.xhrFields) ajaxConfig.xhrFields = config.xhrFields;
 	/**
 	 * add complete, beforesend, etc callbacks (if specified)
 	 */
