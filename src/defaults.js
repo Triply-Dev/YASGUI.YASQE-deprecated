@@ -155,6 +155,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		 */
 		headers: {},
 
+		getQueryForAjax: null,
 		/**
 		 * Set of ajax callbacks
 		 */
