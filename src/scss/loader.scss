@@ -1,0 +1,18 @@
+@mixin spinner($width, $height) {
+  width: 0.9 * $width;
+  height: 0.9 * $height;
+  border-radius: 50%;
+  -webkit-box-sizing: border-box;
+  border: solid 0.1*$height rgba(0, 0, 0, 0.2);
+  border-top-color: #000;
+  -webkit-animation: spin 1s infinite linear;
+}
+.loader {
+  @include spinner($queryButtonWidth, $queryButtonHeight);
+}
+
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
