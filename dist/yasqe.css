@@ -321,14 +321,6 @@
     content: "\25BE"; }
   .yasqe .CodeMirror-foldgutter-folded:after {
     content: "\25B8"; }
-  .yasqe .loader {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    -webkit-box-sizing: border-box;
-    border: solid 4px rgba(0, 0, 0, 0.2);
-    border-top-color: #000;
-    -webkit-animation: spin 1s infinite linear; }
 
 @-webkit-keyframes spin {
   100% {
@@ -457,6 +449,14 @@
         margin-left: 0px; }
       .yasqe .yasqe_buttons .yasqe_queryButton .svgImg {
         display: block; }
+      .yasqe .yasqe_buttons .yasqe_queryButton .loader {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        -webkit-box-sizing: border-box;
+        border: solid 4px rgba(0, 0, 0, 0.2);
+        border-top-color: #000;
+        -webkit-animation: spin 1s infinite linear; }
   .yasqe span.shortlinkErr {
     font-size: small;
     color: red;

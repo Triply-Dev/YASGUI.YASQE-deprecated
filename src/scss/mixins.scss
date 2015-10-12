@@ -7,9 +7,7 @@
   border-top-color: #000;
   -webkit-animation: spin 1s infinite linear;
 }
-.loader {
-  @include spinner($queryButtonWidth, $queryButtonHeight);
-}
+
 
 @-webkit-keyframes spin {
   100% {

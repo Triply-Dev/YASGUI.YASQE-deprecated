@@ -4,7 +4,7 @@
 	@import "../../node_modules/codemirror/addon/display/fullscreen.css";
 	@import "../../node_modules/codemirror/addon/fold/foldgutter.css";
 	@import "variables.scss";
-	@import "loader.scss";
+	@import "mixins.scss";
 
 	.yasqe_btn {
 		color: #333;
@@ -150,6 +150,9 @@
 			margin-left: 10px;
 			.svgImg {
 				display:block;
+			}
+			.loader {
+			  @include spinner($queryButtonWidth, $queryButtonHeight);
 			}
 		}
 	}
