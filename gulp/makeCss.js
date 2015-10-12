@@ -4,6 +4,7 @@ var gulp = require('gulp'),
 	connect = require('gulp-connect'),
 	sourcemaps = require('gulp-sourcemaps');
 	sass = require('gulp-sass'),
+	autoprefixer = require('gulp-autoprefixer'),
 	cssImport = require('gulp-cssimport'),
 	rename = require("gulp-rename"),
 	notify = require('gulp-notify'),
@@ -17,14 +18,17 @@ gulp.task('makeCss', function() {
 	    .on("error", notify.onError(function(error) {
 	    	return error.message;
 	    }))
+			.pipe(autoprefixer({
+          browsers: ['> 5%']
+      }))
 	    .pipe(concat(paths.bundleFileName + '.css'))
 	    .pipe(gulp.dest(paths.bundleDir))
 	    .pipe(minifyCSS({
 			//the minifyer does not work well with lines including a comment. e.g.
-			///* some comment */ } 
+			///* some comment */ }
 			//is completely removed (including the final bracket)
 			//So, disable the 'advantaced' feature. This only makes the minified file 100 bytes larger
-			noAdvanced: true, 
+			noAdvanced: true,
 		}))
 	    .pipe(rename(paths.bundleFileName + '.min.css'))
 	    .pipe(gulp.dest(paths.bundleDir))
