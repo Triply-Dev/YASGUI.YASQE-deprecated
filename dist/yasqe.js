@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7497,6 +7497,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		 */
 		headers: {},
 
+		getQueryForAjax: null,
 		/**
 		 * Set of ajax callbacks
 		 */
@@ -7948,7 +7949,7 @@ root.positionButtons = function(yasqe) {
 	if (scrollBar.is(":visible")) {
 		offset = scrollBar.outerWidth();
 	}
-	if (yasqe.buttons.is(":visible")) yasqe.buttons.css("right", offset + 6);
+	if (yasqe.buttons.is(":visible")) yasqe.buttons.css("right", offset + 4);
 };
 
 /**
@@ -8101,7 +8102,8 @@ root.updateQueryButton = function(yasqe, status) {
 		status = "valid";
 		if (yasqe.queryValid === false) status = "error";
 	}
-	if (status != yasqe.queryStatus && (status == "busy" || status == "valid" || status == "error")) {
+
+	if (status != yasqe.queryStatus) {
 		queryButton
 			.empty()
 			.removeClass(function(index, classNames) {
@@ -8109,10 +8111,18 @@ root.updateQueryButton = function(yasqe, status) {
 					//remove classname from previous status
 					return c.indexOf("query_") == 0;
 				}).join(" ");
-			})
-			.addClass("query_" + status);
-		yutils.svg.draw(queryButton, imgs[queryButtonIds[status]]);
-		yasqe.queryStatus = status;
+			});
+
+		if (status == "busy") {
+			queryButton.append($('<div>', {
+				class: 'loader',
+			}));
+			yasqe.queryStatus = status;
+		} else if (status == "valid" || status == "error") {
+			queryButton.addClass("query_" + status);
+			yutils.svg.draw(queryButton, imgs[queryButtonIds[status]]);
+			yasqe.queryStatus = status;
+		}
 	}
 };
 /**
@@ -8607,7 +8617,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 			Accept: getAcceptHeader(yasqe, config),
 		}
 	};
-
+	if (config.xhrFields) ajaxConfig.xhrFields = config.xhrFields;
 	/**
 	 * add complete, beforesend, etc callbacks (if specified)
 	 */
@@ -8663,7 +8673,7 @@ YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
 		name: yasqe.getQueryMode(), //either 'update' or 'query'
-		value: yasqe.getValue()
+		value: (config.getQueryForAjax? config.getQueryForAjax(yasqe): yasqe.getValue())
 	}];
 
 	/**
