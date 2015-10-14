@@ -1,8 +1,8 @@
 'use strict';
 var $ = require('jquery'),
 	YASQE = require('./main.js');
-YASQE.executeQuery = function(yasqe, callbackOrConfig) {
-	YASQE.signal(yasqe, 'query', yasqe, callbackOrConfig);
+
+YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig : null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
 
@@ -13,7 +13,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 	if (config.handlers)
 		$.extend(true, config.callbacks, config.handlers);
 
-
+	
 	if (!config.endpoint || config.endpoint.length == 0)
 		return; // nothing to query!
 
@@ -56,8 +56,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 	if (config.headers && !$.isEmptyObject(config.headers))
 		$.extend(ajaxConfig.headers, config.headers);
 
-	YASQE.updateQueryButton(yasqe, "busy");
-	yasqe.setBackdrop(true);
+
 	var queryStart = new Date();
 	var updateYasqe = function() {
 		yasqe.lastQueryDuration = new Date() - queryStart;
@@ -74,8 +73,16 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		completeCallbacks.push(ajaxConfig.complete);
 	}
 	ajaxConfig.complete = completeCallbacks;
+	return ajaxConfig;
+};
 
-	yasqe.xhr = $.ajax(ajaxConfig);
+
+
+YASQE.executeQuery = function(yasqe, callbackOrConfig) {
+	YASQE.signal(yasqe, 'query', yasqe, callbackOrConfig);
+	YASQE.updateQueryButton(yasqe, "busy");
+	yasqe.setBackdrop(true);
+	yasqe.xhr = $.ajax(YASQE.getAjaxConfig(yasqe, callbackOrConfig));
 };
 
 
@@ -139,3 +146,7 @@ var getAcceptHeader = function(yasqe, config) {
 	}
 	return acceptHeader;
 };
+
+module.exports = {
+	getAjaxConfig: YASQE.getAjaxConfig
+}

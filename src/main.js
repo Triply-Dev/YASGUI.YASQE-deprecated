@@ -441,7 +441,10 @@ root.createShareLink = function(yasqe) {
 	urlParams['query'] = yasqe.getValue();
 	return urlParams;
 };
-
+root.getAsCurl = function(yasqe, ajaxConfig) {
+	var curl = require('./curl.js');
+	return curl.createCurlString(yasqe, ajaxConfig);
+};
 /**
  * Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASQE doc
  *
@@ -492,7 +495,7 @@ root.drawButtons = function(yasqe) {
 					$('<button>Shorten</button>')
 						.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
 						.click(function() {
-							$(this).attr('disabled', 'disabled');
+							$(this).parent().find('button').attr('disabled', 'disabled');
 							yasqe.options.createShortLink($input.val(), function(errString, shortLink) {
 								if (errString) {
 									$input.remove();
@@ -503,6 +506,13 @@ root.drawButtons = function(yasqe) {
 							})
 						}).appendTo(popup);
 				}
+				$('<button>CURL</button>')
+					.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
+					.click(function() {
+
+						$(this).parent().find('button').attr('disabled', 'disabled');
+						$input.val(root.getAsCurl(yasqe)).focus();
+					}).appendTo(popup);
 				var positions = svgShare.position();
 				popup.css("top", (positions.top + svgShare.outerHeight() + parseInt(popup.css('padding-top')) ) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
 				$input.focus();
