@@ -3,7 +3,7 @@
 //the current browserify version does not support require-ing js files which are used as entry-point
 //this way, we can still require our main.js file
 module.exports = require('./main.js');
-},{"./main.js":31}],2:[function(require,module,exports){
+},{"./main.js":32}],2:[function(require,module,exports){
 'use strict';
 /*
   jQuery deparam is an extraction of the deparam method from Ben Alman's jQuery BBQ
@@ -24947,17 +24947,22 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.6.3",
+  "version": "2.7.0",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
   "devDependencies": {
+    "bootstrap-sass": "^3.3.1",
     "browserify": "^6.1.0",
+    "browserify-transform-tools": "^1.2.1",
+    "exorcist": "^0.1.6",
     "gulp": "~3.6.0",
+    "gulp-autoprefixer": "^3.0.2",
     "gulp-bump": "^0.1.11",
     "gulp-concat": "^2.4.1",
     "gulp-connect": "^2.0.5",
+    "gulp-cssimport": "^1.3.1",
     "gulp-embedlr": "^0.5.2",
     "gulp-filter": "^1.0.2",
     "gulp-git": "^0.5.2",
@@ -24966,6 +24971,8 @@ module.exports={
     "gulp-minify-css": "0.3.11",
     "gulp-notify": "^2.0.1",
     "gulp-rename": "^1.2.0",
+    "gulp-sass": "^2.0.1",
+    "gulp-sourcemaps": "^1.2.8",
     "gulp-streamify": "0.0.5",
     "gulp-tag-version": "^1.1.0",
     "gulp-uglify": "^1.0.1",
@@ -24973,14 +24980,8 @@ module.exports={
     "run-sequence": "^1.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~0.1.1",
-    "watchify": "^0.6.4",
-    "gulp-sourcemaps": "^1.2.8",
-    "exorcist": "^0.1.6",
     "vinyl-transform": "0.0.1",
-    "gulp-sass": "^2.0.1",
-    "bootstrap-sass": "^3.3.1",
-    "browserify-transform-tools": "^1.2.1",
-    "gulp-cssimport": "^1.3.1"
+    "watchify": "^0.6.4"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -25316,7 +25317,7 @@ var selectHint = function(yasqe, data, completion) {
 ////	storeBulkCompletions: storeBulkCompletions,
 //	loadBulkCompletions: loadBulkCompletions,
 //};
-},{"../../lib/trie.js":5,"../main.js":31,"../utils.js":37,"jquery":16,"yasgui-utils":19}],24:[function(require,module,exports){
+},{"../../lib/trie.js":5,"../main.js":32,"../utils.js":38,"jquery":16,"yasgui-utils":19}],24:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
 module.exports = function(yasqe, name) {
@@ -25678,7 +25679,7 @@ module.exports = {
 	preprocessResourceTokenForCompletion: preprocessResourceTokenForCompletion,
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
-},{"../imgs.js":30,"./utils.js":27,"jquery":16,"yasgui-utils":19}],28:[function(require,module,exports){
+},{"../imgs.js":31,"./utils.js":27,"jquery":16,"yasgui-utils":19}],28:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
 module.exports = function(yasqe) {
@@ -25735,6 +25736,38 @@ module.exports = function(yasqe) {
 	}
 };
 },{"jquery":16}],29:[function(require,module,exports){
+var sparql = require('./sparql.js'),
+    $ = require('jquery');
+var quote = function(string) {
+  return "'" + string + "'";
+}
+module.exports = {
+  createCurlString : function(yasqe, config) {
+    var ajaxConfig = sparql.getAjaxConfig(yasqe, config);
+    
+    var url = yasqe.options.sparql.endpoint;
+    if (yasqe.options.sparql.requestMethod == 'GET') {
+      url += '?' + $.param(ajaxConfig.data);
+    }
+    var cmds = [
+      'curl', url,
+      '-X', yasqe.options.sparql.requestMethod
+    ];
+    if (yasqe.options.sparql.requestMethod == 'POST') {
+      cmds.push('--data ' + quote($.param(ajaxConfig.data)));
+    }
+    for (var header in ajaxConfig.headers) {
+      cmds.push('-H ' + quote(header + ': ' + ajaxConfig.headers[header]));
+    }
+    return cmds.join(' ');
+
+
+
+
+  }
+}
+
+},{"./sparql.js":35,"jquery":16}],30:[function(require,module,exports){
 /**
  * The default options of YASQE (check the CodeMirror documentation for even
  * more options, such as disabling line numbers, or changing keyboard shortcut
@@ -25906,10 +25939,9 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	},
 });
 
-},{"./main.js":31,"jquery":16}],30:[function(require,module,exports){
+},{"./main.js":32,"jquery":16}],31:[function(require,module,exports){
 'use strict';
 module.exports = {
-	loader: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%" fill="black">  <circle cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(45 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.125s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(90 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.25s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(135 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.375s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(225 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.625s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(270 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.75s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(315 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.875s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle>  <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />  </circle></svg>',
 	query: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g ></g><g >	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>',
 	queryInvalid: '<svg   xmlns:dc="http://purl.org/dc/elements/1.1/"   xmlns:cc="http://creativecommons.org/ns#"   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"   xmlns:svg="http://www.w3.org/2000/svg"   xmlns="http://www.w3.org/2000/svg"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   version="1.1"   x="0px"   y="0px"   width="100%"   height="100%"   viewBox="0 0 73.627 73.897"   enable-background="new 0 0 80 80"   xml:space="preserve"      inkscape:version="0.48.4 r9939"   sodipodi:docname="warning.svg"><metadata     ><rdf:RDF><cc:Work         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs      /><sodipodi:namedview     pagecolor="#ffffff"     bordercolor="#666666"     borderopacity="1"     objecttolerance="10"     gridtolerance="10"     guidetolerance="10"     inkscape:pageopacity="0"     inkscape:pageshadow="2"     inkscape:window-width="1855"     inkscape:window-height="1056"          showgrid="false"     inkscape:zoom="3.1936344"     inkscape:cx="36.8135"     inkscape:cy="36.9485"     inkscape:window-x="2625"     inkscape:window-y="24"     inkscape:window-maximized="1"     inkscape:current-layer="svg2" /><g     transform="translate(-2.995,-2.411)"      /><g     transform="translate(-2.995,-2.411)"     ><path       d="M 64.622,2.411 H 14.995 c -6.627,0 -12,5.373 -12,12 v 49.897 c 0,6.627 5.373,12 12,12 h 49.627 c 6.627,0 12,-5.373 12,-12 V 14.411 c 0,-6.628 -5.373,-12 -12,-12 z M 24.125,63.906 V 15.093 L 61,39.168 24.125,63.906 z"       inkscape:connector-curvature="0"        /></g><path     d="M 66.129381,65.903784 H 49.769875 c -1.64721,0 -2.889385,-0.581146 -3.498678,-1.63595 -0.609293,-1.055608 -0.491079,-2.422161 0.332391,-3.848223 l 8.179753,-14.167069 c 0.822934,-1.42633 1.9477,-2.211737 3.166018,-2.211737 1.218319,0 2.343086,0.785407 3.166019,2.211737 l 8.179751,14.167069 c 0.823472,1.426062 0.941686,2.792615 0.33239,3.848223 -0.609023,1.054804 -1.851197,1.63595 -3.498138,1.63595 z M 59.618815,60.91766 c 0,-0.850276 -0.68944,-1.539719 -1.539717,-1.539719 -0.850276,0 -1.539718,0.689443 -1.539718,1.539719 0,0.850277 0.689442,1.539718 1.539718,1.539718 0.850277,0 1.539717,-0.689441 1.539717,-1.539718 z m 0.04155,-9.265919 c 0,-0.873061 -0.707939,-1.580998 -1.580999,-1.580998 -0.873061,0 -1.580999,0.707937 -1.580999,1.580998 l 0.373403,5.610965 h 0.0051 c 0.05415,0.619747 0.568548,1.10761 1.202504,1.10761 0.586239,0 1.075443,-0.415756 1.188563,-0.968489 0.0092,-0.04476 0.0099,-0.09248 0.01392,-0.138854 h 0.01072 l 0.367776,-5.611232 z"          inkscape:connector-curvature="0"     style="fill:#aa8800" /></svg>',
 	download: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="tiny" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 100 100" xml:space="preserve"><g ></g><g >	<path fill-rule="evenodd" fill="#000000" d="M88,84v-2c0-2.961-0.859-4-4-4H16c-2.961,0-4,0.98-4,4v2c0,3.102,1.039,4,4,4h68   C87.02,88,88,87.039,88,84z M58,12H42c-5,0-6,0.941-6,6v22H16l34,34l34-34H64V18C64,12.941,62.939,12,58,12z"/></g></svg>',
@@ -25918,7 +25950,8 @@ module.exports = {
 	fullscreen: '<svg   xmlns:dc="http://purl.org/dc/elements/1.1/"   xmlns:cc="http://creativecommons.org/ns#"   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"   xmlns:svg="http://www.w3.org/2000/svg"   xmlns="http://www.w3.org/2000/svg"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   version="1.1"      x="0px"   y="0px"   width="100%"   height="100%"   viewBox="5 -10 74.074074 100"   enable-background="new 0 0 100 100"   xml:space="preserve"   inkscape:version="0.48.4 r9939"   sodipodi:docname="noun_2186_cc.svg"><metadata     ><rdf:RDF><cc:Work         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs      /><sodipodi:namedview     pagecolor="#ffffff"     bordercolor="#666666"     borderopacity="1"     objecttolerance="10"     gridtolerance="10"     guidetolerance="10"     inkscape:pageopacity="0"     inkscape:pageshadow="2"     inkscape:window-width="640"     inkscape:window-height="480"          showgrid="false"     fit-margin-top="0"     fit-margin-left="0"     fit-margin-right="0"     fit-margin-bottom="0"     inkscape:zoom="2.36"     inkscape:cx="44.101509"     inkscape:cy="31.481481"     inkscape:window-x="65"     inkscape:window-y="24"     inkscape:window-maximized="0"     inkscape:current-layer="Layer_1" /><path     d="m -7.962963,-10 v 38.889 l 16.667,-16.667 16.667,16.667 5.555,-5.555 -16.667,-16.667 16.667,-16.667 h -38.889 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="m 92.037037,-10 v 38.889 l -16.667,-16.667 -16.666,16.667 -5.556,-5.555 16.666,-16.667 -16.666,-16.667 h 38.889 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="M -7.962963,90 V 51.111 l 16.667,16.666 16.667,-16.666 5.555,5.556 -16.667,16.666 16.667,16.667 h -38.889 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="M 92.037037,90 V 51.111 l -16.667,16.666 -16.666,-16.666 -5.556,5.556 16.666,16.666 -16.666,16.667 h 38.889 z"          inkscape:connector-curvature="0"     style="fill:#010101" /></svg>',
 	smallscreen: '<svg   xmlns:dc="http://purl.org/dc/elements/1.1/"   xmlns:cc="http://creativecommons.org/ns#"   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"   xmlns:svg="http://www.w3.org/2000/svg"   xmlns="http://www.w3.org/2000/svg"   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"   version="1.1"      x="0px"   y="0px"   width="100%"   height="100%"   viewBox="5 -10 74.074074 100"   enable-background="new 0 0 100 100"   xml:space="preserve"   inkscape:version="0.48.4 r9939"   sodipodi:docname="noun_2186_cc.svg"><metadata     ><rdf:RDF><cc:Work         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs      /><sodipodi:namedview     pagecolor="#ffffff"     bordercolor="#666666"     borderopacity="1"     objecttolerance="10"     gridtolerance="10"     guidetolerance="10"     inkscape:pageopacity="0"     inkscape:pageshadow="2"     inkscape:window-width="1855"     inkscape:window-height="1056"          showgrid="false"     fit-margin-top="0"     fit-margin-left="0"     fit-margin-right="0"     fit-margin-bottom="0"     inkscape:zoom="2.36"     inkscape:cx="44.101509"     inkscape:cy="31.481481"     inkscape:window-x="65"     inkscape:window-y="24"     inkscape:window-maximized="1"     inkscape:current-layer="Layer_1" /><path     d="m 30.926037,28.889 0,-38.889 -16.667,16.667 -16.667,-16.667 -5.555,5.555 16.667,16.667 -16.667,16.667 38.889,0 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="m 53.148037,28.889 0,-38.889 16.667,16.667 16.666,-16.667 5.556,5.555 -16.666,16.667 16.666,16.667 -38.889,0 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="m 30.926037,51.111 0,38.889 -16.667,-16.666 -16.667,16.666 -5.555,-5.556 16.667,-16.666 -16.667,-16.667 38.889,0 z"          inkscape:connector-curvature="0"     style="fill:#010101" /><path     d="m 53.148037,51.111 0,38.889 16.667,-16.666 16.666,16.666 5.556,-5.556 -16.666,-16.666 16.666,-16.667 -38.889,0 z"          inkscape:connector-curvature="0"     style="fill:#010101" /></svg>',
 };
-},{}],31:[function(require,module,exports){
+
+},{}],32:[function(require,module,exports){
 'use strict';
 //make sure any console statements
 window.console = window.console || {
@@ -26362,7 +26395,10 @@ root.createShareLink = function(yasqe) {
 	urlParams['query'] = yasqe.getValue();
 	return urlParams;
 };
-
+root.getAsCurl = function(yasqe, ajaxConfig) {
+	var curl = require('./curl.js');
+	return curl.createCurlString(yasqe, ajaxConfig);
+};
 /**
  * Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASQE doc
  *
@@ -26413,7 +26449,7 @@ root.drawButtons = function(yasqe) {
 					$('<button>Shorten</button>')
 						.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
 						.click(function() {
-							$(this).attr('disabled', 'disabled');
+							$(this).parent().find('button').attr('disabled', 'disabled');
 							yasqe.options.createShortLink($input.val(), function(errString, shortLink) {
 								if (errString) {
 									$input.remove();
@@ -26424,6 +26460,13 @@ root.drawButtons = function(yasqe) {
 							})
 						}).appendTo(popup);
 				}
+				$('<button>CURL</button>')
+					.addClass('yasqe_btn yasqe_btn-sm yasqe_btn-primary')
+					.click(function() {
+
+						$(this).parent().find('button').attr('disabled', 'disabled');
+						$input.val(root.getAsCurl(yasqe)).focus();
+					}).appendTo(popup);
 				var positions = svgShare.position();
 				popup.css("top", (positions.top + svgShare.outerHeight() + parseInt(popup.css('padding-top')) ) + "px").css("left", ((positions.left + svgShare.outerWidth()) - popup.outerWidth()) + "px");
 				$input.focus();
@@ -26714,7 +26757,7 @@ root.version = {
 	"yasgui-utils": yutils.version
 };
 
-},{"../lib/deparam.js":2,"../lib/grammar/tokenizer.js":4,"../package.json":22,"./autocompleters/autocompleterBase.js":23,"./autocompleters/classes.js":24,"./autocompleters/prefixes.js":25,"./autocompleters/properties.js":26,"./autocompleters/variables.js":28,"./defaults.js":29,"./imgs.js":30,"./prefixFold.js":32,"./prefixUtils.js":33,"./sparql.js":34,"./tokenUtils.js":35,"./tooltip":36,"./utils.js":37,"codemirror":15,"codemirror/addon/display/fullscreen.js":6,"codemirror/addon/edit/matchbrackets.js":7,"codemirror/addon/fold/brace-fold.js":8,"codemirror/addon/fold/foldcode.js":9,"codemirror/addon/fold/foldgutter.js":10,"codemirror/addon/fold/xml-fold.js":11,"codemirror/addon/hint/show-hint.js":12,"codemirror/addon/runmode/runmode.js":13,"codemirror/addon/search/searchcursor.js":14,"jquery":16,"yasgui-utils":19}],32:[function(require,module,exports){
+},{"../lib/deparam.js":2,"../lib/grammar/tokenizer.js":4,"../package.json":22,"./autocompleters/autocompleterBase.js":23,"./autocompleters/classes.js":24,"./autocompleters/prefixes.js":25,"./autocompleters/properties.js":26,"./autocompleters/variables.js":28,"./curl.js":29,"./defaults.js":30,"./imgs.js":31,"./prefixFold.js":33,"./prefixUtils.js":34,"./sparql.js":35,"./tokenUtils.js":36,"./tooltip":37,"./utils.js":38,"codemirror":15,"codemirror/addon/display/fullscreen.js":6,"codemirror/addon/edit/matchbrackets.js":7,"codemirror/addon/fold/brace-fold.js":8,"codemirror/addon/fold/foldcode.js":9,"codemirror/addon/fold/foldgutter.js":10,"codemirror/addon/fold/xml-fold.js":11,"codemirror/addon/hint/show-hint.js":12,"codemirror/addon/runmode/runmode.js":13,"codemirror/addon/search/searchcursor.js":14,"jquery":16,"yasgui-utils":19}],33:[function(require,module,exports){
 var CodeMirror = require('codemirror'),
 	tokenUtils = require('./tokenUtils.js');
 
@@ -26844,7 +26887,7 @@ CodeMirror.registerHelper("fold", "prefix", function(cm, start) {
 		to: CodeMirror.Pos(prefixEndLine, prefixEndChar)
 	};
 });
-},{"./tokenUtils.js":35,"codemirror":15}],33:[function(require,module,exports){
+},{"./tokenUtils.js":36,"codemirror":15}],34:[function(require,module,exports){
 'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
@@ -26982,12 +27025,12 @@ module.exports = {
 	getPrefixesFromQuery: getPrefixesFromQuery,
 	removePrefixes: removePrefixes
 };
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 var $ = require('jquery'),
 	YASQE = require('./main.js');
-YASQE.executeQuery = function(yasqe, callbackOrConfig) {
-	YASQE.signal(yasqe, 'query', yasqe, callbackOrConfig);
+
+YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 	var callback = (typeof callbackOrConfig == "function" ? callbackOrConfig : null);
 	var config = (typeof callbackOrConfig == "object" ? callbackOrConfig : {});
 
@@ -26998,7 +27041,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 	if (config.handlers)
 		$.extend(true, config.callbacks, config.handlers);
 
-
+	
 	if (!config.endpoint || config.endpoint.length == 0)
 		return; // nothing to query!
 
@@ -27041,8 +27084,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 	if (config.headers && !$.isEmptyObject(config.headers))
 		$.extend(ajaxConfig.headers, config.headers);
 
-	YASQE.updateQueryButton(yasqe, "busy");
-	yasqe.setBackdrop(true);
+
 	var queryStart = new Date();
 	var updateYasqe = function() {
 		yasqe.lastQueryDuration = new Date() - queryStart;
@@ -27059,8 +27101,16 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 		completeCallbacks.push(ajaxConfig.complete);
 	}
 	ajaxConfig.complete = completeCallbacks;
+	return ajaxConfig;
+};
 
-	yasqe.xhr = $.ajax(ajaxConfig);
+
+
+YASQE.executeQuery = function(yasqe, callbackOrConfig) {
+	YASQE.signal(yasqe, 'query', yasqe, callbackOrConfig);
+	YASQE.updateQueryButton(yasqe, "busy");
+	yasqe.setBackdrop(true);
+	yasqe.xhr = $.ajax(YASQE.getAjaxConfig(yasqe, callbackOrConfig));
 };
 
 
@@ -27125,7 +27175,11 @@ var getAcceptHeader = function(yasqe, config) {
 	return acceptHeader;
 };
 
-},{"./main.js":31,"jquery":16}],35:[function(require,module,exports){
+module.exports = {
+	getAjaxConfig: YASQE.getAjaxConfig
+}
+
+},{"./main.js":32,"jquery":16}],36:[function(require,module,exports){
 'use strict';
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
@@ -27200,7 +27254,7 @@ module.exports = {
 	getCompleteToken: getCompleteToken,
 	getNextNonWsToken: getNextNonWsToken,
 };
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 var $ = require('jquery'),
 	utils = require('./utils.js');
@@ -27236,7 +27290,7 @@ module.exports = function(yasqe, parent, html) {
 		}
 	};
 };
-},{"./utils.js":37,"jquery":16}],37:[function(require,module,exports){
+},{"./utils.js":38,"jquery":16}],38:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
 

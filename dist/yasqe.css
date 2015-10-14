@@ -40,7 +40,6 @@
     min-width: 20px;
     text-align: right;
     color: #999;
-    -moz-box-sizing: content-box;
     box-sizing: content-box; }
   .yasqe .CodeMirror-guttermarker {
     color: black; }
@@ -60,16 +59,7 @@
     width: auto;
     border: 0;
     -webkit-animation: blink 1.06s steps(1) infinite;
-    -moz-animation: blink 1.06s steps(1) infinite;
     animation: blink 1.06s steps(1) infinite; }
-
-@-moz-keyframes blink {
-  0% {
-    background: #7e7; }
-  50% {
-    background: none; }
-  100% {
-    background: #7e7; } }
 
 @-webkit-keyframes blink {
   0% {
@@ -172,12 +162,10 @@
     outline: none;
     /* Prevent dragging from highlighting the element */
     position: relative;
-    -moz-box-sizing: content-box;
     box-sizing: content-box; }
   .yasqe .CodeMirror-sizer {
     position: relative;
     border-right: 30px solid transparent;
-    -moz-box-sizing: content-box;
     box-sizing: content-box; }
   .yasqe .CodeMirror-vscrollbar, .yasqe .CodeMirror-hscrollbar, .yasqe .CodeMirror-scrollbar-filler, .yasqe .CodeMirror-gutter-filler {
     position: absolute;
@@ -207,7 +195,6 @@
   .yasqe .CodeMirror-gutter {
     white-space: normal;
     height: 100%;
-    -moz-box-sizing: content-box;
     box-sizing: content-box;
     display: inline-block;
     margin-bottom: -30px;
@@ -228,8 +215,6 @@
     /* prevents collapsing before first draw */ }
   .yasqe .CodeMirror pre {
     /* Reset some styles that the rest of the page might have set */
-    -moz-border-radius: 0;
-    -webkit-border-radius: 0;
     border-radius: 0;
     border-width: 0;
     background: transparent;
@@ -352,7 +337,6 @@
       cursor: default;
       opacity: .50;
       filter: alpha(opacity=50);
-      -webkit-box-shadow: none;
       box-shadow: none; }
     .yasqe .yasqe_btn:hover {
       outline: 0;
@@ -413,12 +397,14 @@
         margin-left: 0px;
         border: 1px solid #e3e3e3;
         border-radius: 4px;
-        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-        width: 500px;
-        height: auto; }
-        .yasqe .yasqe_buttons div.yasqe_sharePopup.enableShort .inputWrapper {
-          margin-right: 70px; }
+        width: 600px;
+        height: auto;
+        display: -webkit-box;
+        display: flex; }
+        .yasqe .yasqe_buttons div.yasqe_sharePopup .inputWrapper {
+          -webkit-box-flex: 100;
+                  flex-grow: 100; }
         .yasqe .yasqe_buttons div.yasqe_sharePopup input {
           float: left;
           width: 100%;
@@ -427,16 +413,15 @@
           /* ie8 */
           -khtml-box-sizing: border-box;
           /* konqueror */
-          -webkit-box-sizing: border-box;
           /* Safari/Chrome, other WebKit */
-          -moz-box-sizing: border-box;
           /* Firefox, other Gecko */
           box-sizing: border-box;
           /* Opera/IE 8+ */
           box-sizing: border-box;
           /* css3 rec */ }
         .yasqe .yasqe_buttons div.yasqe_sharePopup button {
-          float: right; }
+          float: right;
+          margin-left: 5px; }
         .yasqe .yasqe_buttons div.yasqe_sharePopup textarea {
           width: 100%; }
     .yasqe .yasqe_buttons .yasqe_queryButton {
@@ -453,10 +438,11 @@
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
         border: solid 4px rgba(0, 0, 0, 0.2);
         border-top-color: #000;
-        -webkit-animation: spin 1s infinite linear; }
+        -webkit-animation: spin 1s infinite linear;
+                animation: spin 1s infinite linear; }
   .yasqe span.shortlinkErr {
     font-size: small;
     color: red;
@@ -518,7 +504,8 @@
   .yasqe .matchingVar {
     background-color: #DBDEED;
     border-radius: 6px;
-    transition: background 0.5s linear; }
+    -webkit-transition: background 0.5s linear;
+            transition: background 0.5s linear; }
 
 .CodeMirror-hints {
   position: absolute;
@@ -527,8 +514,6 @@
   list-style: none;
   margin: 0;
   padding: 2px;
-  -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
   box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   border: 1px solid silver;
