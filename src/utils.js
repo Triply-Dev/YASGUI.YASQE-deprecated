@@ -49,8 +49,16 @@ var elementsOverlap = (function() {
 	};
 })();
 
+var getString = function(yasqe, item) {
+	if (typeof item == "function") {
+		return item(yasqe);
+	} else {
+		return item;
+	}
+}
 module.exports = {
 	keyExists: keyExists,
 	getPersistencyId: getPersistencyId,
 	elementsOverlap: elementsOverlap,
+	getString:getString
 };

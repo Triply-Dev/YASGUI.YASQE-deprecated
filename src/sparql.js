@@ -1,5 +1,6 @@
 'use strict';
 var $ = require('jquery'),
+	utils = require('./utils.js'),
 	YASQE = require('./main.js');
 
 YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
@@ -13,7 +14,7 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 	if (config.handlers)
 		$.extend(true, config.callbacks, config.handlers);
 
-	
+
 	if (!config.endpoint || config.endpoint.length == 0)
 		return; // nothing to query!
 
@@ -89,7 +90,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name: yasqe.getQueryMode(), //either 'update' or 'query'
+		name: utils.getString(yasqe.options.sparql.queryName),
 		value: (config.getQueryForAjax? config.getQueryForAjax(yasqe): yasqe.getValue())
 	}];
 

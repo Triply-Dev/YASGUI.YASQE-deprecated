@@ -106,6 +106,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * Settings for querying sparql endpoints
 	 */
 	sparql: {
+		queryName: function(yasqe) {return yasqe.getQueryMode()},
 		showQueryButton: false,
 
 		/**f

@@ -283,6 +283,12 @@
 			<p>Modify the query before it is send via ajax request.</p>
 		</div>
 		<div class="doc" style="margin-left: 30px;">
+		<code>queryName: string | function(doc: yasqe) → string</code>
+			<p>A SPARQL query string is usually send with <code>?query=</code> is the payload for <code>SELECT</code>
+      queries, and <code>?update=</code> for update queries. By default, YASQE changes this behaviour dynamically depending on the query type.
+    This setting enables you to change this behaviour, by e.g. always sending queries with a <code>?query=</code> in the payload, even for update queries.</p>
+		</div>
+		<div class="doc" style="margin-left: 30px;">
 			<code>callbacks: object</code>
 			<p>Set of ajax callbacks</p>
 		</div>
