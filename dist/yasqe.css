@@ -499,7 +499,7 @@
     vertical-align: middle; }
   .yasqe .CodeMirror-foldmarker {
     color: #6E2500;
-    text-shadow: #FF935E 1px 1px 2px, #FF935E -1px -1px 2px, #FF935E 1px -1px 2px, #FF935E -1px 1px 2px;
+    text-shadow: #FF935E 1px 1px 2px,#FF935E -1px -1px 2px,#FF935E 1px -1px 2px,#FF935E -1px 1px 2px;
     font-size: 19px; }
   .yasqe .matchingVar {
     background-color: #DBDEED;

@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -6576,11 +6576,12 @@ module.exports={
     "gulp-minify-css": "0.3.11",
     "gulp-notify": "^2.0.1",
     "gulp-rename": "^1.2.0",
-    "gulp-sass": "^2.0.1",
+    "gulp-sass": "^2.1.0",
     "gulp-sourcemaps": "^1.2.8",
     "gulp-streamify": "0.0.5",
     "gulp-tag-version": "^1.1.0",
     "gulp-uglify": "^1.0.1",
+    "node-sass": "^3.4.2",
     "require-dir": "^0.1.0",
     "run-sequence": "^1.0.1",
     "vinyl-buffer": "^1.0.0",
@@ -7481,6 +7482,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * Settings for querying sparql endpoints
 	 */
 	sparql: {
+		queryName: function(yasqe) {return yasqe.getQueryMode()},
 		showQueryButton: false,
 
 		/**f
@@ -7650,7 +7652,8 @@ var extendCmInstance = function(yasqe) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
 	yasqe.collapsePrefixes = function(collapse) {
-		yasqe.foldCode(require('./prefixFold.js').findFirstPrefixLine(yasqe), YASQE.fold.prefix, (collapse ? "fold" : "unfold"));
+		if (collapse === undefined) collapse = true;
+		yasqe.foldCode(require('./prefixFold.js').findFirstPrefixLine(yasqe), root.fold.prefix, (collapse ? "fold" : "unfold"));
 	};
 	var backdrop = null;
 	var animateSpeed = null;
@@ -8633,6 +8636,7 @@ module.exports = {
 },{}],33:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
+	utils = require('./utils.js'),
 	YASQE = require('./main.js');
 
 YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
@@ -8646,7 +8650,7 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 	if (config.handlers)
 		$.extend(true, config.callbacks, config.handlers);
 
-	
+
 	if (!config.endpoint || config.endpoint.length == 0)
 		return; // nothing to query!
 
@@ -8722,7 +8726,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name: yasqe.getQueryMode(), //either 'update' or 'query'
+		name: utils.getString(yasqe.options.sparql.queryName),
 		value: (config.getQueryForAjax? config.getQueryForAjax(yasqe): yasqe.getValue())
 	}];
 
@@ -8784,7 +8788,7 @@ module.exports = {
 	getAjaxConfig: YASQE.getAjaxConfig
 }
 
-},{"./main.js":30,"jquery":undefined}],34:[function(require,module,exports){
+},{"./main.js":30,"./utils.js":36,"jquery":undefined}],34:[function(require,module,exports){
 'use strict';
 /**
  * When typing a query, this query is sometimes syntactically invalid, causing
@@ -8947,11 +8951,20 @@ var elementsOverlap = (function() {
 	};
 })();
 
+var getString = function(yasqe, item) {
+	if (typeof item == "function") {
+		return item(yasqe);
+	} else {
+		return item;
+	}
+}
 module.exports = {
 	keyExists: keyExists,
 	getPersistencyId: getPersistencyId,
 	elementsOverlap: elementsOverlap,
+	getString:getString
 };
+
 },{"jquery":undefined}]},{},[1])(1)
 });
 
