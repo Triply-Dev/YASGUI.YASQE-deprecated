@@ -91,6 +91,7 @@ var extendCmInstance = function(yasqe) {
 		return require('./tokenUtils.js').getNextNonWsToken(yasqe, lineNumber, charNumber);
 	};
 	yasqe.collapsePrefixes = function(collapse) {
+		if (collapse === undefined) collapse = true;
 		yasqe.foldCode(require('./prefixFold.js').findFirstPrefixLine(yasqe), root.fold.prefix, (collapse ? "fold" : "unfold"));
 	};
 	var backdrop = null;
