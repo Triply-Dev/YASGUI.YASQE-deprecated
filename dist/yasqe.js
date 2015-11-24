@@ -6552,7 +6552,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -8726,7 +8726,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name: utils.getString(yasqe.options.sparql.queryName),
+		name: utils.getString(yasqe, yasqe.options.sparql.queryName),
 		value: (config.getQueryForAjax? config.getQueryForAjax(yasqe): yasqe.getValue())
 	}];
 
