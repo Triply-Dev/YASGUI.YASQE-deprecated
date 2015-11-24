@@ -90,7 +90,7 @@ YASQE.executeQuery = function(yasqe, callbackOrConfig) {
 YASQE.getUrlArguments = function(yasqe, config) {
 	var queryMode = yasqe.getQueryMode();
 	var data = [{
-		name: utils.getString(yasqe.options.sparql.queryName),
+		name: utils.getString(yasqe, yasqe.options.sparql.queryName),
 		value: (config.getQueryForAjax? config.getQueryForAjax(yasqe): yasqe.getValue())
 	}];
 
