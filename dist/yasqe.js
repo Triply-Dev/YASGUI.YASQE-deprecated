@@ -4954,7 +4954,7 @@ Trie.prototype = {
     if (marks.length) {
       // Kludge to work around the IE bug from issue #1193, where text
       // input stops going to the textare whever this fires.
-      if (ie_lt8 && cm.state.focused) cm.display.input.focus();
+      if (ie_lt8 && cm.state.focused) cm.focus();
 
       var clear = function() {
         cm.operation(function() {
@@ -5305,7 +5305,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   function isFolded(cm, line) {
     var marks = cm.findMarksAt(Pos(line));
     for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold && marks[i].find().from.line == line) return true;
+      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
   }
 
   function marker(spec) {
@@ -5347,20 +5347,28 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   }
 
   function onGutterClick(cm, line, gutter) {
-    var opts = cm.state.foldGutter.options;
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
     if (gutter != opts.gutter) return;
-    cm.foldCode(Pos(line, 0), opts.rangeFinder);
+    var folded = isFolded(cm, line);
+    if (folded) folded.clear();
+    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
   }
 
   function onChange(cm) {
-    var state = cm.state.foldGutter, opts = cm.state.foldGutter.options;
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
     state.from = state.to = 0;
     clearTimeout(state.changeUpdate);
     state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
   }
 
   function onViewportChange(cm) {
-    var state = cm.state.foldGutter, opts = cm.state.foldGutter.options;
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
     clearTimeout(state.changeUpdate);
     state.changeUpdate = setTimeout(function() {
       var vp = cm.getViewport();
@@ -5382,7 +5390,9 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   }
 
   function onFold(cm, from) {
-    var state = cm.state.foldGutter, line = from.line;
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var line = from.line;
     if (line >= state.from && line < state.to)
       updateFoldInfo(cm, line, line + 1);
   }
@@ -5600,34 +5610,54 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   };
 
   CodeMirror.defineExtension("showHint", function(options) {
-    // We want a single cursor position.
-    if (this.listSelections().length > 1 || this.somethingSelected()) return;
+    options = parseOptions(this, this.getCursor("start"), options);
+    var selections = this.listSelections()
+    if (selections.length > 1) return;
+    // By default, don't allow completion when something is selected.
+    // A hint function can have a `supportsSelection` property to
+    // indicate that it can handle selections.
+    if (this.somethingSelected()) {
+      if (!options.hint.supportsSelection) return;
+      // Don't try with cross-line selections
+      for (var i = 0; i < selections.length; i++)
+        if (selections[i].head.line != selections[i].anchor.line) return;
+    }
 
     if (this.state.completionActive) this.state.completionActive.close();
     var completion = this.state.completionActive = new Completion(this, options);
-    var getHints = completion.options.hint;
-    if (!getHints) return;
+    if (!completion.options.hint) return;
 
     CodeMirror.signal(this, "startCompletion", this);
-    if (getHints.async)
-      getHints(this, function(hints) { completion.showHints(hints); }, completion.options);
-    else
-      return completion.showHints(getHints(this, completion.options));
+    completion.update(true);
   });
 
   function Completion(cm, options) {
     this.cm = cm;
-    this.options = this.buildOptions(options);
-    this.widget = this.onClose = null;
+    this.options = options;
+    this.widget = null;
+    this.debounce = 0;
+    this.tick = 0;
+    this.startPos = this.cm.getCursor("start");
+    this.startLen = this.cm.getLine(this.startPos.line).length - this.cm.getSelection().length;
+
+    var self = this;
+    cm.on("cursorActivity", this.activityFunc = function() { self.cursorActivity(); });
   }
+
+  var requestAnimationFrame = window.requestAnimationFrame || function(fn) {
+    return setTimeout(fn, 1000/60);
+  };
+  var cancelAnimationFrame = window.cancelAnimationFrame || clearTimeout;
 
   Completion.prototype = {
     close: function() {
       if (!this.active()) return;
       this.cm.state.completionActive = null;
+      this.tick = null;
+      this.cm.off("cursorActivity", this.activityFunc);
 
+      if (this.widget && this.data) CodeMirror.signal(this.data, "close");
       if (this.widget) this.widget.close();
-      if (this.onClose) this.onClose();
       CodeMirror.signal(this.cm, "endCompletion", this.cm);
     },
 
@@ -5644,87 +5674,65 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       this.close();
     },
 
-    showHints: function(data) {
-      if (!data || !data.list.length || !this.active()) return this.close();
+    cursorActivity: function() {
+      if (this.debounce) {
+        cancelAnimationFrame(this.debounce);
+        this.debounce = 0;
+      }
 
-      if (this.options.completeSingle && data.list.length == 1)
-        this.pick(data, 0);
-      else
-        this.showWidget(data);
+      var pos = this.cm.getCursor(), line = this.cm.getLine(pos.line);
+      if (pos.line != this.startPos.line || line.length - pos.ch != this.startLen - this.startPos.ch ||
+          pos.ch < this.startPos.ch || this.cm.somethingSelected() ||
+          (pos.ch && this.options.closeCharacters.test(line.charAt(pos.ch - 1)))) {
+        this.close();
+      } else {
+        var self = this;
+        this.debounce = requestAnimationFrame(function() {self.update();});
+        if (this.widget) this.widget.disable();
+      }
     },
 
-    showWidget: function(data) {
-      this.widget = new Widget(this, data);
-      CodeMirror.signal(data, "shown");
-
-      var debounce = 0, completion = this, finished;
-      var closeOn = this.options.closeCharacters;
-      var startPos = this.cm.getCursor(), startLen = this.cm.getLine(startPos.line).length;
-
-      var requestAnimationFrame = window.requestAnimationFrame || function(fn) {
-        return setTimeout(fn, 1000/60);
-      };
-      var cancelAnimationFrame = window.cancelAnimationFrame || clearTimeout;
-
-      function done() {
-        if (finished) return;
-        finished = true;
-        completion.close();
-        completion.cm.off("cursorActivity", activity);
-        if (data) CodeMirror.signal(data, "close");
+    update: function(first) {
+      if (this.tick == null) return;
+      if (!this.options.hint.async) {
+        this.finishUpdate(this.options.hint(this.cm, this.options), first);
+      } else {
+        var myTick = ++this.tick, self = this;
+        this.options.hint(this.cm, function(data) {
+          if (self.tick == myTick) self.finishUpdate(data, first);
+        }, this.options);
       }
+    },
 
-      function update() {
-        if (finished) return;
-        CodeMirror.signal(data, "update");
-        var getHints = completion.options.hint;
-        if (getHints.async)
-          getHints(completion.cm, finishUpdate, completion.options);
-        else
-          finishUpdate(getHints(completion.cm, completion.options));
-      }
-      function finishUpdate(data_) {
-        data = data_;
-        if (finished) return;
-        if (!data || !data.list.length) return done();
-        if (completion.widget) completion.widget.close();
-        completion.widget = new Widget(completion, data);
-      }
+    finishUpdate: function(data, first) {
+      if (this.data) CodeMirror.signal(this.data, "update");
+      if (data && this.data && CodeMirror.cmpPos(data.from, this.data.from)) data = null;
+      this.data = data;
 
-      function clearDebounce() {
-        if (debounce) {
-          cancelAnimationFrame(debounce);
-          debounce = 0;
-        }
-      }
-
-      function activity() {
-        clearDebounce();
-        var pos = completion.cm.getCursor(), line = completion.cm.getLine(pos.line);
-        if (pos.line != startPos.line || line.length - pos.ch != startLen - startPos.ch ||
-            pos.ch < startPos.ch || completion.cm.somethingSelected() ||
-            (pos.ch && closeOn.test(line.charAt(pos.ch - 1)))) {
-          completion.close();
+      var picked = (this.widget && this.widget.picked) || (first && this.options.completeSingle);
+      if (this.widget) this.widget.close();
+      if (data && data.list.length) {
+        if (picked && data.list.length == 1) {
+          this.pick(data, 0);
         } else {
-          debounce = requestAnimationFrame(update);
-          if (completion.widget) completion.widget.close();
+          this.widget = new Widget(this, data);
+          CodeMirror.signal(data, "shown");
         }
       }
-      this.cm.on("cursorActivity", activity);
-      this.onClose = done;
-    },
-
-    buildOptions: function(options) {
-      var editor = this.cm.options.hintOptions;
-      var out = {};
-      for (var prop in defaultOptions) out[prop] = defaultOptions[prop];
-      if (editor) for (var prop in editor)
-        if (editor[prop] !== undefined) out[prop] = editor[prop];
-      if (options) for (var prop in options)
-        if (options[prop] !== undefined) out[prop] = options[prop];
-      return out;
     }
   };
+
+  function parseOptions(cm, pos, options) {
+    var editor = cm.options.hintOptions;
+    var out = {};
+    for (var prop in defaultOptions) out[prop] = defaultOptions[prop];
+    if (editor) for (var prop in editor)
+      if (editor[prop] !== undefined) out[prop] = editor[prop];
+    if (options) for (var prop in options)
+      if (options[prop] !== undefined) out[prop] = options[prop];
+    if (out.hint.resolve) out.hint = out.hint.resolve(cm, pos)
+    return out;
+  }
 
   function getText(completion) {
     if (typeof completion == "string") return completion;
@@ -5776,6 +5784,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   function Widget(completion, data) {
     this.completion = completion;
     this.data = data;
+    this.picked = false;
     var widget = this, cm = completion.cm;
 
     var hints = this.hints = document.createElement("ul");
@@ -5890,6 +5899,13 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       cm.off("scroll", this.onScroll);
     },
 
+    disable: function() {
+      this.completion.cm.removeKeyMap(this.keyMap);
+      var widget = this;
+      this.keyMap = {Enter: function() { widget.picked = true; }};
+      this.completion.cm.addKeyMap(this.keyMap);
+    },
+
     pick: function() {
       this.completion.pick(this.data, this.selectedHint);
     },
@@ -5916,34 +5932,79 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     }
   };
 
-  CodeMirror.registerHelper("hint", "auto", function(cm, options) {
-    var helpers = cm.getHelpers(cm.getCursor(), "hint"), words;
+  function applicableHelpers(cm, helpers) {
+    if (!cm.somethingSelected()) return helpers
+    var result = []
+    for (var i = 0; i < helpers.length; i++)
+      if (helpers[i].supportsSelection) result.push(helpers[i])
+    return result
+  }
+
+  function resolveAutoHints(cm, pos) {
+    var helpers = cm.getHelpers(pos, "hint"), words
     if (helpers.length) {
-      for (var i = 0; i < helpers.length; i++) {
-        var cur = helpers[i](cm, options);
-        if (cur && cur.list.length) return cur;
+      var async = false, resolved
+      for (var i = 0; i < helpers.length; i++) if (helpers[i].async) async = true
+      if (async) {
+        resolved = function(cm, callback, options) {
+          var app = applicableHelpers(cm, helpers)
+          function run(i, result) {
+            if (i == app.length) return callback(null)
+            var helper = app[i]
+            if (helper.async) {
+              helper(cm, function(result) {
+                if (result) callback(result)
+                else run(i + 1)
+              }, options)
+            } else {
+              var result = helper(cm, options)
+              if (result) callback(result)
+              else run(i + 1)
+            }
+          }
+          run(0)
+        }
+        resolved.async = true
+      } else {
+        resolved = function(cm, options) {
+          var app = applicableHelpers(cm, helpers)
+          for (var i = 0; i < app.length; i++) {
+            var cur = app[i](cm, options)
+            if (cur && cur.list.length) return cur
+          }
+        }
       }
+      resolved.supportsSelection = true
+      return resolved
     } else if (words = cm.getHelper(cm.getCursor(), "hintWords")) {
-      if (words) return CodeMirror.hint.fromList(cm, {words: words});
+      return function(cm) { return CodeMirror.hint.fromList(cm, {words: words}) }
     } else if (CodeMirror.hint.anyword) {
-      return CodeMirror.hint.anyword(cm, options);
+      return function(cm, options) { return CodeMirror.hint.anyword(cm, options) }
+    } else {
+      return function() {}
     }
+  }
+
+  CodeMirror.registerHelper("hint", "auto", {
+    resolve: resolveAutoHints
   });
 
   CodeMirror.registerHelper("hint", "fromList", function(cm, options) {
     var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+    var to = CodeMirror.Pos(cur.line, token.end);
+    if (token.string && /\w/.test(token.string[token.string.length - 1])) {
+      var term = token.string, from = CodeMirror.Pos(cur.line, token.start);
+    } else {
+      var term = "", from = to;
+    }
     var found = [];
     for (var i = 0; i < options.words.length; i++) {
       var word = options.words[i];
-      if (word.slice(0, token.string.length) == token.string)
+      if (word.slice(0, term.length) == term)
         found.push(word);
     }
 
-    if (found.length) return {
-      list: found,
-      from: CodeMirror.Pos(cur.line, token.start),
-            to: CodeMirror.Pos(cur.line, token.end)
-    };
+    if (found.length) return {list: found, from: from, to: to};
   });
 
   CodeMirror.commands.autocomplete = CodeMirror.showHint;
@@ -5954,7 +6015,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     alignWithWord: true,
     closeCharacters: /[\s()\[\]{};:>,]/,
     closeOnUnfocus: true,
-    completeOnSingleClick: false,
+    completeOnSingleClick: true,
     container: null,
     customKeys: null,
     extraKeys: null
@@ -5982,7 +6043,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   var ie = /MSIE \d/.test(navigator.userAgent);
   var ie_lt9 = ie && (document.documentMode == null || document.documentMode < 9);
 
-  if (callback.nodeType == 1) {
+  if (callback.appendChild) {
     var tabSize = (options && options.tabSize) || CodeMirror.defaults.tabSize;
     var node = callback, col = 0;
     node.innerHTML = "";
@@ -6188,10 +6249,10 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     from: function() {if (this.atOccurrence) return this.pos.from;},
     to: function() {if (this.atOccurrence) return this.pos.to;},
 
-    replace: function(newText) {
+    replace: function(newText, origin) {
       if (!this.atOccurrence) return;
       var lines = CodeMirror.splitLines(newText);
-      this.doc.replaceRange(lines, this.pos.from, this.pos.to);
+      this.doc.replaceRange(lines, this.pos.from, this.pos.to, origin);
       this.pos.to = Pos(this.pos.from.line + lines.length - 1,
                         lines[lines.length - 1].length + (lines.length == 1 ? this.pos.from.ch : 0));
     }
@@ -6217,9 +6278,9 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   });
 
   CodeMirror.defineExtension("selectMatches", function(query, caseFold) {
-    var ranges = [], next;
+    var ranges = [];
     var cur = this.getSearchCursor(query, this.getCursor("from"), caseFold);
-    while (next = cur.findNext()) {
+    while (cur.findNext()) {
       if (CodeMirror.cmpPos(cur.to(), this.getCursor("to")) > 0) break;
       ranges.push({anchor: cur.from(), head: cur.to()});
     }
@@ -6229,15 +6290,35 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 });
 
 },{"codemirror":undefined}],15:[function(require,module,exports){
-;(function(win){
+(function (global){
+"use strict"
+// Module export pattern from
+// https://github.com/umdjs/umd/blob/master/returnExports.js
+;(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.store = factory();
+  }
+}(this, function () {
+	
+	// Store.js
 	var store = {},
+		win = (typeof window != 'undefined' ? window : global),
 		doc = win.document,
 		localStorageName = 'localStorage',
 		scriptTag = 'script',
 		storage
 
 	store.disabled = false
-	store.version = '1.3.17'
+	store.version = '1.3.20'
 	store.set = function(key, value) {}
 	store.get = function(key, defaultVal) {}
 	store.has = function(key) { return store.get(key) !== undefined }
@@ -6301,7 +6382,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 				callback(key, store.get(key))
 			}
 		}
-	} else if (doc.documentElement.addBehavior) {
+	} else if (doc && doc.documentElement.addBehavior) {
 		var storageOwner,
 			storageContainer
 		// Since #userData storage applies only to specific paths, we need to
@@ -6346,7 +6427,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 		// See https://github.com/marcuswestin/store.js/issues/40
 		// See https://github.com/marcuswestin/store.js/issues/83
 		var forbiddenCharsRegex = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
-		function ieKeyFix(key) {
+		var ieKeyFix = function(key) {
 			return key.replace(/^d/, '___$&').replace(forbiddenCharsRegex, '___')
 		}
 		store.set = withIEStorage(function(storage, key, val) {
@@ -6369,8 +6450,8 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 		store.clear = withIEStorage(function(storage) {
 			var attributes = storage.XMLDocument.documentElement.attributes
 			storage.load(localStorageName)
-			for (var i=0, attr; attr=attributes[i]; i++) {
-				storage.removeAttribute(attr.name)
+			for (var i=attributes.length-1; i>=0; i--) {
+				storage.removeAttribute(attributes[i].name)
 			}
 			storage.save(localStorageName)
 		})
@@ -6398,44 +6479,83 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 		store.disabled = true
 	}
 	store.enabled = !store.disabled
+	
+	return store
+}));
 
-	if (typeof module != 'undefined' && module.exports && this.module !== module) { module.exports = store }
-	else if (typeof define === 'function' && define.amd) { define(store) }
-	else { win.store = store }
-
-})(Function('return this')());
-
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+//# sourceMappingURL=data:application/json;charset:utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5vZGVfbW9kdWxlcy9zdG9yZS9zdG9yZS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBIiwiZmlsZSI6ImdlbmVyYXRlZC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIlxuLy8gTW9kdWxlIGV4cG9ydCBwYXR0ZXJuIGZyb21cbi8vIGh0dHBzOi8vZ2l0aHViLmNvbS91bWRqcy91bWQvYmxvYi9tYXN0ZXIvcmV0dXJuRXhwb3J0cy5qc1xuOyhmdW5jdGlvbiAocm9vdCwgZmFjdG9yeSkge1xuICAgIGlmICh0eXBlb2YgZGVmaW5lID09PSAnZnVuY3Rpb24nICYmIGRlZmluZS5hbWQpIHtcbiAgICAgICAgLy8gQU1ELiBSZWdpc3RlciBhcyBhbiBhbm9ueW1vdXMgbW9kdWxlLlxuICAgICAgICBkZWZpbmUoW10sIGZhY3RvcnkpO1xuICAgIH0gZWxzZSBpZiAodHlwZW9mIGV4cG9ydHMgPT09ICdvYmplY3QnKSB7XG4gICAgICAgIC8vIE5vZGUuIERvZXMgbm90IHdvcmsgd2l0aCBzdHJpY3QgQ29tbW9uSlMsIGJ1dFxuICAgICAgICAvLyBvbmx5IENvbW1vbkpTLWxpa2UgZW52aXJvbm1lbnRzIHRoYXQgc3VwcG9ydCBtb2R1bGUuZXhwb3J0cyxcbiAgICAgICAgLy8gbGlrZSBOb2RlLlxuICAgICAgICBtb2R1bGUuZXhwb3J0cyA9IGZhY3RvcnkoKTtcbiAgICB9IGVsc2Uge1xuICAgICAgICAvLyBCcm93c2VyIGdsb2JhbHMgKHJvb3QgaXMgd2luZG93KVxuICAgICAgICByb290LnN0b3JlID0gZmFjdG9yeSgpO1xuICB9XG59KHRoaXMsIGZ1bmN0aW9uICgpIHtcblx0XG5cdC8vIFN0b3JlLmpzXG5cdHZhciBzdG9yZSA9IHt9LFxuXHRcdHdpbiA9ICh0eXBlb2Ygd2luZG93ICE9ICd1bmRlZmluZWQnID8gd2luZG93IDogZ2xvYmFsKSxcblx0XHRkb2MgPSB3aW4uZG9jdW1lbnQsXG5cdFx0bG9jYWxTdG9yYWdlTmFtZSA9ICdsb2NhbFN0b3JhZ2UnLFxuXHRcdHNjcmlwdFRhZyA9ICdzY3JpcHQnLFxuXHRcdHN0b3JhZ2VcblxuXHRzdG9yZS5kaXNhYmxlZCA9IGZhbHNlXG5cdHN0b3JlLnZlcnNpb24gPSAnMS4zLjIwJ1xuXHRzdG9yZS5zZXQgPSBmdW5jdGlvbihrZXksIHZhbHVlKSB7fVxuXHRzdG9yZS5nZXQgPSBmdW5jdGlvbihrZXksIGRlZmF1bHRWYWwpIHt9XG5cdHN0b3JlLmhhcyA9IGZ1bmN0aW9uKGtleSkgeyByZXR1cm4gc3RvcmUuZ2V0KGtleSkgIT09IHVuZGVmaW5lZCB9XG5cdHN0b3JlLnJlbW92ZSA9IGZ1bmN0aW9uKGtleSkge31cblx0c3RvcmUuY2xlYXIgPSBmdW5jdGlvbigpIHt9XG5cdHN0b3JlLnRyYW5zYWN0ID0gZnVuY3Rpb24oa2V5LCBkZWZhdWx0VmFsLCB0cmFuc2FjdGlvbkZuKSB7XG5cdFx0aWYgKHRyYW5zYWN0aW9uRm4gPT0gbnVsbCkge1xuXHRcdFx0dHJhbnNhY3Rpb25GbiA9IGRlZmF1bHRWYWxcblx0XHRcdGRlZmF1bHRWYWwgPSBudWxsXG5cdFx0fVxuXHRcdGlmIChkZWZhdWx0VmFsID09IG51bGwpIHtcblx0XHRcdGRlZmF1bHRWYWwgPSB7fVxuXHRcdH1cblx0XHR2YXIgdmFsID0gc3RvcmUuZ2V0KGtleSwgZGVmYXVsdFZhbClcblx0XHR0cmFuc2FjdGlvbkZuKHZhbClcblx0XHRzdG9yZS5zZXQoa2V5LCB2YWwpXG5cdH1cblx0c3RvcmUuZ2V0QWxsID0gZnVuY3Rpb24oKSB7fVxuXHRzdG9yZS5mb3JFYWNoID0gZnVuY3Rpb24oKSB7fVxuXG5cdHN0b3JlLnNlcmlhbGl6ZSA9IGZ1bmN0aW9uKHZhbHVlKSB7XG5cdFx0cmV0dXJuIEpTT04uc3RyaW5naWZ5KHZhbHVlKVxuXHR9XG5cdHN0b3JlLmRlc2VyaWFsaXplID0gZnVuY3Rpb24odmFsdWUpIHtcblx0XHRpZiAodHlwZW9mIHZhbHVlICE9ICdzdHJpbmcnKSB7IHJldHVybiB1bmRlZmluZWQgfVxuXHRcdHRyeSB7IHJldHVybiBKU09OLnBhcnNlKHZhbHVlKSB9XG5cdFx0Y2F0Y2goZSkgeyByZXR1cm4gdmFsdWUgfHwgdW5kZWZpbmVkIH1cblx0fVxuXG5cdC8vIEZ1bmN0aW9ucyB0byBlbmNhcHN1bGF0ZSBxdWVzdGlvbmFibGUgRmlyZUZveCAzLjYuMTMgYmVoYXZpb3Jcblx0Ly8gd2hlbiBhYm91dC5jb25maWc6OmRvbS5zdG9yYWdlLmVuYWJsZWQgPT09IGZhbHNlXG5cdC8vIFNlZSBodHRwczovL2dpdGh1Yi5jb20vbWFyY3Vzd2VzdGluL3N0b3JlLmpzL2lzc3VlcyNpc3N1ZS8xM1xuXHRmdW5jdGlvbiBpc0xvY2FsU3RvcmFnZU5hbWVTdXBwb3J0ZWQoKSB7XG5cdFx0dHJ5IHsgcmV0dXJuIChsb2NhbFN0b3JhZ2VOYW1lIGluIHdpbiAmJiB3aW5bbG9jYWxTdG9yYWdlTmFtZV0pIH1cblx0XHRjYXRjaChlcnIpIHsgcmV0dXJuIGZhbHNlIH1cblx0fVxuXG5cdGlmIChpc0xvY2FsU3RvcmFnZU5hbWVTdXBwb3J0ZWQoKSkge1xuXHRcdHN0b3JhZ2UgPSB3aW5bbG9jYWxTdG9yYWdlTmFtZV1cblx0XHRzdG9yZS5zZXQgPSBmdW5jdGlvbihrZXksIHZhbCkge1xuXHRcdFx0aWYgKHZhbCA9PT0gdW5kZWZpbmVkKSB7IHJldHVybiBzdG9yZS5yZW1vdmUoa2V5KSB9XG5cdFx0XHRzdG9yYWdlLnNldEl0ZW0oa2V5LCBzdG9yZS5zZXJpYWxpemUodmFsKSlcblx0XHRcdHJldHVybiB2YWxcblx0XHR9XG5cdFx0c3RvcmUuZ2V0ID0gZnVuY3Rpb24oa2V5LCBkZWZhdWx0VmFsKSB7XG5cdFx0XHR2YXIgdmFsID0gc3RvcmUuZGVzZXJpYWxpemUoc3RvcmFnZS5nZXRJdGVtKGtleSkpXG5cdFx0XHRyZXR1cm4gKHZhbCA9PT0gdW5kZWZpbmVkID8gZGVmYXVsdFZhbCA6IHZhbClcblx0XHR9XG5cdFx0c3RvcmUucmVtb3ZlID0gZnVuY3Rpb24oa2V5KSB7IHN0b3JhZ2UucmVtb3ZlSXRlbShrZXkpIH1cblx0XHRzdG9yZS5jbGVhciA9IGZ1bmN0aW9uKCkgeyBzdG9yYWdlLmNsZWFyKCkgfVxuXHRcdHN0b3JlLmdldEFsbCA9IGZ1bmN0aW9uKCkge1xuXHRcdFx0dmFyIHJldCA9IHt9XG5cdFx0XHRzdG9yZS5mb3JFYWNoKGZ1bmN0aW9uKGtleSwgdmFsKSB7XG5cdFx0XHRcdHJldFtrZXldID0gdmFsXG5cdFx0XHR9KVxuXHRcdFx0cmV0dXJuIHJldFxuXHRcdH1cblx0XHRzdG9yZS5mb3JFYWNoID0gZnVuY3Rpb24oY2FsbGJhY2spIHtcblx0XHRcdGZvciAodmFyIGk9MDsgaTxzdG9yYWdlLmxlbmd0aDsgaSsrKSB7XG5cdFx0XHRcdHZhciBrZXkgPSBzdG9yYWdlLmtleShpKVxuXHRcdFx0XHRjYWxsYmFjayhrZXksIHN0b3JlLmdldChrZXkpKVxuXHRcdFx0fVxuXHRcdH1cblx0fSBlbHNlIGlmIChkb2MgJiYgZG9jLmRvY3VtZW50RWxlbWVudC5hZGRCZWhhdmlvcikge1xuXHRcdHZhciBzdG9yYWdlT3duZXIsXG5cdFx0XHRzdG9yYWdlQ29udGFpbmVyXG5cdFx0Ly8gU2luY2UgI3VzZXJEYXRhIHN0b3JhZ2UgYXBwbGllcyBvbmx5IHRvIHNwZWNpZmljIHBhdGhzLCB3ZSBuZWVkIHRvXG5cdFx0Ly8gc29tZWhvdyBsaW5rIG91ciBkYXRhIHRvIGEgc3BlY2lmaWMgcGF0aC4gIFdlIGNob29zZSAvZmF2aWNvbi5pY29cblx0XHQvLyBhcyBhIHByZXR0eSBzYWZlIG9wdGlvbiwgc2luY2UgYWxsIGJyb3dzZXJzIGFscmVhZHkgbWFrZSBhIHJlcXVlc3QgdG9cblx0XHQvLyB0aGlzIFVSTCBhbnl3YXkgYW5kIGJlaW5nIGEgNDA0IHdpbGwgbm90IGh1cnQgdXMgaGVyZS4gIFdlIHdyYXAgYW5cblx0XHQvLyBpZnJhbWUgcG9pbnRpbmcgdG8gdGhlIGZhdmljb24gaW4gYW4gQWN0aXZlWE9iamVjdChodG1sZmlsZSkgb2JqZWN0XG5cdFx0Ly8gKHNlZTogaHR0cDovL21zZG4ubWljcm9zb2Z0LmNvbS9lbi11cy9saWJyYXJ5L2FhNzUyNTc0KHY9VlMuODUpLmFzcHgpXG5cdFx0Ly8gc2luY2UgdGhlIGlmcmFtZSBhY2Nlc3MgcnVsZXMgYXBwZWFyIHRvIGFsbG93IGRpcmVjdCBhY2Nlc3MgYW5kXG5cdFx0Ly8gbWFuaXB1bGF0aW9uIG9mIHRoZSBkb2N1bWVudCBlbGVtZW50LCBldmVuIGZvciBhIDQwNCBwYWdlLiAgVGhpc1xuXHRcdC8vIGRvY3VtZW50IGNhbiBiZSB1c2VkIGluc3RlYWQgb2YgdGhlIGN1cnJlbnQgZG9jdW1lbnQgKHdoaWNoIHdvdWxkXG5cdFx0Ly8gaGF2ZSBiZWVuIGxpbWl0ZWQgdG8gdGhlIGN1cnJlbnQgcGF0aCkgdG8gcGVyZm9ybSAjdXNlckRhdGEgc3RvcmFnZS5cblx0XHR0cnkge1xuXHRcdFx0c3RvcmFnZUNvbnRhaW5lciA9IG5ldyBBY3RpdmVYT2JqZWN0KCdodG1sZmlsZScpXG5cdFx0XHRzdG9yYWdlQ29udGFpbmVyLm9wZW4oKVxuXHRcdFx0c3RvcmFnZUNvbnRhaW5lci53cml0ZSgnPCcrc2NyaXB0VGFnKyc+ZG9jdW1lbnQudz13aW5kb3c8Lycrc2NyaXB0VGFnKyc+PGlmcmFtZSBzcmM9XCIvZmF2aWNvbi5pY29cIj48L2lmcmFtZT4nKVxuXHRcdFx0c3RvcmFnZUNvbnRhaW5lci5jbG9zZSgpXG5cdFx0XHRzdG9yYWdlT3duZXIgPSBzdG9yYWdlQ29udGFpbmVyLncuZnJhbWVzWzBdLmRvY3VtZW50XG5cdFx0XHRzdG9yYWdlID0gc3RvcmFnZU93bmVyLmNyZWF0ZUVsZW1lbnQoJ2RpdicpXG5cdFx0fSBjYXRjaChlKSB7XG5cdFx0XHQvLyBzb21laG93IEFjdGl2ZVhPYmplY3QgaW5zdGFudGlhdGlvbiBmYWlsZWQgKHBlcmhhcHMgc29tZSBzcGVjaWFsXG5cdFx0XHQvLyBzZWN1cml0eSBzZXR0aW5ncyBvciBvdGhlcndzZSksIGZhbGwgYmFjayB0byBwZXItcGF0aCBzdG9yYWdlXG5cdFx0XHRzdG9yYWdlID0gZG9jLmNyZWF0ZUVsZW1lbnQoJ2RpdicpXG5cdFx0XHRzdG9yYWdlT3duZXIgPSBkb2MuYm9keVxuXHRcdH1cblx0XHR2YXIgd2l0aElFU3RvcmFnZSA9IGZ1bmN0aW9uKHN0b3JlRnVuY3Rpb24pIHtcblx0XHRcdHJldHVybiBmdW5jdGlvbigpIHtcblx0XHRcdFx0dmFyIGFyZ3MgPSBBcnJheS5wcm90b3R5cGUuc2xpY2UuY2FsbChhcmd1bWVudHMsIDApXG5cdFx0XHRcdGFyZ3MudW5zaGlmdChzdG9yYWdlKVxuXHRcdFx0XHQvLyBTZWUgaHR0cDovL21zZG4ubWljcm9zb2Z0LmNvbS9lbi11cy9saWJyYXJ5L21zNTMxMDgxKHY9VlMuODUpLmFzcHhcblx0XHRcdFx0Ly8gYW5kIGh0dHA6Ly9tc2RuLm1pY3Jvc29mdC5jb20vZW4tdXMvbGlicmFyeS9tczUzMTQyNCh2PVZTLjg1KS5hc3B4XG5cdFx0XHRcdHN0b3JhZ2VPd25lci5hcHBlbmRDaGlsZChzdG9yYWdlKVxuXHRcdFx0XHRzdG9yYWdlLmFkZEJlaGF2aW9yKCcjZGVmYXVsdCN1c2VyRGF0YScpXG5cdFx0XHRcdHN0b3JhZ2UubG9hZChsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdFx0XHR2YXIgcmVzdWx0ID0gc3RvcmVGdW5jdGlvbi5hcHBseShzdG9yZSwgYXJncylcblx0XHRcdFx0c3RvcmFnZU93bmVyLnJlbW92ZUNoaWxkKHN0b3JhZ2UpXG5cdFx0XHRcdHJldHVybiByZXN1bHRcblx0XHRcdH1cblx0XHR9XG5cblx0XHQvLyBJbiBJRTcsIGtleXMgY2Fubm90IHN0YXJ0IHdpdGggYSBkaWdpdCBvciBjb250YWluIGNlcnRhaW4gY2hhcnMuXG5cdFx0Ly8gU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9tYXJjdXN3ZXN0aW4vc3RvcmUuanMvaXNzdWVzLzQwXG5cdFx0Ly8gU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9tYXJjdXN3ZXN0aW4vc3RvcmUuanMvaXNzdWVzLzgzXG5cdFx0dmFyIGZvcmJpZGRlbkNoYXJzUmVnZXggPSBuZXcgUmVnRXhwKFwiWyFcXFwiIyQlJicoKSorLC9cXFxcXFxcXDo7PD0+P0BbXFxcXF1eYHt8fX5dXCIsIFwiZ1wiKVxuXHRcdHZhciBpZUtleUZpeCA9IGZ1bmN0aW9uKGtleSkge1xuXHRcdFx0cmV0dXJuIGtleS5yZXBsYWNlKC9eZC8sICdfX18kJicpLnJlcGxhY2UoZm9yYmlkZGVuQ2hhcnNSZWdleCwgJ19fXycpXG5cdFx0fVxuXHRcdHN0b3JlLnNldCA9IHdpdGhJRVN0b3JhZ2UoZnVuY3Rpb24oc3RvcmFnZSwga2V5LCB2YWwpIHtcblx0XHRcdGtleSA9IGllS2V5Rml4KGtleSlcblx0XHRcdGlmICh2YWwgPT09IHVuZGVmaW5lZCkgeyByZXR1cm4gc3RvcmUucmVtb3ZlKGtleSkgfVxuXHRcdFx0c3RvcmFnZS5zZXRBdHRyaWJ1dGUoa2V5LCBzdG9yZS5zZXJpYWxpemUodmFsKSlcblx0XHRcdHN0b3JhZ2Uuc2F2ZShsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdFx0cmV0dXJuIHZhbFxuXHRcdH0pXG5cdFx0c3RvcmUuZ2V0ID0gd2l0aElFU3RvcmFnZShmdW5jdGlvbihzdG9yYWdlLCBrZXksIGRlZmF1bHRWYWwpIHtcblx0XHRcdGtleSA9IGllS2V5Rml4KGtleSlcblx0XHRcdHZhciB2YWwgPSBzdG9yZS5kZXNlcmlhbGl6ZShzdG9yYWdlLmdldEF0dHJpYnV0ZShrZXkpKVxuXHRcdFx0cmV0dXJuICh2YWwgPT09IHVuZGVmaW5lZCA/IGRlZmF1bHRWYWwgOiB2YWwpXG5cdFx0fSlcblx0XHRzdG9yZS5yZW1vdmUgPSB3aXRoSUVTdG9yYWdlKGZ1bmN0aW9uKHN0b3JhZ2UsIGtleSkge1xuXHRcdFx0a2V5ID0gaWVLZXlGaXgoa2V5KVxuXHRcdFx0c3RvcmFnZS5yZW1vdmVBdHRyaWJ1dGUoa2V5KVxuXHRcdFx0c3RvcmFnZS5zYXZlKGxvY2FsU3RvcmFnZU5hbWUpXG5cdFx0fSlcblx0XHRzdG9yZS5jbGVhciA9IHdpdGhJRVN0b3JhZ2UoZnVuY3Rpb24oc3RvcmFnZSkge1xuXHRcdFx0dmFyIGF0dHJpYnV0ZXMgPSBzdG9yYWdlLlhNTERvY3VtZW50LmRvY3VtZW50RWxlbWVudC5hdHRyaWJ1dGVzXG5cdFx0XHRzdG9yYWdlLmxvYWQobG9jYWxTdG9yYWdlTmFtZSlcblx0XHRcdGZvciAodmFyIGk9YXR0cmlidXRlcy5sZW5ndGgtMTsgaT49MDsgaS0tKSB7XG5cdFx0XHRcdHN0b3JhZ2UucmVtb3ZlQXR0cmlidXRlKGF0dHJpYnV0ZXNbaV0ubmFtZSlcblx0XHRcdH1cblx0XHRcdHN0b3JhZ2Uuc2F2ZShsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdH0pXG5cdFx0c3RvcmUuZ2V0QWxsID0gZnVuY3Rpb24oc3RvcmFnZSkge1xuXHRcdFx0dmFyIHJldCA9IHt9XG5cdFx0XHRzdG9yZS5mb3JFYWNoKGZ1bmN0aW9uKGtleSwgdmFsKSB7XG5cdFx0XHRcdHJldFtrZXldID0gdmFsXG5cdFx0XHR9KVxuXHRcdFx0cmV0dXJuIHJldFxuXHRcdH1cblx0XHRzdG9yZS5mb3JFYWNoID0gd2l0aElFU3RvcmFnZShmdW5jdGlvbihzdG9yYWdlLCBjYWxsYmFjaykge1xuXHRcdFx0dmFyIGF0dHJpYnV0ZXMgPSBzdG9yYWdlLlhNTERvY3VtZW50LmRvY3VtZW50RWxlbWVudC5hdHRyaWJ1dGVzXG5cdFx0XHRmb3IgKHZhciBpPTAsIGF0dHI7IGF0dHI9YXR0cmlidXRlc1tpXTsgKytpKSB7XG5cdFx0XHRcdGNhbGxiYWNrKGF0dHIubmFtZSwgc3RvcmUuZGVzZXJpYWxpemUoc3RvcmFnZS5nZXRBdHRyaWJ1dGUoYXR0ci5uYW1lKSkpXG5cdFx0XHR9XG5cdFx0fSlcblx0fVxuXG5cdHRyeSB7XG5cdFx0dmFyIHRlc3RLZXkgPSAnX19zdG9yZWpzX18nXG5cdFx0c3RvcmUuc2V0KHRlc3RLZXksIHRlc3RLZXkpXG5cdFx0aWYgKHN0b3JlLmdldCh0ZXN0S2V5KSAhPSB0ZXN0S2V5KSB7IHN0b3JlLmRpc2FibGVkID0gdHJ1ZSB9XG5cdFx0c3RvcmUucmVtb3ZlKHRlc3RLZXkpXG5cdH0gY2F0Y2goZSkge1xuXHRcdHN0b3JlLmRpc2FibGVkID0gdHJ1ZVxuXHR9XG5cdHN0b3JlLmVuYWJsZWQgPSAhc3RvcmUuZGlzYWJsZWRcblx0XG5cdHJldHVybiBzdG9yZVxufSkpO1xuIl19
 },{}],16:[function(require,module,exports){
 module.exports={
-  "name": "yasgui-utils",
-  "version": "1.6.0",
-  "description": "Utils for YASGUI libs",
-  "main": "src/main.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/YASGUI/Utils.git"
+  "_args": [
+    [
+      "yasgui-utils@^1.4.1",
+      "/home/lrd900/yasgui/yasqe"
+    ]
+  ],
+  "_from": "yasgui-utils@>=1.4.1 <2.0.0",
+  "_id": "yasgui-utils@1.6.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/yasgui-utils",
+  "_npmUser": {
+    "email": "laurens.rietveld@gmail.com",
+    "name": "laurens.rietveld"
   },
+  "_npmVersion": "1.4.3",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "yasgui-utils",
+    "raw": "yasgui-utils@^1.4.1",
+    "rawSpec": "^1.4.1",
+    "scope": null,
+    "spec": ">=1.4.1 <2.0.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_shrinkwrap": null,
+  "_spec": "yasgui-utils@^1.4.1",
+  "_where": "/home/lrd900/yasgui/yasqe",
+  "author": {
+    "name": "Laurens Rietveld"
+  },
+  "bugs": {
+    "url": "https://github.com/YASGUI/Utils/issues"
+  },
+  "dependencies": {
+    "store": "^1.3.14"
+  },
+  "description": "Utils for YASGUI libs",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "bcb9091109c233e3e82737c94c202e6512389c47",
+    "tarball": "http://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz"
+  },
+  "homepage": "https://github.com/YASGUI/Utils",
   "licenses": [
     {
       "type": "MIT",
       "url": "http://yasgui.github.io/license.txt"
     }
   ],
-  "author": "Laurens Rietveld",
+  "main": "src/main.js",
   "maintainers": [
     {
-      "name": "Laurens Rietveld",
-      "email": "laurens.rietveld@gmail.com",
-      "web": "http://laurensrietveld.nl"
+      "name": "laurens.rietveld",
+      "email": "laurens.rietveld@gmail.com"
     }
   ],
-  "bugs": {
-    "url": "https://github.com/YASGUI/Utils/issues"
+  "name": "yasgui-utils",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/YASGUI/Utils.git"
   },
-  "homepage": "https://github.com/YASGUI/Utils",
-  "dependencies": {
-    "store": "^1.3.14"
-  }
+  "version": "1.6.0"
 }
 
 },{}],17:[function(require,module,exports){
@@ -6552,7 +6672,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.7.2",
+  "version": "2.8.2",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -6568,6 +6688,7 @@ module.exports={
     "gulp-concat": "^2.4.1",
     "gulp-connect": "^2.0.5",
     "gulp-cssimport": "^1.3.1",
+    "gulp-cssnano": "^2.1.0",
     "gulp-embedlr": "^0.5.2",
     "gulp-filter": "^1.0.2",
     "gulp-git": "^0.5.2",
@@ -6580,7 +6701,7 @@ module.exports={
     "gulp-sourcemaps": "^1.2.8",
     "gulp-streamify": "0.0.5",
     "gulp-tag-version": "^1.1.0",
-    "gulp-uglify": "^1.0.1",
+    "gulp-uglify": "^1.5.1",
     "node-sass": "^3.4.2",
     "require-dir": "^0.1.0",
     "run-sequence": "^1.0.1",
@@ -6610,7 +6731,7 @@ module.exports={
   },
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "^4.7.0",
+    "codemirror": "^5.10.0",
     "yasgui-utils": "^1.4.1"
   },
   "optionalShim": {
