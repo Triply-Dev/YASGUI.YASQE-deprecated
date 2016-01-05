@@ -8,7 +8,7 @@ var gulp = require('gulp'),
 	cssImport = require('gulp-cssimport'),
 	rename = require("gulp-rename"),
 	notify = require('gulp-notify'),
-	minifyCSS = require('gulp-minify-css');
+	minifyCSS = require('gulp-cssnano');
 
 
 gulp.task('makeCss', function() {

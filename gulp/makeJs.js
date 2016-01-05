@@ -16,11 +16,11 @@ var gulp = require('gulp'),
 	sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('browserify', function() {
-	browserify({entries: ["./src/entry.js"],standalone: "YASQE", debug: true})
+	return browserify({entries: ["./src/entry.js"],standalone: "YASQE", debug: true})
 		.transform({global:true}, optionalShim)
 		.exclude('jquery')
 		.exclude('codemirror')
-		.exclude('../../lib/codemirror') 
+		.exclude('../../lib/codemirror')
 		.bundle()
 		.pipe(exorcist(paths.bundleDir + '/' + paths.bundleFileName + '.js.map'))
 		.pipe(source(paths.bundleFileName + '.js'))
@@ -46,7 +46,7 @@ gulp.task('browserify', function() {
 
 gulp.task('browserifyWithDeps', function() {
 	var bundler = browserify({entries: ["./src/entry.js"],standalone: "YASQE", debug: true});
-	
+
 	return bundler
 		.bundle()
 		.pipe(exorcist(paths.bundleDir + '/' + paths.bundleFileName + '.bundled.js.map'))
@@ -61,9 +61,9 @@ gulp.task('browserifyWithDeps', function() {
 		.pipe(uglify({
 			compress: {
 				//disable the compressions. Otherwise, breakpoints in minified files don't work (sourcemaped lines get offset w.r.t. original)
-				//minified files does increase from 457 to 459 kb, but can live with that 
+				//minified files does increase from 457 to 459 kb, but can live with that
 	            negate_iife: false,
-	            sequences: false
+	            // sequences: false
 	        }
 		}))
 		.pipe(sourcemaps.write('./'))
@@ -76,7 +76,7 @@ gulp.task('browserifyWithDeps', function() {
  */
 gulp.task('browserifyForDebug', function() {
 	var bundler = browserify({entries: ["./src/entry.js"],standalone: "YASQE", debug: true});
-	
+
 	return bundler
 		.bundle()
 	    .on("error", notify.onError(function(error) {
@@ -87,4 +87,3 @@ gulp.task('browserifyForDebug', function() {
 		.pipe(gulp.dest(paths.bundleDir))
 		.pipe(connect.reload());
 });
-
