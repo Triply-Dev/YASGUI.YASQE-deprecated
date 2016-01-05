@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "jquery": "~ 1.11.0",
-    "codemirror": "^4.7.0",
+    "codemirror": "^5.10.0",
     "yasgui-utils": "^1.4.1"
   },
   "optionalShim": {
