@@ -18,7 +18,7 @@ module.exports = function(yasqe, completerName) {
 			return module.exports.isValidCompletionPosition(yasqe);
 		},
 		get: function(token, callback) {
-			$.get("http://prefix.cc/popular/all.file.json", function(data) {
+			$.get("//prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
 				for (var prefix in data) {
 					if (prefix == "bif")
