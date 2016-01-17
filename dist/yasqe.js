@@ -6672,7 +6672,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7115,7 +7115,7 @@ module.exports = function(yasqe, completerName) {
 			return module.exports.isValidCompletionPosition(yasqe);
 		},
 		get: function(token, callback) {
-			$.get("http://prefix.cc/popular/all.file.json", function(data) {
+			$.get("//prefix.cc/popular/all.file.json", function(data) {
 				var prefixArray = [];
 				for (var prefix in data) {
 					if (prefix == "bif")
@@ -7224,6 +7224,7 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		}
 	}
 };
+
 },{"jquery":undefined}],24:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
