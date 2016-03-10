@@ -407,7 +407,14 @@
 
 
 
-
+    <h3 id="autocompletionsConfig">Configuring Autocompletion Plugins</h3>
+    To modify how autocompletion plugins work, you can simply overwrite the settings and/or function that are explained in the <a href="#autocompletions">section above</a>.
+    To e.g. modify the <code>autoShow</code> setting for the prefix autocompleter, set `YASQE.Autocompleters.prefixes.autoShow = false` before you initialize YASQE.
+    Some plugins may come with extra configuration options such as the prefix autocompleter, that allows you to change the url from where the prefix json is fetched:
+    <div class="doc" style="">
+			<code>YASQE.Autocompleters.prefixes.fetchFrom: string (default: //prefix.cc/popular/all.file.json)</code>
+			<p>Where to fetch the prefix json from. Change this when you'd like to host the json yourself. This might be useful when you run YASQE on an `https` site, considering that prefix.cc currently does not support `https`</p>
+		</div>
 
 </div><!-- col -->
 <div class="col-md-3" id="sidebarmenu">

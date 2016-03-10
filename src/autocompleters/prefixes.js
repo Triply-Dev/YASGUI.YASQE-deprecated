@@ -18,7 +18,7 @@ module.exports = function(yasqe, completerName) {
 			return module.exports.isValidCompletionPosition(yasqe);
 		},
 		get: function(token, callback) {
-			$.get("//prefix.cc/popular/all.file.json", function(data) {
+			$.get(module.exports.fetchFrom, function(data) {
 				var prefixArray = [];
 				for (var prefix in data) {
 					if (prefix == "bif")
@@ -91,7 +91,7 @@ module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
 /**
  * Check whether typed prefix is declared. If not, automatically add declaration
  * using list from prefix.cc
- * 
+ *
  * @param yasqe
  */
 module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
@@ -127,3 +127,4 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		}
 	}
 };
+module.exports.fetchFrom = '//prefix.cc/popular/all.file.json'
