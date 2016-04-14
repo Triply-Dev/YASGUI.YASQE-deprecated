@@ -25914,7 +25914,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -28042,7 +28042,6 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 			}
 		}
 	}
-	console.log('bla', ajaxConfig.type)
 	if (ajaxConfig.type === 'GET') {
 		//we need to do encoding ourselve, as jquery does not properly encode the url string
 		//https://github.com/OpenTriply/YASGUI/issues/75
