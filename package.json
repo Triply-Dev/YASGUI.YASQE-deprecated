@@ -1,7 +1,7 @@
 {
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
