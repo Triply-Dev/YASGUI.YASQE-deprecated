@@ -41,7 +41,6 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 			}
 		}
 	}
-	console.log('bla', ajaxConfig.type)
 	if (ajaxConfig.type === 'GET') {
 		//we need to do encoding ourselve, as jquery does not properly encode the url string
 		//https://github.com/OpenTriply/YASGUI/issues/75
