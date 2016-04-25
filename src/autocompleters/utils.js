@@ -50,6 +50,8 @@ var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedStri
 	return suggestedString;
 };
 
+//Use protocol relative request when served via http[s]*. Otherwise (e.g. file://, fetch via http)
+var reqProtocol = (window.location.protocol.indexOf('http') === 0? '//', 'http://')''
 var fetchFromLov = function(yasqe, completer, token, callback) {
 	if (!token || !token.string || token.string.trim().length == 0) {
 		yasqe.autocompleters.notifications.getEl(completer)
@@ -71,7 +73,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
 	var results = [];
 	var url = "";
 	var updateUrl = function() {
-		url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
+		url = reqProtocol + "lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
 	};
 	updateUrl();
 	var increasePage = function() {
