@@ -127,4 +127,5 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		}
 	}
 };
-module.exports.fetchFrom = '//prefix.cc/popular/all.file.json'
+
+module.exports.fetchFrom = (window.location.protocol.indexOf('http') === 0? '//': 'http://') + 'prefix.cc/popular/all.file.json'
