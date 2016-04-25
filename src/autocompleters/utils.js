@@ -51,7 +51,7 @@ var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedStri
 };
 
 //Use protocol relative request when served via http[s]*. Otherwise (e.g. file://, fetch via http)
-var reqProtocol = (window.location.protocol.indexOf('http') === 0? '//', 'http://')''
+var reqProtocol = (window.location.protocol.indexOf('http') === 0? '//': 'http://')
 var fetchFromLov = function(yasqe, completer, token, callback) {
 	if (!token || !token.string || token.string.trim().length == 0) {
 		yasqe.autocompleters.notifications.getEl(completer)
