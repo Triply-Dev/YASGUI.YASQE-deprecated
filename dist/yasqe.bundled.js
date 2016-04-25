@@ -25914,7 +25914,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.9.1",
+  "version": "2.10.0",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -26466,7 +26466,8 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 		}
 	}
 };
-module.exports.fetchFrom = '//prefix.cc/popular/all.file.json'
+
+module.exports.fetchFrom = (window.location.protocol.indexOf('http') === 0? '//': 'http://') + 'prefix.cc/popular/all.file.json'
 
 },{"jquery":16}],26:[function(require,module,exports){
 'use strict';
@@ -26575,6 +26576,8 @@ var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedStri
 	return suggestedString;
 };
 
+//Use protocol relative request when served via http[s]*. Otherwise (e.g. file://, fetch via http)
+var reqProtocol = (window.location.protocol.indexOf('http') === 0? '//': 'http://')
 var fetchFromLov = function(yasqe, completer, token, callback) {
 	if (!token || !token.string || token.string.trim().length == 0) {
 		yasqe.autocompleters.notifications.getEl(completer)
@@ -26596,7 +26599,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
 	var results = [];
 	var url = "";
 	var updateUrl = function() {
-		url = "http://lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
+		url = reqProtocol + "lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
 	};
 	updateUrl();
 	var increasePage = function() {
@@ -26650,6 +26653,7 @@ module.exports = {
 	preprocessResourceTokenForCompletion: preprocessResourceTokenForCompletion,
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
+
 },{"../imgs.js":31,"./utils.js":27,"jquery":16,"yasgui-utils":19}],28:[function(require,module,exports){
 'use strict';
 var $ = require('jquery');
