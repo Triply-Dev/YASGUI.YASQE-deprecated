@@ -6,7 +6,9 @@
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
-  "scripts": "gulp",
+  "scripts": {
+    "install": "gulp"
+  },
   "devDependencies": {
     "bootstrap-sass": "^3.3.1",
     "browserify": "^6.1.0",
