@@ -6,6 +6,7 @@
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
+  "scripts": "gulp",
   "devDependencies": {
     "bootstrap-sass": "^3.3.1",
     "browserify": "^6.1.0",
@@ -59,8 +60,9 @@
     "url": "https://github.com/YASGUI/YASQE.git"
   },
   "dependencies": {
+    "codemirror": "5.10.0",
+    "gulp": "^3.9.0",
     "jquery": "~ 1.11.0",
-    "codemirror": "^5.10.0",
     "yasgui-utils": "^1.4.1"
   },
   "optionalShim": {
