@@ -21,7 +21,7 @@ gulp.task('makeMainPageJs', function() {
 });
 gulp.task('makeMainPageCss', function() {
 	return gulp.src(['./doc/main.scss'])
-	.pipe(sass())
+	.pipe(sass({ includePaths: [__dirname + '/../']}))
 	.pipe(minifyCSS())
   	.pipe(concat('doc.min.css'))
     .pipe(gulp.dest("doc"))
