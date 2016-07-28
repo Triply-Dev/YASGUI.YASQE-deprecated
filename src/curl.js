@@ -6,9 +6,21 @@ var quote = function(string) {
 module.exports = {
   createCurlString : function(yasqe, config) {
     var ajaxConfig = sparql.getAjaxConfig(yasqe, config);
-
+    var url = ajaxConfig.url;
+    if (ajaxConfig.url.indexOf('http') !== 0) {
+      //this is either a relative or absolute url, which is not supported by CURL.
+      //Add domain, schema, etc etc
+      var url = window.location.protocol + '//' + window.location.host;
+      if (ajaxConfig.url.indexOf('/') === 0) {
+        //its an absolute path
+        url += ajaxConfig.url;
+      } else {
+        //relative, so append current location to url first
+        url += window.location.pathname + ajaxConfig.url;
+      }
+    }
     var cmds = [
-      'curl', ajaxConfig.url,
+      'curl', url,
       '-X', yasqe.options.sparql.requestMethod
     ];
     if (yasqe.options.sparql.requestMethod == 'POST') {
