@@ -6,6 +6,11 @@
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
+  "scripts": {
+    "install": "gulp",
+    "dev": "gulp serve",
+    "build": "gulp"
+  },
   "devDependencies": {
     "gulp-bump": "^2.2.0",
     "gulp-connect": "^4.2.0",
