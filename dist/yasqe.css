@@ -55,7 +55,7 @@
     border-left: 1px solid silver; }
   .yasqe .cm-fat-cursor .CodeMirror-cursor {
     width: auto;
-    border: 0;
+    border: 0 !important;
     background: #7e7; }
   .yasqe .cm-fat-cursor div.CodeMirror-cursors {
     z-index: 1; }
@@ -80,8 +80,17 @@
   .yasqe .cm-tab {
     display: inline-block;
     text-decoration: inherit; }
+  .yasqe .CodeMirror-rulers {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -50px;
+    bottom: -20px;
+    overflow: hidden; }
   .yasqe .CodeMirror-ruler {
     border-left: 1px solid #ccc;
+    top: 0;
+    bottom: 0;
     position: absolute; }
   .yasqe .cm-s-default .cm-header {
     color: blue; }
@@ -190,11 +199,13 @@
     position: absolute;
     left: 0;
     top: 0;
+    min-height: 100%;
     z-index: 3; }
   .yasqe .CodeMirror-gutter {
     white-space: normal;
     height: 100%;
     display: inline-block;
+    vertical-align: top;
     margin-bottom: -30px;
     /* Hack to make IE7 behave */
     *zoom: 1;
@@ -236,7 +247,9 @@
     z-index: 2;
     position: relative;
     overflow: visible;
-    -webkit-tap-highlight-color: transparent; }
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-variant-ligatures: none;
+    font-variant-ligatures: none; }
   .yasqe .CodeMirror-wrap pre {
     word-wrap: break-word;
     white-space: pre-wrap;
@@ -267,7 +280,8 @@
     overflow: hidden;
     visibility: hidden; }
   .yasqe .CodeMirror-cursor {
-    position: absolute; }
+    position: absolute;
+    pointer-events: none; }
   .yasqe .CodeMirror-measure pre {
     position: static; }
   .yasqe div.CodeMirror-cursors {
@@ -547,8 +561,6 @@
   margin: 0;
   padding: 0 4px;
   border-radius: 2px;
-  max-width: 19em;
-  overflow: hidden;
   white-space: pre;
   color: black;
   cursor: pointer; }

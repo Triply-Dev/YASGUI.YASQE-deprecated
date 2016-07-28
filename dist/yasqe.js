@@ -1,9 +1,4 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.YASQE=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-//this is the entry-point for browserify.
-//the current browserify version does not support require-ing js files which are used as entry-point
-//this way, we can still require our main.js file
-module.exports = require('./main.js');
-},{"./main.js":30}],2:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.YASQE = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 /*
   jQuery deparam is an extraction of the deparam method from Ben Alman's jQuery BBQ
@@ -102,7 +97,7 @@ $.each(params.replace(/\+/g, ' ').split('&'), function (j,v) {
 return obj;
 };
 
-},{"jquery":undefined}],3:[function(require,module,exports){
+},{"jquery":undefined}],2:[function(require,module,exports){
 module.exports = {table:
 {
   "*[&&,valueLogical]" : {
@@ -3986,7 +3981,7 @@ punct:/^(\*|a|\.|\{|\}|,|\(|\)|;|\[|\]|\|\||&&|=|!=|!|<=|>=|<|>|\+|-|\/|\^\^|\?|
 startSymbol:"sparql11",
 acceptEmpty:true,
 }
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 var CodeMirror = (function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})();
 CodeMirror.defineMode("sparql11", function(config, parserConfig) {
@@ -4551,7 +4546,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 );
 CodeMirror.defineMIME("application/x-sparql-query", "sparql11");
 
-},{"./_tokenizer-table.js":3,"codemirror":undefined}],5:[function(require,module,exports){
+},{"./_tokenizer-table.js":2,"codemirror":undefined}],4:[function(require,module,exports){
 /*
 * TRIE implementation in Javascript
 * Copyright (c) 2010 Saurabh Odhyan | http://odhyan.com
@@ -4827,7 +4822,7 @@ Trie.prototype = {
     }
 };
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -4870,7 +4865,7 @@ Trie.prototype = {
   }
 });
 
-},{"codemirror":undefined}],7:[function(require,module,exports){
+},{"codemirror":undefined}],6:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -4992,7 +4987,7 @@ Trie.prototype = {
   });
 });
 
-},{"codemirror":undefined}],8:[function(require,module,exports){
+},{"codemirror":undefined}],7:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -5008,7 +5003,7 @@ Trie.prototype = {
 
 CodeMirror.registerHelper("fold", "brace", function(cm, start) {
   var line = start.line, lineText = cm.getLine(line);
-  var startCh, tokenType;
+  var tokenType;
 
   function findOpening(openCh) {
     for (var at = start.ch, pass = 0;;) {
@@ -5067,15 +5062,15 @@ CodeMirror.registerHelper("fold", "import", function(cm, start) {
     }
   }
 
-  var start = start.line, has = hasImport(start), prev;
-  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+  var startLine = start.line, has = hasImport(startLine), prev;
+  if (!has || hasImport(startLine - 1) || ((prev = hasImport(startLine - 2)) && prev.end.line == startLine - 1))
     return null;
   for (var end = has.end;;) {
     var next = hasImport(end.line + 1);
     if (next == null) break;
     end = next.end;
   }
-  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+  return {from: cm.clipPos(CodeMirror.Pos(startLine, has.startCh + 1)), to: end};
 });
 
 CodeMirror.registerHelper("fold", "include", function(cm, start) {
@@ -5086,20 +5081,20 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
   }
 
-  var start = start.line, has = hasInclude(start);
-  if (has == null || hasInclude(start - 1) != null) return null;
-  for (var end = start;;) {
+  var startLine = start.line, has = hasInclude(startLine);
+  if (has == null || hasInclude(startLine - 1) != null) return null;
+  for (var end = startLine;;) {
     var next = hasInclude(end + 1);
     if (next == null) break;
     ++end;
   }
-  return {from: CodeMirror.Pos(start, has + 1),
+  return {from: CodeMirror.Pos(startLine, has + 1),
           to: cm.clipPos(CodeMirror.Pos(end))};
 });
 
 });
 
-},{"codemirror":undefined}],9:[function(require,module,exports){
+},{"codemirror":undefined}],8:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -5151,7 +5146,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     });
     var myRange = cm.markText(range.from, range.to, {
       replacedWith: myWidget,
-      clearOnEnter: true,
+      clearOnEnter: getOption(cm, options, "clearOnEnter"),
       __isFold: true
     });
     myRange.on("clear", function(from, to) {
@@ -5231,7 +5226,8 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     rangeFinder: CodeMirror.fold.auto,
     widget: "\u2194",
     minFoldSize: 0,
-    scanUp: false
+    scanUp: false,
+    clearOnEnter: true
   };
 
   CodeMirror.defineOption("foldOptions", null);
@@ -5250,7 +5246,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   });
 });
 
-},{"codemirror":undefined}],10:[function(require,module,exports){
+},{"codemirror":undefined}],9:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -5273,7 +5269,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       cm.off("viewportChange", onViewportChange);
       cm.off("fold", onFold);
       cm.off("unfold", onFold);
-      cm.off("swapDoc", updateInViewport);
+      cm.off("swapDoc", onChange);
     }
     if (val) {
       cm.state.foldGutter = new State(parseOptions(val));
@@ -5283,7 +5279,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       cm.on("viewportChange", onViewportChange);
       cm.on("fold", onFold);
       cm.on("unfold", onFold);
-      cm.on("swapDoc", updateInViewport);
+      cm.on("swapDoc", onChange);
     }
   });
 
@@ -5303,7 +5299,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   }
 
   function isFolded(cm, line) {
-    var marks = cm.findMarksAt(Pos(line));
+    var marks = cm.findMarks(Pos(line, 0), Pos(line + 1, 0));
     for (var i = 0; i < marks.length; ++i)
       if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
   }
@@ -5398,7 +5394,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   }
 });
 
-},{"./foldcode":9,"codemirror":undefined}],11:[function(require,module,exports){
+},{"./foldcode":8,"codemirror":undefined}],10:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -5541,9 +5537,9 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       var openTag = toNextTag(iter), end;
       if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
       if (!openTag[1] && end != "selfClose") {
-        var start = Pos(iter.line, iter.ch);
-        var close = findMatchingClose(iter, openTag[2]);
-        return close && {from: start, to: close.from};
+        var startPos = Pos(iter.line, iter.ch);
+        var endPos = findMatchingClose(iter, openTag[2]);
+        return endPos && {from: startPos, to: endPos.from};
       }
     }
   });
@@ -5582,7 +5578,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   };
 });
 
-},{"codemirror":undefined}],12:[function(require,module,exports){
+},{"codemirror":undefined}],11:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -5693,24 +5689,22 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     },
 
     update: function(first) {
-      if (this.tick == null) return;
-      if (!this.options.hint.async) {
-        this.finishUpdate(this.options.hint(this.cm, this.options), first);
-      } else {
-        var myTick = ++this.tick, self = this;
-        this.options.hint(this.cm, function(data) {
-          if (self.tick == myTick) self.finishUpdate(data, first);
-        }, this.options);
-      }
+      if (this.tick == null) return
+      var self = this, myTick = ++this.tick
+      fetchHints(this.options.hint, this.cm, this.options, function(data) {
+        if (self.tick == myTick) self.finishUpdate(data, first)
+      })
     },
 
     finishUpdate: function(data, first) {
       if (this.data) CodeMirror.signal(this.data, "update");
-      if (data && this.data && CodeMirror.cmpPos(data.from, this.data.from)) data = null;
-      this.data = data;
 
       var picked = (this.widget && this.widget.picked) || (first && this.options.completeSingle);
       if (this.widget) this.widget.close();
+
+      if (data && this.data && isNewCompletion(this.data, data)) return;
+      this.data = data;
+
       if (data && data.list.length) {
         if (picked && data.list.length == 1) {
           this.pick(data, 0);
@@ -5721,6 +5715,11 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       }
     }
   };
+
+  function isNewCompletion(old, nw) {
+    var moved = CodeMirror.cmpPos(nw.from, old.from)
+    return moved > 0 && old.to.ch - old.from.ch != nw.to.ch - nw.from.ch
+  }
 
   function parseOptions(cm, pos, options) {
     var editor = cm.options.hintOptions;
@@ -5811,6 +5810,9 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     var winH = window.innerHeight || Math.max(document.body.offsetHeight, document.documentElement.offsetHeight);
     (completion.options.container || document.body).appendChild(hints);
     var box = hints.getBoundingClientRect(), overlapY = box.bottom - winH;
+    var scrolls = hints.scrollHeight > hints.clientHeight + 1
+    var startScroll = cm.getScrollInfo();
+
     if (overlapY > 0) {
       var height = box.bottom - box.top, curTop = pos.top - (pos.bottom - box.top);
       if (curTop - height > 0) { // Fits above cursor
@@ -5835,6 +5837,8 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       }
       hints.style.left = (left = pos.left - overlapX) + "px";
     }
+    if (scrolls) for (var node = hints.firstChild; node; node = node.nextSibling)
+      node.style.paddingRight = cm.display.nativeBarWidth + "px"
 
     cm.addKeyMap(this.keyMap = buildKeyMap(completion, {
       moveFocus: function(n, avoidWrap) { widget.changeActive(widget.selectedHint + n, avoidWrap); },
@@ -5852,7 +5856,6 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
       cm.on("focus", this.onFocus = function() { clearTimeout(closingOnBlur); });
     }
 
-    var startScroll = cm.getScrollInfo();
     cm.on("scroll", this.onScroll = function() {
       var curScroll = cm.getScrollInfo(), editor = cm.getWrapperElement().getBoundingClientRect();
       var newTop = top + startScroll.top - curScroll.top;
@@ -5940,40 +5943,31 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
     return result
   }
 
+  function fetchHints(hint, cm, options, callback) {
+    if (hint.async) {
+      hint(cm, callback, options)
+    } else {
+      var result = hint(cm, options)
+      if (result && result.then) result.then(callback)
+      else callback(result)
+    }
+  }
+
   function resolveAutoHints(cm, pos) {
     var helpers = cm.getHelpers(pos, "hint"), words
     if (helpers.length) {
-      var async = false, resolved
-      for (var i = 0; i < helpers.length; i++) if (helpers[i].async) async = true
-      if (async) {
-        resolved = function(cm, callback, options) {
-          var app = applicableHelpers(cm, helpers)
-          function run(i, result) {
-            if (i == app.length) return callback(null)
-            var helper = app[i]
-            if (helper.async) {
-              helper(cm, function(result) {
-                if (result) callback(result)
-                else run(i + 1)
-              }, options)
-            } else {
-              var result = helper(cm, options)
-              if (result) callback(result)
-              else run(i + 1)
-            }
-          }
-          run(0)
+      var resolved = function(cm, callback, options) {
+        var app = applicableHelpers(cm, helpers);
+        function run(i) {
+          if (i == app.length) return callback(null)
+          fetchHints(app[i], cm, options, function(result) {
+            if (result && result.list.length > 0) callback(result)
+            else run(i + 1)
+          })
         }
-        resolved.async = true
-      } else {
-        resolved = function(cm, options) {
-          var app = applicableHelpers(cm, helpers)
-          for (var i = 0; i < app.length; i++) {
-            var cur = app[i](cm, options)
-            if (cur && cur.list.length) return cur
-          }
-        }
+        run(0)
       }
+      resolved.async = true
       resolved.supportsSelection = true
       return resolved
     } else if (words = cm.getHelper(cm.getCursor(), "hintWords")) {
@@ -6024,7 +6018,7 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   CodeMirror.defineOption("hintOptions", null);
 });
 
-},{"codemirror":undefined}],13:[function(require,module,exports){
+},{"codemirror":undefined}],12:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -6098,7 +6092,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 
 });
 
-},{"codemirror":undefined}],14:[function(require,module,exports){
+},{"codemirror":undefined}],13:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -6289,7 +6283,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   });
 });
 
-},{"codemirror":undefined}],15:[function(require,module,exports){
+},{"codemirror":undefined}],14:[function(require,module,exports){
 (function (global){
 "use strict"
 // Module export pattern from
@@ -6484,8 +6478,8 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-//# sourceMappingURL=data:application/json;charset:utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm5vZGVfbW9kdWxlcy9zdG9yZS9zdG9yZS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBIiwiZmlsZSI6ImdlbmVyYXRlZC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIlxuLy8gTW9kdWxlIGV4cG9ydCBwYXR0ZXJuIGZyb21cbi8vIGh0dHBzOi8vZ2l0aHViLmNvbS91bWRqcy91bWQvYmxvYi9tYXN0ZXIvcmV0dXJuRXhwb3J0cy5qc1xuOyhmdW5jdGlvbiAocm9vdCwgZmFjdG9yeSkge1xuICAgIGlmICh0eXBlb2YgZGVmaW5lID09PSAnZnVuY3Rpb24nICYmIGRlZmluZS5hbWQpIHtcbiAgICAgICAgLy8gQU1ELiBSZWdpc3RlciBhcyBhbiBhbm9ueW1vdXMgbW9kdWxlLlxuICAgICAgICBkZWZpbmUoW10sIGZhY3RvcnkpO1xuICAgIH0gZWxzZSBpZiAodHlwZW9mIGV4cG9ydHMgPT09ICdvYmplY3QnKSB7XG4gICAgICAgIC8vIE5vZGUuIERvZXMgbm90IHdvcmsgd2l0aCBzdHJpY3QgQ29tbW9uSlMsIGJ1dFxuICAgICAgICAvLyBvbmx5IENvbW1vbkpTLWxpa2UgZW52aXJvbm1lbnRzIHRoYXQgc3VwcG9ydCBtb2R1bGUuZXhwb3J0cyxcbiAgICAgICAgLy8gbGlrZSBOb2RlLlxuICAgICAgICBtb2R1bGUuZXhwb3J0cyA9IGZhY3RvcnkoKTtcbiAgICB9IGVsc2Uge1xuICAgICAgICAvLyBCcm93c2VyIGdsb2JhbHMgKHJvb3QgaXMgd2luZG93KVxuICAgICAgICByb290LnN0b3JlID0gZmFjdG9yeSgpO1xuICB9XG59KHRoaXMsIGZ1bmN0aW9uICgpIHtcblx0XG5cdC8vIFN0b3JlLmpzXG5cdHZhciBzdG9yZSA9IHt9LFxuXHRcdHdpbiA9ICh0eXBlb2Ygd2luZG93ICE9ICd1bmRlZmluZWQnID8gd2luZG93IDogZ2xvYmFsKSxcblx0XHRkb2MgPSB3aW4uZG9jdW1lbnQsXG5cdFx0bG9jYWxTdG9yYWdlTmFtZSA9ICdsb2NhbFN0b3JhZ2UnLFxuXHRcdHNjcmlwdFRhZyA9ICdzY3JpcHQnLFxuXHRcdHN0b3JhZ2VcblxuXHRzdG9yZS5kaXNhYmxlZCA9IGZhbHNlXG5cdHN0b3JlLnZlcnNpb24gPSAnMS4zLjIwJ1xuXHRzdG9yZS5zZXQgPSBmdW5jdGlvbihrZXksIHZhbHVlKSB7fVxuXHRzdG9yZS5nZXQgPSBmdW5jdGlvbihrZXksIGRlZmF1bHRWYWwpIHt9XG5cdHN0b3JlLmhhcyA9IGZ1bmN0aW9uKGtleSkgeyByZXR1cm4gc3RvcmUuZ2V0KGtleSkgIT09IHVuZGVmaW5lZCB9XG5cdHN0b3JlLnJlbW92ZSA9IGZ1bmN0aW9uKGtleSkge31cblx0c3RvcmUuY2xlYXIgPSBmdW5jdGlvbigpIHt9XG5cdHN0b3JlLnRyYW5zYWN0ID0gZnVuY3Rpb24oa2V5LCBkZWZhdWx0VmFsLCB0cmFuc2FjdGlvbkZuKSB7XG5cdFx0aWYgKHRyYW5zYWN0aW9uRm4gPT0gbnVsbCkge1xuXHRcdFx0dHJhbnNhY3Rpb25GbiA9IGRlZmF1bHRWYWxcblx0XHRcdGRlZmF1bHRWYWwgPSBudWxsXG5cdFx0fVxuXHRcdGlmIChkZWZhdWx0VmFsID09IG51bGwpIHtcblx0XHRcdGRlZmF1bHRWYWwgPSB7fVxuXHRcdH1cblx0XHR2YXIgdmFsID0gc3RvcmUuZ2V0KGtleSwgZGVmYXVsdFZhbClcblx0XHR0cmFuc2FjdGlvbkZuKHZhbClcblx0XHRzdG9yZS5zZXQoa2V5LCB2YWwpXG5cdH1cblx0c3RvcmUuZ2V0QWxsID0gZnVuY3Rpb24oKSB7fVxuXHRzdG9yZS5mb3JFYWNoID0gZnVuY3Rpb24oKSB7fVxuXG5cdHN0b3JlLnNlcmlhbGl6ZSA9IGZ1bmN0aW9uKHZhbHVlKSB7XG5cdFx0cmV0dXJuIEpTT04uc3RyaW5naWZ5KHZhbHVlKVxuXHR9XG5cdHN0b3JlLmRlc2VyaWFsaXplID0gZnVuY3Rpb24odmFsdWUpIHtcblx0XHRpZiAodHlwZW9mIHZhbHVlICE9ICdzdHJpbmcnKSB7IHJldHVybiB1bmRlZmluZWQgfVxuXHRcdHRyeSB7IHJldHVybiBKU09OLnBhcnNlKHZhbHVlKSB9XG5cdFx0Y2F0Y2goZSkgeyByZXR1cm4gdmFsdWUgfHwgdW5kZWZpbmVkIH1cblx0fVxuXG5cdC8vIEZ1bmN0aW9ucyB0byBlbmNhcHN1bGF0ZSBxdWVzdGlvbmFibGUgRmlyZUZveCAzLjYuMTMgYmVoYXZpb3Jcblx0Ly8gd2hlbiBhYm91dC5jb25maWc6OmRvbS5zdG9yYWdlLmVuYWJsZWQgPT09IGZhbHNlXG5cdC8vIFNlZSBodHRwczovL2dpdGh1Yi5jb20vbWFyY3Vzd2VzdGluL3N0b3JlLmpzL2lzc3VlcyNpc3N1ZS8xM1xuXHRmdW5jdGlvbiBpc0xvY2FsU3RvcmFnZU5hbWVTdXBwb3J0ZWQoKSB7XG5cdFx0dHJ5IHsgcmV0dXJuIChsb2NhbFN0b3JhZ2VOYW1lIGluIHdpbiAmJiB3aW5bbG9jYWxTdG9yYWdlTmFtZV0pIH1cblx0XHRjYXRjaChlcnIpIHsgcmV0dXJuIGZhbHNlIH1cblx0fVxuXG5cdGlmIChpc0xvY2FsU3RvcmFnZU5hbWVTdXBwb3J0ZWQoKSkge1xuXHRcdHN0b3JhZ2UgPSB3aW5bbG9jYWxTdG9yYWdlTmFtZV1cblx0XHRzdG9yZS5zZXQgPSBmdW5jdGlvbihrZXksIHZhbCkge1xuXHRcdFx0aWYgKHZhbCA9PT0gdW5kZWZpbmVkKSB7IHJldHVybiBzdG9yZS5yZW1vdmUoa2V5KSB9XG5cdFx0XHRzdG9yYWdlLnNldEl0ZW0oa2V5LCBzdG9yZS5zZXJpYWxpemUodmFsKSlcblx0XHRcdHJldHVybiB2YWxcblx0XHR9XG5cdFx0c3RvcmUuZ2V0ID0gZnVuY3Rpb24oa2V5LCBkZWZhdWx0VmFsKSB7XG5cdFx0XHR2YXIgdmFsID0gc3RvcmUuZGVzZXJpYWxpemUoc3RvcmFnZS5nZXRJdGVtKGtleSkpXG5cdFx0XHRyZXR1cm4gKHZhbCA9PT0gdW5kZWZpbmVkID8gZGVmYXVsdFZhbCA6IHZhbClcblx0XHR9XG5cdFx0c3RvcmUucmVtb3ZlID0gZnVuY3Rpb24oa2V5KSB7IHN0b3JhZ2UucmVtb3ZlSXRlbShrZXkpIH1cblx0XHRzdG9yZS5jbGVhciA9IGZ1bmN0aW9uKCkgeyBzdG9yYWdlLmNsZWFyKCkgfVxuXHRcdHN0b3JlLmdldEFsbCA9IGZ1bmN0aW9uKCkge1xuXHRcdFx0dmFyIHJldCA9IHt9XG5cdFx0XHRzdG9yZS5mb3JFYWNoKGZ1bmN0aW9uKGtleSwgdmFsKSB7XG5cdFx0XHRcdHJldFtrZXldID0gdmFsXG5cdFx0XHR9KVxuXHRcdFx0cmV0dXJuIHJldFxuXHRcdH1cblx0XHRzdG9yZS5mb3JFYWNoID0gZnVuY3Rpb24oY2FsbGJhY2spIHtcblx0XHRcdGZvciAodmFyIGk9MDsgaTxzdG9yYWdlLmxlbmd0aDsgaSsrKSB7XG5cdFx0XHRcdHZhciBrZXkgPSBzdG9yYWdlLmtleShpKVxuXHRcdFx0XHRjYWxsYmFjayhrZXksIHN0b3JlLmdldChrZXkpKVxuXHRcdFx0fVxuXHRcdH1cblx0fSBlbHNlIGlmIChkb2MgJiYgZG9jLmRvY3VtZW50RWxlbWVudC5hZGRCZWhhdmlvcikge1xuXHRcdHZhciBzdG9yYWdlT3duZXIsXG5cdFx0XHRzdG9yYWdlQ29udGFpbmVyXG5cdFx0Ly8gU2luY2UgI3VzZXJEYXRhIHN0b3JhZ2UgYXBwbGllcyBvbmx5IHRvIHNwZWNpZmljIHBhdGhzLCB3ZSBuZWVkIHRvXG5cdFx0Ly8gc29tZWhvdyBsaW5rIG91ciBkYXRhIHRvIGEgc3BlY2lmaWMgcGF0aC4gIFdlIGNob29zZSAvZmF2aWNvbi5pY29cblx0XHQvLyBhcyBhIHByZXR0eSBzYWZlIG9wdGlvbiwgc2luY2UgYWxsIGJyb3dzZXJzIGFscmVhZHkgbWFrZSBhIHJlcXVlc3QgdG9cblx0XHQvLyB0aGlzIFVSTCBhbnl3YXkgYW5kIGJlaW5nIGEgNDA0IHdpbGwgbm90IGh1cnQgdXMgaGVyZS4gIFdlIHdyYXAgYW5cblx0XHQvLyBpZnJhbWUgcG9pbnRpbmcgdG8gdGhlIGZhdmljb24gaW4gYW4gQWN0aXZlWE9iamVjdChodG1sZmlsZSkgb2JqZWN0XG5cdFx0Ly8gKHNlZTogaHR0cDovL21zZG4ubWljcm9zb2Z0LmNvbS9lbi11cy9saWJyYXJ5L2FhNzUyNTc0KHY9VlMuODUpLmFzcHgpXG5cdFx0Ly8gc2luY2UgdGhlIGlmcmFtZSBhY2Nlc3MgcnVsZXMgYXBwZWFyIHRvIGFsbG93IGRpcmVjdCBhY2Nlc3MgYW5kXG5cdFx0Ly8gbWFuaXB1bGF0aW9uIG9mIHRoZSBkb2N1bWVudCBlbGVtZW50LCBldmVuIGZvciBhIDQwNCBwYWdlLiAgVGhpc1xuXHRcdC8vIGRvY3VtZW50IGNhbiBiZSB1c2VkIGluc3RlYWQgb2YgdGhlIGN1cnJlbnQgZG9jdW1lbnQgKHdoaWNoIHdvdWxkXG5cdFx0Ly8gaGF2ZSBiZWVuIGxpbWl0ZWQgdG8gdGhlIGN1cnJlbnQgcGF0aCkgdG8gcGVyZm9ybSAjdXNlckRhdGEgc3RvcmFnZS5cblx0XHR0cnkge1xuXHRcdFx0c3RvcmFnZUNvbnRhaW5lciA9IG5ldyBBY3RpdmVYT2JqZWN0KCdodG1sZmlsZScpXG5cdFx0XHRzdG9yYWdlQ29udGFpbmVyLm9wZW4oKVxuXHRcdFx0c3RvcmFnZUNvbnRhaW5lci53cml0ZSgnPCcrc2NyaXB0VGFnKyc+ZG9jdW1lbnQudz13aW5kb3c8Lycrc2NyaXB0VGFnKyc+PGlmcmFtZSBzcmM9XCIvZmF2aWNvbi5pY29cIj48L2lmcmFtZT4nKVxuXHRcdFx0c3RvcmFnZUNvbnRhaW5lci5jbG9zZSgpXG5cdFx0XHRzdG9yYWdlT3duZXIgPSBzdG9yYWdlQ29udGFpbmVyLncuZnJhbWVzWzBdLmRvY3VtZW50XG5cdFx0XHRzdG9yYWdlID0gc3RvcmFnZU93bmVyLmNyZWF0ZUVsZW1lbnQoJ2RpdicpXG5cdFx0fSBjYXRjaChlKSB7XG5cdFx0XHQvLyBzb21laG93IEFjdGl2ZVhPYmplY3QgaW5zdGFudGlhdGlvbiBmYWlsZWQgKHBlcmhhcHMgc29tZSBzcGVjaWFsXG5cdFx0XHQvLyBzZWN1cml0eSBzZXR0aW5ncyBvciBvdGhlcndzZSksIGZhbGwgYmFjayB0byBwZXItcGF0aCBzdG9yYWdlXG5cdFx0XHRzdG9yYWdlID0gZG9jLmNyZWF0ZUVsZW1lbnQoJ2RpdicpXG5cdFx0XHRzdG9yYWdlT3duZXIgPSBkb2MuYm9keVxuXHRcdH1cblx0XHR2YXIgd2l0aElFU3RvcmFnZSA9IGZ1bmN0aW9uKHN0b3JlRnVuY3Rpb24pIHtcblx0XHRcdHJldHVybiBmdW5jdGlvbigpIHtcblx0XHRcdFx0dmFyIGFyZ3MgPSBBcnJheS5wcm90b3R5cGUuc2xpY2UuY2FsbChhcmd1bWVudHMsIDApXG5cdFx0XHRcdGFyZ3MudW5zaGlmdChzdG9yYWdlKVxuXHRcdFx0XHQvLyBTZWUgaHR0cDovL21zZG4ubWljcm9zb2Z0LmNvbS9lbi11cy9saWJyYXJ5L21zNTMxMDgxKHY9VlMuODUpLmFzcHhcblx0XHRcdFx0Ly8gYW5kIGh0dHA6Ly9tc2RuLm1pY3Jvc29mdC5jb20vZW4tdXMvbGlicmFyeS9tczUzMTQyNCh2PVZTLjg1KS5hc3B4XG5cdFx0XHRcdHN0b3JhZ2VPd25lci5hcHBlbmRDaGlsZChzdG9yYWdlKVxuXHRcdFx0XHRzdG9yYWdlLmFkZEJlaGF2aW9yKCcjZGVmYXVsdCN1c2VyRGF0YScpXG5cdFx0XHRcdHN0b3JhZ2UubG9hZChsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdFx0XHR2YXIgcmVzdWx0ID0gc3RvcmVGdW5jdGlvbi5hcHBseShzdG9yZSwgYXJncylcblx0XHRcdFx0c3RvcmFnZU93bmVyLnJlbW92ZUNoaWxkKHN0b3JhZ2UpXG5cdFx0XHRcdHJldHVybiByZXN1bHRcblx0XHRcdH1cblx0XHR9XG5cblx0XHQvLyBJbiBJRTcsIGtleXMgY2Fubm90IHN0YXJ0IHdpdGggYSBkaWdpdCBvciBjb250YWluIGNlcnRhaW4gY2hhcnMuXG5cdFx0Ly8gU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9tYXJjdXN3ZXN0aW4vc3RvcmUuanMvaXNzdWVzLzQwXG5cdFx0Ly8gU2VlIGh0dHBzOi8vZ2l0aHViLmNvbS9tYXJjdXN3ZXN0aW4vc3RvcmUuanMvaXNzdWVzLzgzXG5cdFx0dmFyIGZvcmJpZGRlbkNoYXJzUmVnZXggPSBuZXcgUmVnRXhwKFwiWyFcXFwiIyQlJicoKSorLC9cXFxcXFxcXDo7PD0+P0BbXFxcXF1eYHt8fX5dXCIsIFwiZ1wiKVxuXHRcdHZhciBpZUtleUZpeCA9IGZ1bmN0aW9uKGtleSkge1xuXHRcdFx0cmV0dXJuIGtleS5yZXBsYWNlKC9eZC8sICdfX18kJicpLnJlcGxhY2UoZm9yYmlkZGVuQ2hhcnNSZWdleCwgJ19fXycpXG5cdFx0fVxuXHRcdHN0b3JlLnNldCA9IHdpdGhJRVN0b3JhZ2UoZnVuY3Rpb24oc3RvcmFnZSwga2V5LCB2YWwpIHtcblx0XHRcdGtleSA9IGllS2V5Rml4KGtleSlcblx0XHRcdGlmICh2YWwgPT09IHVuZGVmaW5lZCkgeyByZXR1cm4gc3RvcmUucmVtb3ZlKGtleSkgfVxuXHRcdFx0c3RvcmFnZS5zZXRBdHRyaWJ1dGUoa2V5LCBzdG9yZS5zZXJpYWxpemUodmFsKSlcblx0XHRcdHN0b3JhZ2Uuc2F2ZShsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdFx0cmV0dXJuIHZhbFxuXHRcdH0pXG5cdFx0c3RvcmUuZ2V0ID0gd2l0aElFU3RvcmFnZShmdW5jdGlvbihzdG9yYWdlLCBrZXksIGRlZmF1bHRWYWwpIHtcblx0XHRcdGtleSA9IGllS2V5Rml4KGtleSlcblx0XHRcdHZhciB2YWwgPSBzdG9yZS5kZXNlcmlhbGl6ZShzdG9yYWdlLmdldEF0dHJpYnV0ZShrZXkpKVxuXHRcdFx0cmV0dXJuICh2YWwgPT09IHVuZGVmaW5lZCA/IGRlZmF1bHRWYWwgOiB2YWwpXG5cdFx0fSlcblx0XHRzdG9yZS5yZW1vdmUgPSB3aXRoSUVTdG9yYWdlKGZ1bmN0aW9uKHN0b3JhZ2UsIGtleSkge1xuXHRcdFx0a2V5ID0gaWVLZXlGaXgoa2V5KVxuXHRcdFx0c3RvcmFnZS5yZW1vdmVBdHRyaWJ1dGUoa2V5KVxuXHRcdFx0c3RvcmFnZS5zYXZlKGxvY2FsU3RvcmFnZU5hbWUpXG5cdFx0fSlcblx0XHRzdG9yZS5jbGVhciA9IHdpdGhJRVN0b3JhZ2UoZnVuY3Rpb24oc3RvcmFnZSkge1xuXHRcdFx0dmFyIGF0dHJpYnV0ZXMgPSBzdG9yYWdlLlhNTERvY3VtZW50LmRvY3VtZW50RWxlbWVudC5hdHRyaWJ1dGVzXG5cdFx0XHRzdG9yYWdlLmxvYWQobG9jYWxTdG9yYWdlTmFtZSlcblx0XHRcdGZvciAodmFyIGk9YXR0cmlidXRlcy5sZW5ndGgtMTsgaT49MDsgaS0tKSB7XG5cdFx0XHRcdHN0b3JhZ2UucmVtb3ZlQXR0cmlidXRlKGF0dHJpYnV0ZXNbaV0ubmFtZSlcblx0XHRcdH1cblx0XHRcdHN0b3JhZ2Uuc2F2ZShsb2NhbFN0b3JhZ2VOYW1lKVxuXHRcdH0pXG5cdFx0c3RvcmUuZ2V0QWxsID0gZnVuY3Rpb24oc3RvcmFnZSkge1xuXHRcdFx0dmFyIHJldCA9IHt9XG5cdFx0XHRzdG9yZS5mb3JFYWNoKGZ1bmN0aW9uKGtleSwgdmFsKSB7XG5cdFx0XHRcdHJldFtrZXldID0gdmFsXG5cdFx0XHR9KVxuXHRcdFx0cmV0dXJuIHJldFxuXHRcdH1cblx0XHRzdG9yZS5mb3JFYWNoID0gd2l0aElFU3RvcmFnZShmdW5jdGlvbihzdG9yYWdlLCBjYWxsYmFjaykge1xuXHRcdFx0dmFyIGF0dHJpYnV0ZXMgPSBzdG9yYWdlLlhNTERvY3VtZW50LmRvY3VtZW50RWxlbWVudC5hdHRyaWJ1dGVzXG5cdFx0XHRmb3IgKHZhciBpPTAsIGF0dHI7IGF0dHI9YXR0cmlidXRlc1tpXTsgKytpKSB7XG5cdFx0XHRcdGNhbGxiYWNrKGF0dHIubmFtZSwgc3RvcmUuZGVzZXJpYWxpemUoc3RvcmFnZS5nZXRBdHRyaWJ1dGUoYXR0ci5uYW1lKSkpXG5cdFx0XHR9XG5cdFx0fSlcblx0fVxuXG5cdHRyeSB7XG5cdFx0dmFyIHRlc3RLZXkgPSAnX19zdG9yZWpzX18nXG5cdFx0c3RvcmUuc2V0KHRlc3RLZXksIHRlc3RLZXkpXG5cdFx0aWYgKHN0b3JlLmdldCh0ZXN0S2V5KSAhPSB0ZXN0S2V5KSB7IHN0b3JlLmRpc2FibGVkID0gdHJ1ZSB9XG5cdFx0c3RvcmUucmVtb3ZlKHRlc3RLZXkpXG5cdH0gY2F0Y2goZSkge1xuXHRcdHN0b3JlLmRpc2FibGVkID0gdHJ1ZVxuXHR9XG5cdHN0b3JlLmVuYWJsZWQgPSAhc3RvcmUuZGlzYWJsZWRcblx0XG5cdHJldHVybiBzdG9yZVxufSkpO1xuIl19
-},{}],16:[function(require,module,exports){
+
+},{}],15:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -6558,7 +6552,7 @@ module.exports={
   "version": "1.6.0"
 }
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 window.console = window.console || {"log":function(){}};//make sure any console statements don't break IE
 module.exports = {
 	storage: require("./storage.js"),
@@ -6579,7 +6573,7 @@ module.exports = {
 	}
 };
 
-},{"../package.json":16,"./storage.js":18,"./svg.js":19}],18:[function(require,module,exports){
+},{"../package.json":15,"./storage.js":17,"./svg.js":18}],17:[function(require,module,exports){
 var store = require("store");
 var times = {
 	day: function() {
@@ -6639,7 +6633,7 @@ var root = module.exports = {
 
 };
 
-},{"store":15}],19:[function(require,module,exports){
+},{"store":14}],18:[function(require,module,exports){
 module.exports = {
 	draw: function(parent, svgString) {
 		if (!parent) return;
@@ -6668,47 +6662,31 @@ module.exports = {
 		return false;
 	}
 };
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
+  "scripts": {
+    "install": "gulp",
+    "dev": "gulp serve",
+    "build": "gulp",
+    "patch": "gulp patch",
+    "minor": "gulp minor",
+    "major": "gulp major"
+  },
   "devDependencies": {
-    "bootstrap-sass": "^3.3.1",
-    "browserify": "^6.1.0",
-    "browserify-transform-tools": "^1.2.1",
-    "exorcist": "^0.1.6",
-    "gulp": "~3.6.0",
-    "gulp-autoprefixer": "^3.0.2",
-    "gulp-bump": "^0.1.11",
-    "gulp-concat": "^2.4.1",
-    "gulp-connect": "^2.0.5",
-    "gulp-cssimport": "^1.3.1",
-    "gulp-cssnano": "^2.1.0",
+    "gulp-bump": "^2.2.0",
+    "gulp-connect": "^4.2.0",
     "gulp-embedlr": "^0.5.2",
-    "gulp-filter": "^1.0.2",
-    "gulp-git": "^0.5.2",
-    "gulp-jsvalidate": "^0.2.0",
-    "gulp-livereload": "^1.3.1",
-    "gulp-minify-css": "0.3.11",
-    "gulp-notify": "^2.0.1",
-    "gulp-rename": "^1.2.0",
-    "gulp-sass": "^2.1.0",
-    "gulp-sourcemaps": "^1.2.8",
-    "gulp-streamify": "0.0.5",
-    "gulp-tag-version": "^1.1.0",
-    "gulp-uglify": "^1.5.1",
-    "node-sass": "^3.4.2",
-    "require-dir": "^0.1.0",
-    "run-sequence": "^1.0.1",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "~0.1.1",
-    "vinyl-transform": "0.0.1",
-    "watchify": "^0.6.4"
+    "gulp-git": "^1.10.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-tag-version": "^1.3.0",
+    "watchify": "^3.7.0"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
@@ -6730,9 +6708,33 @@ module.exports={
     "url": "https://github.com/YASGUI/YASQE.git"
   },
   "dependencies": {
-    "jquery": "~ 1.11.0",
-    "codemirror": "^5.10.0",
-    "yasgui-utils": "^1.4.1"
+    "bootstrap-sass": "^3.3.7",
+    "browserify": "^13.1.0",
+    "browserify-transform-tools": "^1.6.0",
+    "exorcist": "^0.4.0",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssimport": "^3.1.0",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-filter": "^4.0.0",
+    "gulp-jsvalidate": "^2.1.0",
+    "gulp-minify-css": "1.2.4",
+    "gulp-notify": "^2.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-streamify": "1.0.2",
+    "gulp-uglify": "^1.5.4",
+    "node-sass": "^3.8.0",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.2.2",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "~1.1.0",
+    "vinyl-transform": "1.0.0",
+    "codemirror": "5.17.0",
+    "gulp": "^3.9.1",
+    "jquery": "~3.1.0",
+    "yasgui-utils": "^1.6.0"
   },
   "optionalShim": {
     "codemirror": {
@@ -6750,7 +6752,7 @@ module.exports={
   }
 }
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('../utils.js'),
@@ -7044,7 +7046,7 @@ var selectHint = function(yasqe, data, completion) {
 ////	storeBulkCompletions: storeBulkCompletions,
 //	loadBulkCompletions: loadBulkCompletions,
 //};
-},{"../../lib/trie.js":5,"../main.js":30,"../utils.js":36,"jquery":undefined,"yasgui-utils":17}],22:[function(require,module,exports){
+},{"../../lib/trie.js":4,"../main.js":30,"../utils.js":36,"jquery":undefined,"yasgui-utils":16}],21:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe, name) {
@@ -7094,7 +7096,7 @@ module.exports.preProcessToken = function(yasqe, token) {
 module.exports.postProcessToken = function(yasqe, token, suggestedString) {
 	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
 };
-},{"./utils":25,"./utils.js":25,"jquery":undefined}],23:[function(require,module,exports){
+},{"./utils":24,"./utils.js":24,"jquery":undefined}],22:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 //this is a mapping from the class names (generic ones, for compatability with codemirror themes), to what they -actually- represent
@@ -7227,7 +7229,7 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
 
 module.exports.fetchFrom = (window.location.protocol.indexOf('http') === 0? '//': 'http://') + 'prefix.cc/popular/all.file.json'
 
-},{"jquery":undefined}],24:[function(require,module,exports){
+},{"jquery":undefined}],23:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe, name) {
@@ -7281,7 +7283,7 @@ module.exports.preProcessToken = function(yasqe, token) {
 module.exports.postProcessToken = function(yasqe, token, suggestedString) {
 	return require('./utils.js').postprocessResourceTokenForCompletion(yasqe, token, suggestedString)
 };
-},{"./utils":25,"./utils.js":25,"jquery":undefined}],25:[function(require,module,exports){
+},{"./utils":24,"./utils.js":24,"jquery":undefined}],24:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
 	utils = require('./utils.js'),
@@ -7412,7 +7414,7 @@ module.exports = {
 	postprocessResourceTokenForCompletion: postprocessResourceTokenForCompletion,
 };
 
-},{"../imgs.js":29,"./utils.js":25,"jquery":undefined,"yasgui-utils":17}],26:[function(require,module,exports){
+},{"../imgs.js":29,"./utils.js":24,"jquery":undefined,"yasgui-utils":16}],25:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 module.exports = function(yasqe) {
@@ -7468,7 +7470,7 @@ module.exports = function(yasqe) {
 		autoShow: true,
 	}
 };
-},{"jquery":undefined}],27:[function(require,module,exports){
+},{"jquery":undefined}],26:[function(require,module,exports){
 var sparql = require('./sparql.js'),
     $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})();
 var quote = function(string) {
@@ -7477,10 +7479,18 @@ var quote = function(string) {
 module.exports = {
   createCurlString : function(yasqe, config) {
     var ajaxConfig = sparql.getAjaxConfig(yasqe, config);
-    
-    var url = yasqe.options.sparql.endpoint;
-    if (yasqe.options.sparql.requestMethod == 'GET') {
-      url += '?' + $.param(ajaxConfig.data);
+    var url = ajaxConfig.url;
+    if (ajaxConfig.url.indexOf('http') !== 0) {
+      //this is either a relative or absolute url, which is not supported by CURL.
+      //Add domain, schema, etc etc
+      var url = window.location.protocol + '//' + window.location.host;
+      if (ajaxConfig.url.indexOf('/') === 0) {
+        //its an absolute path
+        url += ajaxConfig.url;
+      } else {
+        //relative, so append current location to url first
+        url += window.location.pathname + ajaxConfig.url;
+      }
     }
     var cmds = [
       'curl', url,
@@ -7493,14 +7503,10 @@ module.exports = {
       cmds.push('-H ' + quote(header + ': ' + ajaxConfig.headers[header]));
     }
     return cmds.join(' ');
-
-
-
-
   }
 }
 
-},{"./sparql.js":33,"jquery":undefined}],28:[function(require,module,exports){
+},{"./sparql.js":33,"jquery":undefined}],27:[function(require,module,exports){
 /**
  * The default options of YASQE (check the CodeMirror documentation for even
  * more options, such as disabling line numbers, or changing keyboard shortcut
@@ -7673,7 +7679,12 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	},
 });
 
-},{"./main.js":30,"jquery":undefined}],29:[function(require,module,exports){
+},{"./main.js":30,"jquery":undefined}],28:[function(require,module,exports){
+//this is the entry-point for browserify.
+//the current browserify version does not support require-ing js files which are used as entry-point
+//this way, we can still require our main.js file
+module.exports = require('./main.js');
+},{"./main.js":30}],29:[function(require,module,exports){
 'use strict';
 module.exports = {
 	query: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 80 80" enable-background="new 0 0 80 80" xml:space="preserve"><g ></g><g >	<path d="M64.622,2.411H14.995c-6.627,0-12,5.373-12,12v49.897c0,6.627,5.373,12,12,12h49.627c6.627,0,12-5.373,12-12V14.411   C76.622,7.783,71.249,2.411,64.622,2.411z M24.125,63.906V15.093L61,39.168L24.125,63.906z"/></g></svg>',
@@ -8492,7 +8503,7 @@ root.version = {
 	"yasgui-utils": yutils.version
 };
 
-},{"../lib/deparam.js":2,"../lib/grammar/tokenizer.js":4,"../package.json":20,"./autocompleters/autocompleterBase.js":21,"./autocompleters/classes.js":22,"./autocompleters/prefixes.js":23,"./autocompleters/properties.js":24,"./autocompleters/variables.js":26,"./curl.js":27,"./defaults.js":28,"./imgs.js":29,"./prefixFold.js":31,"./prefixUtils.js":32,"./sparql.js":33,"./tokenUtils.js":34,"./tooltip":35,"./utils.js":36,"codemirror":undefined,"codemirror/addon/display/fullscreen.js":6,"codemirror/addon/edit/matchbrackets.js":7,"codemirror/addon/fold/brace-fold.js":8,"codemirror/addon/fold/foldcode.js":9,"codemirror/addon/fold/foldgutter.js":10,"codemirror/addon/fold/xml-fold.js":11,"codemirror/addon/hint/show-hint.js":12,"codemirror/addon/runmode/runmode.js":13,"codemirror/addon/search/searchcursor.js":14,"jquery":undefined,"yasgui-utils":17}],31:[function(require,module,exports){
+},{"../lib/deparam.js":1,"../lib/grammar/tokenizer.js":3,"../package.json":19,"./autocompleters/autocompleterBase.js":20,"./autocompleters/classes.js":21,"./autocompleters/prefixes.js":22,"./autocompleters/properties.js":23,"./autocompleters/variables.js":25,"./curl.js":26,"./defaults.js":27,"./imgs.js":29,"./prefixFold.js":31,"./prefixUtils.js":32,"./sparql.js":33,"./tokenUtils.js":34,"./tooltip":35,"./utils.js":36,"codemirror":undefined,"codemirror/addon/display/fullscreen.js":5,"codemirror/addon/edit/matchbrackets.js":6,"codemirror/addon/fold/brace-fold.js":7,"codemirror/addon/fold/foldcode.js":8,"codemirror/addon/fold/foldgutter.js":9,"codemirror/addon/fold/xml-fold.js":10,"codemirror/addon/hint/show-hint.js":11,"codemirror/addon/runmode/runmode.js":12,"codemirror/addon/search/searchcursor.js":13,"jquery":undefined,"yasgui-utils":16}],31:[function(require,module,exports){
 var CodeMirror = (function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})(),
 	tokenUtils = require('./tokenUtils.js');
 
@@ -9102,8 +9113,6 @@ module.exports = {
 	getString:getString
 };
 
-},{"jquery":undefined}]},{},[1])(1)
+},{"jquery":undefined}]},{},[28])(28)
 });
-
-
 //# sourceMappingURL=yasqe.js.map
