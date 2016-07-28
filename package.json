@@ -1,7 +1,7 @@
 {
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -9,7 +9,10 @@
   "scripts": {
     "install": "gulp",
     "dev": "gulp serve",
-    "build": "gulp"
+    "build": "gulp",
+    "patch": "gulp patch",
+    "minor": "gulp minor",
+    "major": "gulp major"
   },
   "devDependencies": {
     "gulp-bump": "^2.2.0",
