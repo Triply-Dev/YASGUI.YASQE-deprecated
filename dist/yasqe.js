@@ -6666,13 +6666,12 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.2",
+  "version": "2.10.3",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
   "scripts": {
-    "install": "gulp",
     "dev": "gulp serve",
     "build": "gulp",
     "patch": "gulp patch",
