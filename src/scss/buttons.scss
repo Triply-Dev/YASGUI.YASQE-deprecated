@@ -1,0 +1,140 @@
+@import "variables.scss";
+@import "mixins.scss";
+.yasqe_btn {
+  color: #333;
+  border: 1px solid transparent;
+  background-color: #fff;
+  border-color: #ccc;
+  border-width: 1px;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-appearance: button;
+  /* margin: 0; */
+  overflow: visible;
+  box-sizing: border-box;
+  &.btn_icon {
+    padding: 4px 8px;
+  }
+  &[disabled], &.disabled {
+    cursor: default;
+    opacity: .50;
+    filter: alpha(opacity=50);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+  &:hover {
+    outline:0;
+    background-color: #ebebeb;
+    border-color: #adadad;
+  }
+  &:focus, &.selected {
+    color: #fff;
+    outline:0;
+    background-color: #337ab7;
+    border-color: #337ab7;
+  }
+  &.btn_icon:focus {
+    color: #333;
+    border: 1px solid transparent;
+    background-color: #fff;
+    border-color: #ccc;
+  }
+  &.yasqe_btn-sm{
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+  }
+}
+
+	.yasqe_buttons {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		z-index: 5;
+		.yasqe_share {
+			cursor:pointer;
+			height: 20px;
+			width: 20px;
+			margin-top: 3px;
+		}
+		div {
+			vertical-align: top;
+			margin-left: 5px;
+			&.yasqe_sharePopup {
+				position:absolute;
+				padding: 4px;
+				margin-left: 0px;
+				// background-color: ;
+				border: 1px solid #e3e3e3;
+				border-radius: 4px;
+				-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+				box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+				width: 600px;
+				height: auto;
+				display: flex;
+				.inputWrapper {
+					flex-grow: 100;
+				}
+
+				input {
+					float:left;
+					width: 100%;
+					border: 0px;
+					-ms-box-sizing: border-box; /* ie8 */
+					-khtml-box-sizing: border-box; /* konqueror */
+					-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+					-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+					box-sizing: border-box;         /* Opera/IE 8+ */
+					box-sizing: border-box; /* css3 rec */
+				}
+				button {
+					float:right;
+					margin-left: 5px;
+				}
+				textarea {
+					width: 100%;
+				}
+			}
+		}
+		.yasqe_queryButton {
+			display:inline-block;
+			cursor: pointer;
+			width: $queryButtonWidth;
+			height: $queryButtonHeight;
+			div {
+				margin-left: 0px;
+			}
+			margin-left: 10px;
+			.svgImg {
+				display:block;
+			}
+			.loader {
+			  @include spinner($queryButtonWidth, $queryButtonHeight);
+			}
+		}
+	}
+
+
+  	.fullscreenToggleBtns {
+  		display:inline-block;
+  		margin-top: 3px;
+  		div {
+  			cursor:pointer;
+  			width: 20px;
+  			height: 20px;
+  		}
+  		.yasqe_smallscreenBtn {
+  			display: none;
+  		}
+  	}
