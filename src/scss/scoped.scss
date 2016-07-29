@@ -1,8 +1,9 @@
 .yasqe {
 	position: relative;
-	@import "../../node_modules/codemirror/lib/codemirror.css";
-	@import "../../node_modules/codemirror/addon/display/fullscreen.css";
-	@import "../../node_modules/codemirror/addon/fold/foldgutter.css";
+
+	@import "cssIncludes/codemirror";
+	@import "cssIncludes/fullscreen";
+	@import "cssIncludes/foldgutter";
 
 
 
