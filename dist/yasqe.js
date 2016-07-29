@@ -6666,7 +6666,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.3",
+  "version": "2.10.4",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",

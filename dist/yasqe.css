@@ -391,27 +391,6 @@
       font-size: 12px;
       line-height: 1.5;
       border-radius: 3px; }
-  .yasqe .backdrop {
-    background-color: #000;
-    opacity: 0.5;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    z-index: 5;
-    display: none; }
-  .yasqe .svgImg {
-    display: inline-block; }
-  .yasqe .CodeMirror {
-    line-height: 1.5em;
-    border: 1px solid #d1d1d1; }
-  .yasqe pre {
-    font-size: 13px; }
-  .yasqe span.cm-error {
-    border-bottom: 2px dotted red; }
-  .yasqe .gutterErrorBar {
-    width: 4px; }
   .yasqe .yasqe_buttons {
     position: absolute;
     top: 5px;
@@ -477,6 +456,49 @@
         border-top-color: #000;
         -webkit-animation: spin 1s infinite linear;
                 animation: spin 1s infinite linear; }
+  .yasqe .fullscreenToggleBtns {
+    display: inline-block;
+    margin-top: 3px; }
+    .yasqe .fullscreenToggleBtns div {
+      cursor: pointer;
+      width: 20px;
+      height: 20px; }
+    .yasqe .fullscreenToggleBtns .yasqe_smallscreenBtn {
+      display: none; }
+  .yasqe .CodeMirror {
+    line-height: 1.5em;
+    border: 1px solid #d1d1d1; }
+  .yasqe pre {
+    font-size: 13px; }
+  .yasqe span.cm-error {
+    border-bottom: 2px dotted red; }
+  .yasqe .gutterErrorBar {
+    width: 4px; }
+  .yasqe .CodeMirror-fullscreen .fullscreenToggleBtns .yasqe_smallscreenBtn {
+    display: inline-block; }
+  .yasqe .CodeMirror-fullscreen .fullscreenToggleBtns .yasqe_fullscreenBtn {
+    display: none; }
+  .yasqe .CodeMirror-foldmarker {
+    color: #6E2500;
+    text-shadow: #FF935E 1px 1px 2px,#FF935E -1px -1px 2px,#FF935E 1px -1px 2px,#FF935E -1px 1px 2px;
+    font-size: 19px; }
+  .yasqe .matchingVar {
+    background-color: #DBDEED;
+    border-radius: 6px;
+    -webkit-transition: background 0.5s linear;
+    transition: background 0.5s linear; }
+  .yasqe .backdrop {
+    background-color: #000;
+    opacity: 0.5;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 5;
+    display: none; }
+  .yasqe .svgImg {
+    display: inline-block; }
   .yasqe span.shortlinkErr {
     font-size: small;
     color: red;
@@ -490,19 +512,6 @@
     right: 0px;
     bottom: 0px;
     font-size: 90%; }
-  .yasqe .CodeMirror-fullscreen .fullscreenToggleBtns .yasqe_smallscreenBtn {
-    display: inline-block; }
-  .yasqe .CodeMirror-fullscreen .fullscreenToggleBtns .yasqe_fullscreenBtn {
-    display: none; }
-  .yasqe .fullscreenToggleBtns {
-    display: inline-block;
-    margin-top: 3px; }
-    .yasqe .fullscreenToggleBtns div {
-      cursor: pointer;
-      width: 20px;
-      height: 20px; }
-    .yasqe .fullscreenToggleBtns .yasqe_smallscreenBtn {
-      display: none; }
   .yasqe .parseErrorIcon {
     width: 15px;
     height: 15px; }
@@ -531,15 +540,6 @@
     width: 18px;
     height: 18px;
     vertical-align: middle; }
-  .yasqe .CodeMirror-foldmarker {
-    color: #6E2500;
-    text-shadow: #FF935E 1px 1px 2px,#FF935E -1px -1px 2px,#FF935E 1px -1px 2px,#FF935E -1px 1px 2px;
-    font-size: 19px; }
-  .yasqe .matchingVar {
-    background-color: #DBDEED;
-    border-radius: 6px;
-    -webkit-transition: background 0.5s linear;
-    transition: background 0.5s linear; }
 
 .CodeMirror-hints {
   position: absolute;
