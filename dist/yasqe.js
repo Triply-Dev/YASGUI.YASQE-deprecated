@@ -6483,34 +6483,45 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 module.exports={
   "_args": [
     [
-      "yasgui-utils@^1.4.1",
+      {
+        "raw": "yasgui-utils@^1.6.0",
+        "scope": null,
+        "escapedName": "yasgui-utils",
+        "name": "yasgui-utils",
+        "rawSpec": "^1.6.0",
+        "spec": ">=1.6.0 <2.0.0",
+        "type": "range"
+      },
       "/home/lrd900/yasgui/yasqe"
     ]
   ],
-  "_from": "yasgui-utils@>=1.4.1 <2.0.0",
+  "_from": "yasgui-utils@>=1.6.0 <2.0.0",
   "_id": "yasgui-utils@1.6.0",
   "_inCache": true,
   "_installable": true,
   "_location": "/yasgui-utils",
   "_npmUser": {
-    "email": "laurens.rietveld@gmail.com",
-    "name": "laurens.rietveld"
+    "name": "laurens.rietveld",
+    "email": "laurens.rietveld@gmail.com"
   },
   "_npmVersion": "1.4.3",
   "_phantomChildren": {},
   "_requested": {
-    "name": "yasgui-utils",
-    "raw": "yasgui-utils@^1.4.1",
-    "rawSpec": "^1.4.1",
+    "raw": "yasgui-utils@^1.6.0",
     "scope": null,
-    "spec": ">=1.4.1 <2.0.0",
+    "escapedName": "yasgui-utils",
+    "name": "yasgui-utils",
+    "rawSpec": "^1.6.0",
+    "spec": ">=1.6.0 <2.0.0",
     "type": "range"
   },
   "_requiredBy": [
     "/"
   ],
+  "_resolved": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz",
+  "_shasum": "bcb9091109c233e3e82737c94c202e6512389c47",
   "_shrinkwrap": null,
-  "_spec": "yasgui-utils@^1.4.1",
+  "_spec": "yasgui-utils@^1.6.0",
   "_where": "/home/lrd900/yasgui/yasqe",
   "author": {
     "name": "Laurens Rietveld"
@@ -6526,7 +6537,7 @@ module.exports={
   "directories": {},
   "dist": {
     "shasum": "bcb9091109c233e3e82737c94c202e6512389c47",
-    "tarball": "http://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz"
+    "tarball": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz"
   },
   "homepage": "https://github.com/YASGUI/Utils",
   "licenses": [
@@ -6666,7 +6677,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.4",
+  "version": "2.10.5",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -6725,7 +6736,7 @@ module.exports={
     "gulp-sourcemaps": "^1.6.0",
     "gulp-streamify": "1.0.2",
     "gulp-uglify": "^1.5.4",
-    "jquery": "~3.1.0",
+    "jquery": "^2.2.4",
     "node-sass": "^3.8.0",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.2.2",
