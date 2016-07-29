@@ -7,7 +7,6 @@
   "author": "Laurens Rietveld",
   "homepage": "http://yasqe.yasgui.org",
   "scripts": {
-    "install": "gulp",
     "dev": "gulp serve",
     "build": "gulp",
     "patch": "gulp patch",
