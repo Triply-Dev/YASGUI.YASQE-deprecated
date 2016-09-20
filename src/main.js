@@ -357,7 +357,11 @@ var checkSyntax = function(yasqe, deepcheck) {
 			}
 
 			var warningEl = yutils.svg.getElement(imgs.warning);
-			if (state.possibleCurrent && state.possibleCurrent.length > 0) {
+			if (state.errorMsg) {
+				require('./tooltip')(yasqe, warningEl, function() {
+					return $("<div/>").text(token.state.errorMsg).html();
+				});
+			} else if (state.possibleCurrent && state.possibleCurrent.length > 0) {
 				//				warningEl.style.zIndex = "99999999";
 				require('./tooltip')(yasqe, warningEl, function() {
 					var expectedEncoded = [];
