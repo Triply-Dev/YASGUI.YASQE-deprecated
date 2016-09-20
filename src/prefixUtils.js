@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
- * 
+ *
  * @param yasqe
  * @param prefix
  */
@@ -58,59 +58,18 @@ var removePrefixes = function(yasqe, prefixes) {
 
 /**
  * Get defined prefixes from query as array, in format {"prefix:" "uri"}
- * 
+ *
  * @param cm
  * @returns {Array}
  */
 var getPrefixesFromQuery = function(yasqe) {
-	var queryPrefixes = {};
-	var shouldContinue = true;
-	var getPrefixesFromLine = function(lineOffset, colOffset) {
-		if (!shouldContinue) return;
-		if (!colOffset) colOffset = 1;
-		var token = yasqe.getNextNonWsToken(i, colOffset);
-		if (token) {
-			if (token.state.possibleCurrent.indexOf("PREFIX") == -1 && token.state.possibleNext.indexOf("PREFIX") == -1) shouldContinue = false; //we are beyond the place in the query where we can enter prefixes
-			if (token.string.toUpperCase() == "PREFIX") {
-				var prefix = yasqe.getNextNonWsToken(i, token.end + 1);
-				if (prefix) {
-					var uri = yasqe.getNextNonWsToken(i, prefix.end + 1);
-					if (uri) {
-						var uriString = uri.string;
-						if (uriString.indexOf("<") == 0)
-							uriString = uriString.substring(1);
-						if (uriString.slice(-1) == ">")
-							uriString = uriString
-							.substring(0, uriString.length - 1);
-						queryPrefixes[prefix.string.slice(0, -1)] = uriString;
-
-						getPrefixesFromLine(lineOffset, uri.end + 1);
-					} else {
-						getPrefixesFromLine(lineOffset, prefix.end + 1);
-					}
-
-				} else {
-					getPrefixesFromLine(lineOffset, token.end + 1);
-				}
-			} else {
-				getPrefixesFromLine(lineOffset, token.end + 1);
-			}
-		}
-	};
-
-
-	var numLines = yasqe.lineCount();
-	for (var i = 0; i < numLines; i++) {
-		if (!shouldContinue) break;
-		getPrefixesFromLine(i);
-
-	}
-	return queryPrefixes;
+	//just get last token, and return prefixes from the state
+	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}).state.prefixes;
 };
 
 /**
  * Get the used indentation for a certain line
- * 
+ *
  * @param yasqe
  * @param line
  * @param charNumber
