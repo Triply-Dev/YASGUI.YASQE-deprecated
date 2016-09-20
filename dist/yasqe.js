@@ -4035,8 +4035,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 	var DOUBLE_NEGATIVE  = '-' + DOUBLE;
 
 	var ECHAR = '\\\\[tbnrf\\\\"\']';
-	
-	
+
+
 	 //IMPORTANT: this unicode rule is not in the official grammar.
       //Reason: https://github.com/YASGUI/YASQE/issues/49
       //unicode escape sequences (which the sparql spec considers part of the pre-processing of sparql queries)
@@ -4047,13 +4047,13 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 	var LINE_BREAK = "\n";
 	var STRING_LITERAL1 = "'(([^\\x27\\x5C\\x0A\\x0D])|"+ECHAR+"|" + unicode + ")*'";
 	var STRING_LITERAL2 = '"(([^\\x22\\x5C\\x0A\\x0D])|'+ECHAR+'|' + unicode + ')*"';
-	
+
 	var STRING_LITERAL_LONG = {
 		SINGLE: {
 			CAT: "STRING_LITERAL_LONG1",
 			QUOTES: "'''",
 			CONTENTS: "(('|'')?([^'\\\\]|"+ECHAR+"|"+unicode+"))*",
-			
+
 		},
 		DOUBLE: {
 			CAT: "STRING_LITERAL_LONG2",
@@ -4074,7 +4074,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 //	};
 //	var STRING_LITERAL_LONG1 = STRING_LITERAL_LONG['SINGLE'].QUOTES + STRING_LITERAL_LONG['SINGLE'].CONTENTS + STRING_LITERAL_LONG['SINGLE'].QUOTES;
 //	var STRING_LITERAL_LONG2 = STRING_LITERAL_LONG['DOUBLE'].QUOTES + STRING_LITERAL_LONG['DOUBLE'].CONTENTS + STRING_LITERAL_LONG['DOUBLE'].QUOTES;
-	
+
 //	var stringLiteralLongContentTerminals = {};
 //	for (var key in STRING_LITERAL_LONG) {
 //		stringLiteralLongContentTerminals[key] = {
@@ -4107,10 +4107,10 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				regex:new RegExp("^"+STRING_LITERAL_LONG[key].QUOTES),
 				style:"string"
 			},
-		
+
 		}
 	}
-	
+
 	var WS    =        '[\\x20\\x09\\x0D\\x0A]';
 	// Careful! Code mirror feeds one line at a time with no \n
 	// ... but otherwise comment is terminated by \n
@@ -4182,7 +4182,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 //		stringLiteralLongRegex.DOUBLE.complete,
 //		stringLiteralLongRegex.SINGLE.quotes,
 //		stringLiteralLongRegex.DOUBLE.quotes,
-		
+
 		{ name: "STRING_LITERAL1",
 			regex:new RegExp("^"+STRING_LITERAL1),
 			style:"string" },
@@ -4232,7 +4232,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		function nextToken() {
 			var consumed=null;
 			if (state.inLiteral) {
-				
+
 				var closingQuotes = false;
 				//multi-line literal. try to parse contents.
 				consumed = stream.match(stringLiteralLongRegex[state.inLiteral].contents.regex, true, false);
@@ -4241,9 +4241,9 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 					consumed = stream.match(stringLiteralLongRegex[state.inLiteral].closing.regex, true, false);
 					closingQuotes = true;
 				}
-				
+
 				if (consumed && consumed[0].length > 0) {
-					//some string content here. 
+					//some string content here.
 					 var returnObj = {
 						quotePos: (closingQuotes? 'end': 'content'),
 						cat: STRING_LITERAL_LONG[state.inLiteral].CAT,
@@ -4255,7 +4255,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 					 return returnObj;
 				}
 			}
-			
+
 			//Multiline literals
 			for (var quoteType in stringLiteralLongRegex) {
 				consumed= stream.match(stringLiteralLongRegex[quoteType].quotes.regex,true,false);
@@ -4278,9 +4278,9 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 					};
 				}
 			}
-			
-			
-			
+
+
+
 			// Tokens defined by individual regular expressions
 			for (var i=0; i<terminals.length; ++i) {
 				consumed= stream.match(terminals[i].regex,true,false);
@@ -4328,7 +4328,6 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 			state.errorStartPos= col;
 			state.errorEndPos= col+tokenOb.text.length;
 		};
-
 		function setQueryType(s) {
 			if (state.queryType==null) {
 				if (s =="SELECT" || s=="CONSTRUCT" || s=="ASK" || s=="DESCRIBE" || s=="INSERT" || s=="DELETE" || s=="LOAD" || s=="CLEAR" || s=="CREATE" || s=="DROP" || s=="COPY" || s=="MOVE" || s=="ADD")
@@ -4340,11 +4339,23 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		// - i.e. allow or disallow variables and bnodes in certain non-nesting
 		// contexts
 		function setSideConditions(topSymbol) {
-			if (topSymbol=="disallowVars") state.allowVars=false;
-			else if (topSymbol=="allowVars") state.allowVars=true;
-			else if (topSymbol=="disallowBnodes") state.allowBnodes=false;
-			else if (topSymbol=="allowBnodes") state.allowBnodes=true;
-			else if (topSymbol=="storeProperty") state.storeProperty=true;
+			if (topSymbol === "prefixDecl") {
+				state.inPrefixDecl = true;
+			} else {
+				state.inPrefixDecl = false;
+			}
+			switch(topSymbol) {
+				case "disallowVars":
+						state.allowVars=false;break;
+				case "allowVars":
+					state.allowVars=true; break;
+				case "disallowBnodes":
+					state.allowBnodes=false;break;
+				case "allowBnodes":
+					state.allowBnodes=true; break;
+				case "storeProperty":
+					state.storeProperty=true; break;
+			}
 		}
 
 		function checkSideConditions(topSymbol) {
@@ -4385,15 +4396,24 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		var finished= false;
 		var topSymbol;
 		var token= tokenOb.cat;
-		
+
 		if (!tokenOb.quotePos || tokenOb.quotePos == 'end') {
 		// Incremental LL1 parse
 			while(state.stack.length>0 && token && state.OK && !finished ) {
 				topSymbol= state.stack.pop();
-	
+
 				if (!ll1_table[topSymbol]) {
 					// Top symbol is a terminal
 					if (topSymbol == token) {
+						if (state.inPrefixDecl) {
+							if (topSymbol === "PNAME_NS" && tokenOb.text.length > 0) {
+								state.currentPnameNs = tokenOb.text.slice(0,-1);
+							} else if (state.currentPnameNs !== undefined && tokenOb.text.length > 2) {
+								state.prefixes[state.currentPnameNs] = tokenOb.text.slice(1,-1);
+								//reset current pname ns
+								state.currentPnameNs = undefined;
+							}
+						}
 						// Matching terminals
 						// - consume token from input stream
 						finished=true;
@@ -4410,6 +4430,17 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 						if (state.storeProperty && token.cat != "punc") {
 							state.lastProperty = tokenOb.text;
 							state.storeProperty = false;
+						}
+
+						//check whether a used prefix is actually defined
+						if (!state.inPrefixDecl && token === "PNAME_NS" && !state.prefixes[tokenOb.text.slice(0,-1)]) {
+								//avoid warnings for missing bif prefixes (yuck, virtuoso-specific)
+								if (tokenOb.text !== 'bif:') {
+									console.log('not defined?', tokenOb)
+									state.OK = false;
+									recordFailurePos();
+									state.errorMsg = "Prefix '" + tokenOb.text + "' is not defined";
+								}
 						}
 					} else {
 						state.OK=false;
@@ -4438,15 +4469,15 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				}
 			}
 		}
-		if (!finished && state.OK) { 
-			state.OK=false; state.complete=false; recordFailurePos(); 
+		if (!finished && state.OK) {
+			state.OK=false; state.complete=false; recordFailurePos();
 		}
-		
+
 		if (state.possibleCurrent.indexOf('a') >= 0){
 			state.lastPredicateOffset = tokenOb.start;
 		}
 		state.possibleCurrent = state.possibleNext;
-		
+
 		state.possibleNext = getPossibles(state.stack[state.stack.length-1]);
 
 		return tokenOb.style;
@@ -4480,7 +4511,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 		"(":-1,
 //		"*[;,?[or([verbPath,verbSimple]),objectList]]": 1,
 	};
-	
+
 
 	function indent(state, textAfter) {
 		//just avoid we don't indent multi-line  literals
@@ -4496,15 +4527,15 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				var closeBracket=textAfter.substr(0,1);
 				for( ;i>=0;--i)	{
 					if (state.stack[i]==closeBracket) {
-						--i; 
+						--i;
 						break;
 					};
 				}
 			} else {
 				// Consider nullable non-terminals if at top of stack
 				var dn = indentTop[state.stack[i]];
-				if (dn) { 
-					n += dn; 
+				if (dn) {
+					n += dn;
 					--i;
 				}
 			}
@@ -4537,7 +4568,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 				inLiteral: false,
 				stack: [grammar.startSymbol],
 				lastPredicateOffset: config.indentUnit,
-			}; 
+				prefixes: {},
+			};
 		},
 		indent: indent,
 		electricChars: "}])"
@@ -6677,7 +6709,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.10.5",
+  "version": "2.11.0",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -8065,7 +8097,11 @@ var checkSyntax = function(yasqe, deepcheck) {
 			}
 
 			var warningEl = yutils.svg.getElement(imgs.warning);
-			if (state.possibleCurrent && state.possibleCurrent.length > 0) {
+			if (state.errorMsg) {
+				require('./tooltip')(yasqe, warningEl, function() {
+					return $("<div/>").text(token.state.errorMsg).html();
+				});
+			} else if (state.possibleCurrent && state.possibleCurrent.length > 0) {
 				//				warningEl.style.zIndex = "99999999";
 				require('./tooltip')(yasqe, warningEl, function() {
 					var expectedEncoded = [];
@@ -8646,7 +8682,7 @@ CodeMirror.registerHelper("fold", "prefix", function(cm, start) {
 'use strict';
 /**
  * Append prefix declaration to list of prefixes in query window.
- * 
+ *
  * @param yasqe
  * @param prefix
  */
@@ -8703,59 +8739,18 @@ var removePrefixes = function(yasqe, prefixes) {
 
 /**
  * Get defined prefixes from query as array, in format {"prefix:" "uri"}
- * 
+ *
  * @param cm
  * @returns {Array}
  */
 var getPrefixesFromQuery = function(yasqe) {
-	var queryPrefixes = {};
-	var shouldContinue = true;
-	var getPrefixesFromLine = function(lineOffset, colOffset) {
-		if (!shouldContinue) return;
-		if (!colOffset) colOffset = 1;
-		var token = yasqe.getNextNonWsToken(i, colOffset);
-		if (token) {
-			if (token.state.possibleCurrent.indexOf("PREFIX") == -1 && token.state.possibleNext.indexOf("PREFIX") == -1) shouldContinue = false; //we are beyond the place in the query where we can enter prefixes
-			if (token.string.toUpperCase() == "PREFIX") {
-				var prefix = yasqe.getNextNonWsToken(i, token.end + 1);
-				if (prefix) {
-					var uri = yasqe.getNextNonWsToken(i, prefix.end + 1);
-					if (uri) {
-						var uriString = uri.string;
-						if (uriString.indexOf("<") == 0)
-							uriString = uriString.substring(1);
-						if (uriString.slice(-1) == ">")
-							uriString = uriString
-							.substring(0, uriString.length - 1);
-						queryPrefixes[prefix.string.slice(0, -1)] = uriString;
-
-						getPrefixesFromLine(lineOffset, uri.end + 1);
-					} else {
-						getPrefixesFromLine(lineOffset, prefix.end + 1);
-					}
-
-				} else {
-					getPrefixesFromLine(lineOffset, token.end + 1);
-				}
-			} else {
-				getPrefixesFromLine(lineOffset, token.end + 1);
-			}
-		}
-	};
-
-
-	var numLines = yasqe.lineCount();
-	for (var i = 0; i < numLines; i++) {
-		if (!shouldContinue) break;
-		getPrefixesFromLine(i);
-
-	}
-	return queryPrefixes;
+	//just get last token, and return prefixes from the state
+	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}).state.prefixes;
 };
 
 /**
  * Get the used indentation for a certain line
- * 
+ *
  * @param yasqe
  * @param line
  * @param charNumber
@@ -8780,6 +8775,7 @@ module.exports = {
 	getPrefixesFromQuery: getPrefixesFromQuery,
 	removePrefixes: removePrefixes
 };
+
 },{}],33:[function(require,module,exports){
 'use strict';
 var $ = (function(){try{return require('jquery')}catch(e){return window.jQuery}})(),
