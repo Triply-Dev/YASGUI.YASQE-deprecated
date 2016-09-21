@@ -30,7 +30,7 @@ function findFirstPrefix(cm, line, ch, lineText) {
 		if (pass == 1 && found < ch)
 			break;
 		tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-		if (!/^(comment|string)/.test(tokenType))
+		if (!/^(string)/.test(tokenType))
 			return found + 1;
 		at = found - 1;
 	}
