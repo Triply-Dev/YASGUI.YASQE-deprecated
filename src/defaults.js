@@ -42,6 +42,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		"Cmd-Space": YASQE.autoComplete,
 		"Ctrl-D": YASQE.deleteLine,
 		"Ctrl-K": YASQE.deleteLine,
+		"Shift-Ctrl-K": YASQE.deleteLine,
 		"Cmd-D": YASQE.deleteLine,
 		"Cmd-K": YASQE.deleteLine,
 		"Ctrl-/": YASQE.commentLines,
