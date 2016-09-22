@@ -4433,14 +4433,18 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 						}
 
 						//check whether a used prefix is actually defined
-						if (!state.inPrefixDecl && token === "PNAME_NS" && !state.prefixes[tokenOb.text.slice(0,-1)]) {
+						if (!state.inPrefixDecl && (token === "PNAME_NS" || token === "PNAME_LN")) {
+							var colonIndex = tokenOb.text.indexOf(':');
+							if (colonIndex >= 0) {
+								var prefNs = tokenOb.text.slice(0,colonIndex)
 								//avoid warnings for missing bif prefixes (yuck, virtuoso-specific)
-								if (tokenOb.text !== 'bif:') {
-									console.log('not defined?', tokenOb)
+								if (!state.prefixes[prefNs] && prefNs !== 'bif') {
 									state.OK = false;
 									recordFailurePos();
-									state.errorMsg = "Prefix '" + tokenOb.text + "' is not defined";
+									state.errorMsg = "Prefix '" + prefNs + "' is not defined";
 								}
+							}
+
 						}
 					} else {
 						state.OK=false;
@@ -6709,7 +6713,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.0",
+  "version": "2.11.1",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7592,6 +7596,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 		"Cmd-Space": YASQE.autoComplete,
 		"Ctrl-D": YASQE.deleteLine,
 		"Ctrl-K": YASQE.deleteLine,
+		"Shift-Ctrl-K": YASQE.deleteLine,
 		"Cmd-D": YASQE.deleteLine,
 		"Cmd-K": YASQE.deleteLine,
 		"Ctrl-/": YASQE.commentLines,
@@ -8581,7 +8586,7 @@ function findFirstPrefix(cm, line, ch, lineText) {
 		if (pass == 1 && found < ch)
 			break;
 		tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-		if (!/^(comment|string)/.test(tokenType))
+		if (!/^(string)/.test(tokenType))
 			return found + 1;
 		at = found - 1;
 	}
@@ -8678,6 +8683,7 @@ CodeMirror.registerHelper("fold", "prefix", function(cm, start) {
 		to: CodeMirror.Pos(prefixEndLine, prefixEndChar)
 	};
 });
+
 },{"./tokenUtils.js":34,"codemirror":undefined}],32:[function(require,module,exports){
 'use strict';
 /**
