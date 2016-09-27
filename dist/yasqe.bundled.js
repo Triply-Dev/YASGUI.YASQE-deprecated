@@ -25466,7 +25466,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.1",
+  "version": "2.11.2",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -26110,7 +26110,7 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
 	if (!token.string.indexOf("<") == 0 && token.string.indexOf(":") > -1) {
 		// hmm, the token is prefixed. We still need the complete uri for autocompletions. generate this!
 		for (var prefix in queryPrefixes) {
-			if (token.string.indexOf(prefix) == 0) {
+			if (token.tokenPrefix === prefix + ':') {
 				token.autocompletionString = queryPrefixes[prefix];
 				token.autocompletionString += token.string.substring(prefix.length + 1);
 				break;
