@@ -3991,7 +3991,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 	var grammar = require('./_tokenizer-table.js');
 	var ll1_table = grammar.table;
 
-	var IRI_REF = '<[^<>\"\'\|\{\}\^\\\x00-\x20]*>';
+	var IRI_REF = '<[^<>\"`\|\{\}\^\\\x00-\x20]*>';
 	/*
 	 * PN_CHARS_BASE =
 	 * '[A-Z]|[a-z]|[\\u00C0-\\u00D6]|[\\u00D8-\\u00F6]|[\\u00F8-\\u02FF]|[\\u0370-\\u037D]|[\\u037F-\\u1FFF]|[\\u200C-\\u200D]|[\\u2070-\\u218F]|[\\u2C00-\\u2FEF]|[\\u3001-\\uD7FF]|[\\uF900-\\uFDCF]|[\\uFDF0-\\uFFFD]|[\\u10000-\\uEFFFF]';
@@ -25466,7 +25466,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.2",
+  "version": "2.11.3",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
