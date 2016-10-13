@@ -5006,8 +5006,10 @@ Trie.prototype = {
   }
 
   CodeMirror.defineOption("matchBrackets", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init)
+    if (old && old != CodeMirror.Init) {
       cm.off("cursorActivity", doMatchBrackets);
+      if (currentlyHighlighted) {currentlyHighlighted(); currentlyHighlighted = null;}
+    }
     if (val) {
       cm.state.matchBrackets = typeof val == "object" ? val : {};
       cm.on("cursorActivity", doMatchBrackets);
@@ -5454,8 +5456,8 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   function Iter(cm, line, ch, range) {
     this.line = line; this.ch = ch;
     this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? range.from : cm.firstLine();
-    this.max = range ? range.to - 1 : cm.lastLine();
+    this.min = range ? Math.max(range.from, cm.firstLine()) : cm.firstLine();
+    this.max = range ? Math.min(range.to - 1, cm.lastLine()) : cm.lastLine();
   }
 
   function tagAt(iter, ch) {
@@ -6713,7 +6715,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.3",
+  "version": "2.11.4",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -8750,8 +8752,10 @@ var removePrefixes = function(yasqe, prefixes) {
  * @returns {Array}
  */
 var getPrefixesFromQuery = function(yasqe) {
-	//just get last token, and return prefixes from the state
-	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}).state.prefixes;
+	//Use precise here. We want to be sure we use the most up to date state. If we're
+	//not, we might get outdated prefixes from the current query (creating loops such
+	//as https://github.com/OpenTriply/YASGUI/issues/84)
+	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}, true).state.prefixes;
 };
 
 /**
