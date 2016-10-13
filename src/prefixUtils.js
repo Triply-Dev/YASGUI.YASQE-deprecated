@@ -63,8 +63,10 @@ var removePrefixes = function(yasqe, prefixes) {
  * @returns {Array}
  */
 var getPrefixesFromQuery = function(yasqe) {
-	//just get last token, and return prefixes from the state
-	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}).state.prefixes;
+	//Use precise here. We want to be sure we use the most up to date state. If we're
+	//not, we might get outdated prefixes from the current query (creating loops such
+	//as https://github.com/OpenTriply/YASGUI/issues/84)
+	return yasqe.getTokenAt({line: yasqe.lastLine(), ch:yasqe.getLine(yasqe.lastLine()).length}, true).state.prefixes;
 };
 
 /**
