@@ -25497,7 +25497,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.4",
+  "version": "2.11.5",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -25540,6 +25540,7 @@ module.exports={
   "dependencies": {
     "bootstrap-sass": "^3.3.7",
     "browserify": "^13.1.0",
+    "browserify-shim": "^3.8.12",
     "browserify-transform-tools": "^1.6.0",
     "codemirror": "5.17.0",
     "exorcist": "^0.4.0",
