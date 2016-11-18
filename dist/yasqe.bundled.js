@@ -4438,7 +4438,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 							if (colonIndex >= 0) {
 								var prefNs = tokenOb.text.slice(0,colonIndex)
 								//avoid warnings for missing bif prefixes (yuck, virtuoso-specific)
-								if (!state.prefixes[prefNs] && prefNs !== 'bif') {
+								if (!state.prefixes[prefNs] && ['bif', 'xsd'].indexOf(prefNs) < 0) {
 									state.OK = false;
 									recordFailurePos();
 									state.errorMsg = "Prefix '" + prefNs + "' is not defined";
@@ -25497,7 +25497,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.5",
+  "version": "2.11.6",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
