@@ -5006,10 +5006,8 @@ Trie.prototype = {
   }
 
   CodeMirror.defineOption("matchBrackets", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
+    if (old && old != CodeMirror.Init)
       cm.off("cursorActivity", doMatchBrackets);
-      if (currentlyHighlighted) {currentlyHighlighted(); currentlyHighlighted = null;}
-    }
     if (val) {
       cm.state.matchBrackets = typeof val == "object" ? val : {};
       cm.on("cursorActivity", doMatchBrackets);
@@ -5456,8 +5454,8 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   function Iter(cm, line, ch, range) {
     this.line = line; this.ch = ch;
     this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? Math.max(range.from, cm.firstLine()) : cm.firstLine();
-    this.max = range ? Math.min(range.to - 1, cm.lastLine()) : cm.lastLine();
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
   }
 
   function tagAt(iter, ch) {
@@ -6536,7 +6534,6 @@ module.exports={
   "_from": "yasgui-utils@>=1.6.0 <2.0.0",
   "_id": "yasgui-utils@1.6.0",
   "_inCache": true,
-  "_installable": true,
   "_location": "/yasgui-utils",
   "_npmUser": {
     "name": "laurens.rietveld",
@@ -6715,7 +6712,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.6",
+  "version": "2.11.7",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",

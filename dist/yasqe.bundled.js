@@ -5006,10 +5006,8 @@ Trie.prototype = {
   }
 
   CodeMirror.defineOption("matchBrackets", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
+    if (old && old != CodeMirror.Init)
       cm.off("cursorActivity", doMatchBrackets);
-      if (currentlyHighlighted) {currentlyHighlighted(); currentlyHighlighted = null;}
-    }
     if (val) {
       cm.state.matchBrackets = typeof val == "object" ? val : {};
       cm.on("cursorActivity", doMatchBrackets);
@@ -5456,8 +5454,8 @@ CodeMirror.registerHelper("fold", "include", function(cm, start) {
   function Iter(cm, line, ch, range) {
     this.line = line; this.ch = ch;
     this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? Math.max(range.from, cm.firstLine()) : cm.firstLine();
-    this.max = range ? Math.min(range.to - 1, cm.lastLine()) : cm.lastLine();
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
   }
 
   function tagAt(iter, ch) {
@@ -6916,12 +6914,8 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     var comp = compensateForHScroll(display) - display.scroller.scrollLeft + cm.doc.scrollLeft;
     var gutterW = display.gutters.offsetWidth, left = comp + "px";
     for (var i = 0; i < view.length; i++) if (!view[i].hidden) {
-      if (cm.options.fixedGutter) {
-        if (view[i].gutter)
-          view[i].gutter.style.left = left;
-        if (view[i].gutterBackground)
-          view[i].gutterBackground.style.left = left;
-      }
+      if (cm.options.fixedGutter && view[i].gutter)
+        view[i].gutter.style.left = left;
       var align = view[i].alignable;
       if (align) for (var j = 0; j < align.length; j++)
         align[j].style.left = left;
@@ -7477,7 +7471,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   }
 
   function handlePaste(e, cm) {
-    var pasted = e.clipboardData && e.clipboardData.getData("Text");
+    var pasted = e.clipboardData && e.clipboardData.getData("text/plain");
     if (pasted) {
       e.preventDefault();
       if (!cm.isReadOnly() && !cm.options.disableInput)
@@ -7521,10 +7515,10 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     return {text: text, ranges: ranges};
   }
 
-  function disableBrowserMagic(field, spellcheck) {
+  function disableBrowserMagic(field) {
     field.setAttribute("autocorrect", "off");
     field.setAttribute("autocapitalize", "off");
-    field.setAttribute("spellcheck", !!spellcheck);
+    field.setAttribute("spellcheck", "false");
   }
 
   // TEXTAREA INPUT STYLE
@@ -7902,14 +7896,10 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     init: function(display) {
       var input = this, cm = input.cm;
       var div = input.div = display.lineDiv;
-      disableBrowserMagic(div, cm.options.spellcheck);
+      disableBrowserMagic(div);
 
       on(div, "paste", function(e) {
-        if (signalDOMEvent(cm, e) || handlePaste(e, cm)) return
-        // IE doesn't fire input events, so we schedule a read for the pasted content in this way
-        if (ie_version <= 11) setTimeout(operation(cm, function() {
-          if (!input.pollContent()) regChange(cm);
-        }), 20)
+        if (!signalDOMEvent(cm, e)) handlePaste(e, cm);
       })
 
       on(div, "compositionstart", function(e) {
@@ -7969,27 +7959,23 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
             });
           }
         }
-        if (e.clipboardData) {
+        // iOS exposes the clipboard API, but seems to discard content inserted into it
+        if (e.clipboardData && !ios) {
+          e.preventDefault();
           e.clipboardData.clearData();
-          var content = lastCopied.text.join("\n")
-          // iOS exposes the clipboard API, but seems to discard content inserted into it
-          e.clipboardData.setData("Text", content);
-          if (e.clipboardData.getData("Text") == content) {
-            e.preventDefault();
-            return
-          }
+          e.clipboardData.setData("text/plain", lastCopied.text.join("\n"));
+        } else {
+          // Old-fashioned briefly-focus-a-textarea hack
+          var kludge = hiddenTextarea(), te = kludge.firstChild;
+          cm.display.lineSpace.insertBefore(kludge, cm.display.lineSpace.firstChild);
+          te.value = lastCopied.text.join("\n");
+          var hadFocus = document.activeElement;
+          selectInput(te);
+          setTimeout(function() {
+            cm.display.lineSpace.removeChild(kludge);
+            hadFocus.focus();
+          }, 50);
         }
-        // Old-fashioned briefly-focus-a-textarea hack
-        var kludge = hiddenTextarea(), te = kludge.firstChild;
-        cm.display.lineSpace.insertBefore(kludge, cm.display.lineSpace.firstChild);
-        te.value = lastCopied.text.join("\n");
-        var hadFocus = document.activeElement;
-        selectInput(te);
-        setTimeout(function() {
-          cm.display.lineSpace.removeChild(kludge);
-          hadFocus.focus();
-          if (hadFocus == div) input.showPrimarySelection()
-        }, 50);
       }
       on(div, "copy", onCopyCut);
       on(div, "cut", onCopyCut);
@@ -8297,7 +8283,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
       if (found)
         return badPos(Pos(found.line, found.ch + dist), bad);
       else
-        dist += before.textContent.length;
+        dist += after.textContent.length;
     }
   }
 
@@ -9857,8 +9843,8 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     on(inp, "keyup", function(e) { onKeyUp.call(cm, e); });
     on(inp, "keydown", operation(cm, onKeyDown));
     on(inp, "keypress", operation(cm, onKeyPress));
-    on(inp, "focus", function (e) { onFocus(cm, e); });
-    on(inp, "blur", function (e) { onBlur(cm, e); });
+    on(inp, "focus", bind(onFocus, cm));
+    on(inp, "blur", bind(onBlur, cm));
   }
 
   function dragDropChanged(cm, value, old) {
@@ -10586,12 +10572,12 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     }, 100);
   }
 
-  function onFocus(cm, e) {
+  function onFocus(cm) {
     if (cm.state.delayingBlurEvent) cm.state.delayingBlurEvent = false;
 
     if (cm.options.readOnly == "nocursor") return;
     if (!cm.state.focused) {
-      signal(cm, "focus", cm, e);
+      signal(cm, "focus", cm);
       cm.state.focused = true;
       addClass(cm.display.wrapper, "CodeMirror-focused");
       // This test prevents this from firing when a context
@@ -10605,11 +10591,11 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     }
     restartBlink(cm);
   }
-  function onBlur(cm, e) {
+  function onBlur(cm) {
     if (cm.state.delayingBlurEvent) return;
 
     if (cm.state.focused) {
-      signal(cm, "blur", cm, e);
+      signal(cm, "blur", cm);
       cm.state.focused = false;
       rmClass(cm.display.wrapper, "CodeMirror-focused");
     }
@@ -11231,8 +11217,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     var doc = cm.doc, x = pos.left, y;
     if (unit == "page") {
       var pageSize = Math.min(cm.display.wrapper.clientHeight, window.innerHeight || document.documentElement.clientHeight);
-      var moveAmount = Math.max(pageSize - .5 * textHeight(cm.display), 3);
-      y = (dir > 0 ? pos.bottom : pos.top) + dir * moveAmount;
+      y = pos.top + dir * (pageSize - (dir < 0 ? 1.5 : .5) * textHeight(cm.display));
     } else if (unit == "line") {
       y = dir > 0 ? pos.bottom + 3 : pos.top - 3;
     }
@@ -11285,10 +11270,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     addOverlay: methodOp(function(spec, options) {
       var mode = spec.token ? spec : CodeMirror.getMode(this.options, spec);
       if (mode.startState) throw new Error("Overlays may not be stateful.");
-      insertSorted(this.state.overlays,
-                   {mode: mode, modeSpec: spec, opaque: options && options.opaque,
-                    priority: (options && options.priority) || 0},
-                   function(overlay) { return overlay.priority })
+      this.state.overlays.push({mode: mode, modeSpec: spec, opaque: options && options.opaque});
       this.state.modeGen++;
       regChange(this);
     }),
@@ -11760,9 +11742,6 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   option("inputStyle", mobile ? "contenteditable" : "textarea", function() {
     throw new Error("inputStyle can not (yet) be changed in a running editor"); // FIXME
   }, true);
-  option("spellcheck", false, function(cm, val) {
-    cm.getInputField().spellcheck = val
-  }, true);
   option("rtlMoveVisually", !windows);
   option("wholeLineUpdateBefore", true);
 
@@ -11872,8 +11851,6 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
       spec.name = found.name;
     } else if (typeof spec == "string" && /^[\w\-]+\/[\w\-]+\+xml$/.test(spec)) {
       return CodeMirror.resolveMode("application/xml");
-    } else if (typeof spec == "string" && /^[\w\-]+\/[\w\-]+\+json$/.test(spec)) {
-      return CodeMirror.resolveMode("application/json");
     }
     if (typeof spec == "string") return {name: spec};
     else return spec || {name: "null"};
@@ -13185,7 +13162,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
       }
       if (!flattenSpans || curStyle != style) {
         while (curStart < stream.start) {
-          curStart = Math.min(stream.start, curStart + 5000);
+          curStart = Math.min(stream.start, curStart + 50000);
           f(curStart, curStyle);
         }
         curStyle = style;
@@ -13193,10 +13170,8 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
       stream.start = stream.pos;
     }
     while (curStart < stream.pos) {
-      // Webkit seems to refuse to render text nodes longer than 57444
-      // characters, and returns inaccurate measurements in nodes
-      // starting around 5000 chars.
-      var pos = Math.min(stream.pos, curStart + 5000);
+      // Webkit seems to refuse to render text nodes longer than 57444 characters
+      var pos = Math.min(stream.pos, curStart + 50000);
       f(pos, curStyle);
       curStart = pos;
     }
@@ -14305,7 +14280,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
   }
 
   // Register a change in the history. Merges changes that are within
-  // a single operation, or are close together with an origin that
+  // a single operation, ore are close together with an origin that
   // allows merging (starting with "+") into a single event.
   function addChangeToHistory(doc, change, selAfter, opId) {
     var hist = doc.history;
@@ -14706,12 +14681,6 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
     var out = [];
     for (var i = 0; i < array.length; i++) out[i] = f(array[i], i);
     return out;
-  }
-
-  function insertSorted(array, value, score) {
-    var pos = 0, priority = score(value)
-    while (pos < array.length && score(array[pos]) <= priority) pos++
-    array.splice(pos, 0, value)
   }
 
   function nothing() {}
@@ -15282,7 +15251,7 @@ CodeMirror.runMode = function(string, modespec, callback, options) {
 
   // THE END
 
-  CodeMirror.version = "5.19.0";
+  CodeMirror.version = "5.17.0";
 
   return CodeMirror;
 });
@@ -25318,7 +25287,6 @@ module.exports={
   "_from": "yasgui-utils@>=1.6.0 <2.0.0",
   "_id": "yasgui-utils@1.6.0",
   "_inCache": true,
-  "_installable": true,
   "_location": "/yasgui-utils",
   "_npmUser": {
     "name": "laurens.rietveld",
@@ -25497,7 +25465,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.6",
+  "version": "2.11.7",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
