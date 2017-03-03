@@ -5528,17 +5528,17 @@ CodeMirror.defineMIME("application/x-sparql-query", "sparql11");
 /*
 * TRIE implementation in Javascript
 * Copyright (c) 2010 Saurabh Odhyan | http://odhyan.com
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -5551,9 +5551,9 @@ CodeMirror.defineMIME("application/x-sparql-query", "sparql11");
 */
 
 /*
-* A trie, or prefix tree, is a multi-way tree structure useful for storing strings over an alphabet. 
-* It has been used to store large dictionaries of English (say) words in spell-checking programs 
-* and in natural-language "understanding" programs.    
+* A trie, or prefix tree, is a multi-way tree structure useful for storing strings over an alphabet.
+* It has been used to store large dictionaries of English (say) words in spell-checking programs
+* and in natural-language "understanding" programs.
 * @see http://en.wikipedia.org/wiki/Trie
 * @see http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Tree/Trie/
 /*
@@ -5570,7 +5570,7 @@ var Trie = module.exports = function() {
 
 Trie.prototype = {
   /*
-    * Insert a word into the dictionary. 
+    * Insert a word into the dictionary.
     * Recursively traverse through the trie nodes, and create new node if does not already exist.
     *
     * @method insert
@@ -5635,7 +5635,7 @@ Trie.prototype = {
   },
 
   /*
-    * Update an existing word in the dictionary. 
+    * Update an existing word in the dictionary.
     * This method removes the old word from the dictionary and inserts the new word.
     *
     * @method update
@@ -5749,8 +5749,10 @@ Trie.prototype = {
       ret.push(str);
     }
     for (k in T.children) {
-      child = T.children[k];
-      ret = ret.concat(child.getAllWords(str + k));
+      if (T.children.hasOwnProperty(k)) {
+        child = T.children[k];
+        ret = ret.concat(child.getAllWords(str + k));
+      }
     }
     return ret;
   },
@@ -7642,7 +7644,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.8",
+  "version": "2.11.9",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
