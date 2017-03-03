@@ -20,15 +20,18 @@ function findFirstPrefix(cm, line, ch, lineText) {
   for (var at = ch, pass = 0; ; ) {
     var found = lineText.indexOf(lookFor, at);
     if (found == -1) {
+      //no prefix on this line
       if (pass == 1) break;
       pass = 1;
       at = lineText.length;
       continue;
     }
     if (pass == 1 && found < ch) break;
-    tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-    if (!/^(string)/.test(tokenType)) return found + 1;
+    var tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+    if (!/^(comment|string)/.test(tokenType)) return found + 1;
     at = found - 1;
+    //Could not find a prefix, no use looping any further. Probably invalid query
+    if (at === pass) break;
   }
 }
 
