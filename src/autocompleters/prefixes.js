@@ -60,30 +60,18 @@ module.exports.isValidCompletionPosition = function(yasqe) {
   // we shouldnt be at the uri part the prefix declaration
   // also check whether current token isnt 'a' (that makes codemirror
   // thing a namespace is a possiblecurrent
-  if (
-    !token.string.indexOf("a") == 0 &&
-    $.inArray("PNAME_NS", token.state.possibleCurrent) == -1
-  )
-    return false;
+  if (!token.string.indexOf("a") == 0 && $.inArray("PNAME_NS", token.state.possibleCurrent) == -1) return false;
 
   // First token of line needs to be PREFIX,
   // there should be no trailing text (otherwise, text is wrongly inserted
   // in between)
   var previousToken = yasqe.getPreviousNonWsToken(cur.line, token);
-  if (!previousToken || previousToken.string.toUpperCase() != "PREFIX")
-    return false;
+  if (!previousToken || previousToken.string.toUpperCase() != "PREFIX") return false;
   return true;
 };
 module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
-  var previousToken = yasqe.getPreviousNonWsToken(
-    yasqe.getCursor().line,
-    token
-  );
-  if (
-    previousToken &&
-    previousToken.string &&
-    previousToken.string.slice(-1) == ":"
-  ) {
+  var previousToken = yasqe.getPreviousNonWsToken(yasqe.getCursor().line, token);
+  if (previousToken && previousToken.string && previousToken.string.slice(-1) == ":") {
     //combine both tokens! In this case we have the cursor at the end of line "PREFIX bla: <".
     //we want the token to be "bla: <", en not "<"
     token = {
@@ -103,11 +91,7 @@ module.exports.preprocessPrefixTokenForCompletion = function(yasqe, token) {
  */
 module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
   if (!yasqe.autocompleters.getTrie(completerName)) return; // no prefixed defined. just stop
-  if (
-    !yasqe.options.autocompleters ||
-    yasqe.options.autocompleters.indexOf(completerName) == -1
-  )
-    return; //this autocompleter is disabled
+  if (!yasqe.options.autocompleters || yasqe.options.autocompleters.indexOf(completerName) == -1) return; //this autocompleter is disabled
   var cur = yasqe.getCursor();
 
   var token = yasqe.getTokenAt(cur);
@@ -116,26 +100,19 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
     if (colonIndex !== -1) {
       // check previous token isnt PREFIX, or a '<'(which would mean we are in a uri)
       //			var firstTokenString = yasqe.getNextNonWsToken(cur.line).string.toUpperCase();
-      var lastNonWsTokenString = yasqe
-        .getPreviousNonWsToken(cur.line, token)
-        .string.toUpperCase();
+      var lastNonWsTokenString = yasqe.getPreviousNonWsToken(cur.line, token).string.toUpperCase();
       var previousToken = yasqe.getTokenAt({
         line: cur.line,
         ch: token.start
       }); // needs to be null (beginning of line), or whitespace
-      if (
-        lastNonWsTokenString != "PREFIX" &&
-        (previousToken.type == "ws" || previousToken.type == null)
-      ) {
+      if (lastNonWsTokenString != "PREFIX" && (previousToken.type == "ws" || previousToken.type == null)) {
         // check whether it isnt defined already (saves us from looping
         // through the array)
         var currentPrefix = token.string.substring(0, colonIndex + 1);
         var queryPrefixes = yasqe.getPrefixesFromQuery();
         if (queryPrefixes[currentPrefix.slice(0, -1)] == null) {
           // ok, so it isnt added yet!
-          var completions = yasqe.autocompleters
-            .getTrie(completerName)
-            .autoComplete(currentPrefix);
+          var completions = yasqe.autocompleters.getTrie(completerName).autoComplete(currentPrefix);
           if (completions.length > 0) {
             yasqe.addPrefixes(completions[0]);
           }
@@ -145,6 +122,5 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
   }
 };
 
-module.exports.fetchFrom = (window.location.protocol.indexOf("http") === 0
-  ? "//"
-  : "http://") + "prefix.cc/popular/all.file.json";
+module.exports.fetchFrom = (window.location.protocol.indexOf("http") === 0 ? "//" : "http://") +
+  "prefix.cc/popular/all.file.json";

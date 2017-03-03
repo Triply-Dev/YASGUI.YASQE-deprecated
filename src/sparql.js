@@ -1,12 +1,8 @@
 "use strict";
-var $ = require("jquery"),
-  utils = require("./utils.js"),
-  YASQE = require("./main.js");
+var $ = require("jquery"), utils = require("./utils.js"), YASQE = require("./main.js");
 
 YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
-  var callback = typeof callbackOrConfig == "function"
-    ? callbackOrConfig
-    : null;
+  var callback = typeof callbackOrConfig == "function" ? callbackOrConfig : null;
   var config = typeof callbackOrConfig == "object" ? callbackOrConfig : {};
 
   if (yasqe.options.sparql) config = $.extend({}, yasqe.options.sparql, config);
@@ -20,12 +16,8 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 	 * initialize ajax config
 	 */
   var ajaxConfig = {
-    url: typeof config.endpoint == "function"
-      ? config.endpoint(yasqe)
-      : config.endpoint,
-    type: typeof config.requestMethod == "function"
-      ? config.requestMethod(yasqe)
-      : config.requestMethod,
+    url: typeof config.endpoint == "function" ? config.endpoint(yasqe) : config.endpoint,
+    type: typeof config.requestMethod == "function" ? config.requestMethod(yasqe) : config.requestMethod,
     headers: {
       Accept: getAcceptHeader(yasqe, config)
     }
@@ -48,10 +40,7 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
     //https://github.com/OpenTriply/YASGUI/issues/75
     var first = true;
     $.each(yasqe.getUrlArguments(config), function(key, val) {
-      ajaxConfig.url += (first ? "?" : "&") +
-        val.name +
-        "=" +
-        encodeURIComponent(val.value);
+      ajaxConfig.url += (first ? "?" : "&") + val.name + "=" + encodeURIComponent(val.value);
       first = false;
     });
   } else {
@@ -65,8 +54,7 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
   /**
 	 * merge additional request headers
 	 */
-  if (config.headers && !$.isEmptyObject(config.headers))
-    $.extend(ajaxConfig.headers, config.headers);
+  if (config.headers && !$.isEmptyObject(config.headers)) $.extend(ajaxConfig.headers, config.headers);
 
   var queryStart = new Date();
   var updateYasqe = function() {
@@ -101,9 +89,7 @@ YASQE.getUrlArguments = function(yasqe, config) {
   var data = [
     {
       name: utils.getString(yasqe, yasqe.options.sparql.queryName),
-      value: config.getQueryForAjax
-        ? config.getQueryForAjax(yasqe)
-        : yasqe.getValue()
+      value: config.getQueryForAjax ? config.getQueryForAjax(yasqe) : yasqe.getValue()
     }
   ];
 
@@ -111,9 +97,7 @@ YASQE.getUrlArguments = function(yasqe, config) {
 	 * add named graphs to ajax config
 	 */
   if (config.namedGraphs && config.namedGraphs.length > 0) {
-    var argName = queryMode == "query"
-      ? "named-graph-uri"
-      : "using-named-graph-uri ";
+    var argName = queryMode == "query" ? "named-graph-uri" : "using-named-graph-uri ";
     for (var i = 0; i < config.namedGraphs.length; i++)
       data.push({
         name: argName,
@@ -124,9 +108,7 @@ YASQE.getUrlArguments = function(yasqe, config) {
 	 * add default graphs to ajax config
 	 */
   if (config.defaultGraphs && config.defaultGraphs.length > 0) {
-    var argName = queryMode == "query"
-      ? "default-graph-uri"
-      : "using-graph-uri ";
+    var argName = queryMode == "query" ? "default-graph-uri" : "using-graph-uri ";
     for (var i = 0; i < config.defaultGraphs.length; i++)
       data.push({
         name: argName,
@@ -143,12 +125,7 @@ YASQE.getUrlArguments = function(yasqe, config) {
 };
 var getAcceptHeader = function(yasqe, config) {
   var acceptHeader = null;
-  if (
-    config.acceptHeader &&
-    !config.acceptHeaderGraph &&
-    !config.acceptHeaderSelect &&
-    !config.acceptHeaderUpdate
-  ) {
+  if (config.acceptHeader && !config.acceptHeaderGraph && !config.acceptHeaderSelect && !config.acceptHeaderUpdate) {
     //this is the old config. For backwards compatability, keep supporting it
     if (typeof config.acceptHeader == "function") {
       acceptHeader = config.acceptHeader(yasqe);

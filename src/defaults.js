@@ -22,11 +22,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
     rangeFinder: new YASQE.fold.combine(YASQE.fold.brace, YASQE.fold.prefix)
   },
   collapsePrefixesOnLoad: false,
-  gutters: [
-    "gutterErrorBar",
-    "CodeMirror-linenumbers",
-    "CodeMirror-foldgutter"
-  ],
+  gutters: ["gutterErrorBar", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
   matchBrackets: true,
   fixedGutter: true,
   syntaxErrorCheck: true,
@@ -98,9 +94,7 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * @type function|string
 	 */
   persistent: function(yasqe) {
-    return "yasqe_" +
-      $(yasqe.getWrapperElement()).closest("[id]").attr("id") +
-      "_queryVal";
+    return "yasqe_" + $(yasqe.getWrapperElement()).closest("[id]").attr("id") + "_queryVal";
   },
 
   /**

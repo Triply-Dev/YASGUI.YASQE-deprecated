@@ -40,8 +40,7 @@ var elementsOverlap = (function() {
 
   return function(a, b) {
     var pos1 = getPositions(a), pos2 = getPositions(b);
-    return comparePositions(pos1[0], pos2[0]) &&
-      comparePositions(pos1[1], pos2[1]);
+    return comparePositions(pos1[0], pos2[0]) && comparePositions(pos1[1], pos2[1]);
   };
 })();
 

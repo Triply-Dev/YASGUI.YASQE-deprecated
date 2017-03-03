@@ -1,7 +1,5 @@
 "use strict";
-var $ = require("jquery"),
-  utils = require("./utils.js"),
-  yutils = require("yasgui-utils");
+var $ = require("jquery"), utils = require("./utils.js"), yutils = require("yasgui-utils");
 /**
  * Where the base class only contains functionality related to -all- completions, this class contains some utils used here and there in our autocompletions
  */
@@ -13,10 +11,7 @@ var $ = require("jquery"),
 var preprocessResourceTokenForCompletion = function(yasqe, token) {
   var queryPrefixes = yasqe.getPrefixesFromQuery();
   if (!token.string.indexOf("<") == 0) {
-    token.tokenPrefix = token.string.substring(
-      0,
-      token.string.indexOf(":") + 1
-    );
+    token.tokenPrefix = token.string.substring(0, token.string.indexOf(":") + 1);
 
     if (queryPrefixes[token.tokenPrefix.slice(0, -1)] != null) {
       token.tokenPrefixUri = queryPrefixes[token.tokenPrefix.slice(0, -1)];
@@ -38,22 +33,14 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
   if (token.autocompletionString.indexOf("<") == 0)
     token.autocompletionString = token.autocompletionString.substring(1);
   if (token.autocompletionString.indexOf(">", token.length - 1) !== -1)
-    token.autocompletionString = token.autocompletionString.substring(
-      0,
-      token.autocompletionString.length - 1
-    );
+    token.autocompletionString = token.autocompletionString.substring(0, token.autocompletionString.length - 1);
   return token;
 };
 
-var postprocessResourceTokenForCompletion = function(
-  yasqe,
-  token,
-  suggestedString
-) {
+var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedString) {
   if (token.tokenPrefix && token.autocompletionString && token.tokenPrefixUri) {
     // we need to get the suggested string back to prefixed form
-    suggestedString = token.tokenPrefix +
-      suggestedString.substring(token.tokenPrefixUri.length);
+    suggestedString = token.tokenPrefix + suggestedString.substring(token.tokenPrefixUri.length);
   } else {
     // it is a regular uri. add '<' and '>' to string
     suggestedString = "<" + suggestedString + ">";
@@ -62,15 +49,10 @@ var postprocessResourceTokenForCompletion = function(
 };
 
 //Use protocol relative request when served via http[s]*. Otherwise (e.g. file://, fetch via http)
-var reqProtocol = window.location.protocol.indexOf("http") === 0
-  ? "//"
-  : "http://";
+var reqProtocol = window.location.protocol.indexOf("http") === 0 ? "//" : "http://";
 var fetchFromLov = function(yasqe, completer, token, callback) {
   if (!token || !token.string || token.string.trim().length == 0) {
-    yasqe.autocompleters.notifications
-      .getEl(completer)
-      .empty()
-      .append("Nothing to autocomplete yet!");
+    yasqe.autocompleters.notifications.getEl(completer).empty().append("Nothing to autocomplete yet!");
     return false;
   }
   var maxResults = 50;
@@ -87,9 +69,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
   var results = [];
   var url = "";
   var updateUrl = function() {
-    url = reqProtocol +
-      "lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" +
-      $.param(args);
+    url = reqProtocol + "lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
   };
   updateUrl();
   var increasePage = function() {
@@ -113,18 +93,13 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
         if (results.length > 0) {
           yasqe.autocompleters.notifications.hide(yasqe, completer);
         } else {
-          yasqe.autocompleters.notifications
-            .getEl(completer)
-            .text("0 matches found...");
+          yasqe.autocompleters.notifications.getEl(completer).text("0 matches found...");
         }
         callback(results);
         // requests done! Don't call this function again
       }
     }).fail(function(jqXHR, textStatus, errorThrown) {
-      yasqe.autocompleters.notifications
-        .getEl(completer)
-        .empty()
-        .append("Failed fetching suggestions..");
+      yasqe.autocompleters.notifications.getEl(completer).empty().append("Failed fetching suggestions..");
     });
   };
   //if notification bar is there, show a loader
@@ -132,11 +107,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
     .getEl(completer)
     .empty()
     .append($("<span>Fetchting autocompletions &nbsp;</span>"))
-    .append(
-      $(yutils.svg.getElement(require("../imgs.js").loader)).addClass(
-        "notificationLoader"
-      )
-    );
+    .append($(yutils.svg.getElement(require("../imgs.js").loader)).addClass("notificationLoader"));
   doRequests();
 };
 

@@ -13,10 +13,7 @@ module.exports = function(yasqe, parent, html) {
   parent.hover(
     function() {
       if (typeof html == "function") html = html();
-      tooltip = $("<div>")
-        .addClass("yasqe_tooltip")
-        .html(html)
-        .appendTo(parent);
+      tooltip = $("<div>").addClass("yasqe_tooltip").html(html).appendTo(parent);
       repositionTooltip();
     },
     function() {

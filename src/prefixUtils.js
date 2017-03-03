@@ -12,8 +12,7 @@ var addPrefixes = function(yasqe, prefixes) {
     addPrefixAsString(yasqe, prefixes);
   } else {
     for (var pref in prefixes) {
-      if (!(pref in existingPrefixes))
-        addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
+      if (!(pref in existingPrefixes)) addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
     }
   }
   yasqe.collapsePrefixes(false);
@@ -25,10 +24,7 @@ var addPrefixAsString = function(yasqe, prefixString) {
   var numLines = yasqe.lineCount();
   for (var i = 0; i < numLines; i++) {
     var firstToken = yasqe.getNextNonWsToken(i);
-    if (
-      firstToken != null &&
-      (firstToken.string == "PREFIX" || firstToken.string == "BASE")
-    ) {
+    if (firstToken != null && (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
       lastPrefix = firstToken;
       lastPrefixLine = i;
     }
@@ -56,17 +52,7 @@ var removePrefixes = function(yasqe, prefixes) {
     yasqe.setValue(
       yasqe
         .getValue()
-        .replace(
-          new RegExp(
-            "PREFIX\\s*" +
-              pref +
-              ":\\s*" +
-              escapeRegex("<" + prefixes[pref] + ">") +
-              "\\s*",
-            "ig"
-          ),
-          ""
-        )
+        .replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), "")
     );
   }
   yasqe.collapsePrefixes(false);
@@ -82,10 +68,7 @@ var getPrefixesFromQuery = function(yasqe) {
   //Use precise here. We want to be sure we use the most up to date state. If we're
   //not, we might get outdated prefixes from the current query (creating loops such
   //as https://github.com/OpenTriply/YASGUI/issues/84)
-  return yasqe.getTokenAt(
-    { line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length },
-    true
-  ).state.prefixes;
+  return yasqe.getTokenAt({ line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length }, true).state.prefixes;
 };
 
 /**

@@ -22,9 +22,7 @@ module.exports = function(YASQE, yasqe) {
     }
     if (needPossibleAdjustment.length > 0) {
       //position completion notifications
-      var scrollBar = $(yasqe.getWrapperElement()).find(
-        ".CodeMirror-vscrollbar"
-      );
+      var scrollBar = $(yasqe.getWrapperElement()).find(".CodeMirror-vscrollbar");
       var offset = 0;
       if (scrollBar.is(":visible")) {
         offset = scrollBar.outerWidth();
@@ -57,9 +55,7 @@ module.exports = function(YASQE, yasqe) {
     completer.name = name;
     if (completer.bulk) {
       var storeArrayAsBulk = function(suggestions) {
-        if (
-          suggestions && suggestions instanceof Array && suggestions.length > 0
-        ) {
+        if (suggestions && suggestions instanceof Array && suggestions.length > 0) {
           storeBulkCompletions(completer, suggestions);
         }
       };
@@ -71,12 +67,8 @@ module.exports = function(YASQE, yasqe) {
         // if completions are defined in localstorage, use those! (calling the
         // function may come with overhead (e.g. async calls))
         var completionsFromStorage = null;
-        var persistencyIdentifier = utils.getPersistencyId(
-          yasqe,
-          completer.persistent
-        );
-        if (persistencyIdentifier)
-          completionsFromStorage = yutils.storage.get(persistencyIdentifier);
+        var persistencyIdentifier = utils.getPersistencyId(yasqe, completer.persistent);
+        if (persistencyIdentifier) completionsFromStorage = yutils.storage.get(persistencyIdentifier);
         if (completionsFromStorage && completionsFromStorage.length > 0) {
           storeArrayAsBulk(completionsFromStorage);
         } else {
@@ -119,8 +111,7 @@ module.exports = function(YASQE, yasqe) {
       return true;
     };
     for (var completerName in completers) {
-      if ($.inArray(completerName, yasqe.options.autocompleters) == -1)
-        continue; //this completer is disabled
+      if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue; //this completer is disabled
       var completer = completers[completerName];
       if (!completer.isValidCompletionPosition) continue; //no way to check whether we are in a valid position
 
@@ -134,8 +125,7 @@ module.exports = function(YASQE, yasqe) {
       }
       // run valid position handler, if there is one (if it returns false, stop the autocompletion!)
       if (completer.callbacks && completer.callbacks.validPosition) {
-        if (completer.callbacks.validPosition(yasqe, completer) === false)
-          continue;
+        if (completer.callbacks.validPosition(yasqe, completer) === false) continue;
       }
       var success = tryHintType(completer);
       if (success) break;
@@ -144,14 +134,11 @@ module.exports = function(YASQE, yasqe) {
 
   var getCompletionHintsObject = function(completer, callback) {
     var getSuggestionsFromToken = function(partialToken) {
-      var stringToAutocomplete = partialToken.autocompletionString ||
-        partialToken.string;
+      var stringToAutocomplete = partialToken.autocompletionString || partialToken.string;
       var suggestions = [];
       if (tries[completer.name]) {
         suggestions = tries[completer.name].autoComplete(stringToAutocomplete);
-      } else if (
-        typeof completer.get == "function" && completer.async == false
-      ) {
+      } else if (typeof completer.get == "function" && completer.async == false) {
         suggestions = completer.get(stringToAutocomplete);
       } else if (typeof completer.get == "object") {
         var partialTokenLength = stringToAutocomplete.length;
@@ -238,16 +225,12 @@ module.exports = function(YASQE, yasqe) {
         //only draw when the user needs to use a keypress to summon autocompletions
         if (!completer.autoshow) {
           if (!completionNotifications[completer.name])
-            completionNotifications[completer.name] = $(
-              "<div class='completionNotification'></div>"
-            );
+            completionNotifications[completer.name] = $("<div class='completionNotification'></div>");
           completionNotifications[completer.name]
             .show()
             .text(
               "Press " +
-                (navigator.userAgent.indexOf("Mac OS X") != -1
-                  ? "CMD"
-                  : "CTRL") +
+                (navigator.userAgent.indexOf("Mac OS X") != -1 ? "CMD" : "CTRL") +
                 " - <spacebar> to autocomplete"
             )
             .appendTo($(yasqe.getWrapperElement()));
@@ -261,9 +244,7 @@ module.exports = function(YASQE, yasqe) {
     },
     autoComplete: autoComplete,
     getTrie: function(completer) {
-      return typeof completer == "string"
-        ? tries[completer]
-        : tries[completer.name];
+      return typeof completer == "string" ? tries[completer] : tries[completer.name];
     }
   };
 };

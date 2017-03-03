@@ -42,15 +42,8 @@ module.exports.isValidCompletionPosition = function(yasqe) {
   return false;
 };
 module.exports.preProcessToken = function(yasqe, token) {
-  return require("./utils.js").preprocessResourceTokenForCompletion(
-    yasqe,
-    token
-  );
+  return require("./utils.js").preprocessResourceTokenForCompletion(yasqe, token);
 };
 module.exports.postProcessToken = function(yasqe, token, suggestedString) {
-  return require("./utils.js").postprocessResourceTokenForCompletion(
-    yasqe,
-    token,
-    suggestedString
-  );
+  return require("./utils.js").postprocessResourceTokenForCompletion(yasqe, token, suggestedString);
 };

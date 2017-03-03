@@ -71,14 +71,10 @@ var extendConfig = function(config) {
  */
 var extendCmInstance = function(yasqe) {
   //instantiate autocompleters
-  yasqe.autocompleters = require("./autocompleters/autocompleterBase.js")(
-    root,
-    yasqe
-  );
+  yasqe.autocompleters = require("./autocompleters/autocompleterBase.js")(root, yasqe);
   if (yasqe.options.autocompleters) {
     yasqe.options.autocompleters.forEach(function(name) {
-      if (root.Autocompleters[name])
-        yasqe.autocompleters.init(name, root.Autocompleters[name]);
+      if (root.Autocompleters[name]) yasqe.autocompleters.init(name, root.Autocompleters[name]);
     });
   }
   yasqe.lastQueryDuration = null;
@@ -89,11 +85,7 @@ var extendCmInstance = function(yasqe) {
     return require("./tokenUtils.js").getPreviousNonWsToken(yasqe, line, token);
   };
   yasqe.getNextNonWsToken = function(lineNumber, charNumber) {
-    return require("./tokenUtils.js").getNextNonWsToken(
-      yasqe,
-      lineNumber,
-      charNumber
-    );
+    return require("./tokenUtils.js").getNextNonWsToken(yasqe, lineNumber, charNumber);
   };
   yasqe.collapsePrefixes = function(collapse) {
     if (collapse === undefined) collapse = true;
@@ -106,11 +98,7 @@ var extendCmInstance = function(yasqe) {
   var backdrop = null;
   var animateSpeed = null;
   yasqe.setBackdrop = function(show) {
-    if (
-      yasqe.options.backdrop ||
-      yasqe.options.backdrop === 0 ||
-      yasqe.options.backdrop === "0"
-    ) {
+    if (yasqe.options.backdrop || yasqe.options.backdrop === 0 || yasqe.options.backdrop === "0") {
       if (animateSpeed === null) {
         animateSpeed = +yasqe.options.backdrop;
         if (animateSpeed === 1) {
@@ -221,8 +209,7 @@ var extendCmInstance = function(yasqe) {
 
   yasqe.enableCompleter = function(name) {
     addCompleterToSettings(yasqe.options, name);
-    if (root.Autocompleters[name])
-      yasqe.autocompleters.init(name, root.Autocompleters[name]);
+    if (root.Autocompleters[name]) yasqe.autocompleters.init(name, root.Autocompleters[name]);
   };
   yasqe.disableCompleter = function(name) {
     removeCompleterFromSettings(yasqe.options, name);
@@ -291,9 +278,7 @@ var postProcessCmElement = function(yasqe) {
         .addClass("matchingVar");
     })
     .on("mouseleave", ".cm-atom", function() {
-      $(yasqe.getWrapperElement())
-        .find(".matchingVar")
-        .removeClass("matchingVar");
+      $(yasqe.getWrapperElement()).find(".matchingVar").removeClass("matchingVar");
     });
   /**
 	 * check url args and modify yasqe settings if needed
@@ -319,9 +304,7 @@ var getUrlParams = function() {
     //Don't want this. So simply get the hash string ourselves
     urlParams = $.deparam(location.href.split("#")[1]);
   }
-  if (
-    (!urlParams || !("query" in urlParams)) && window.location.search.length > 1
-  ) {
+  if ((!urlParams || !("query" in urlParams)) && window.location.search.length > 1) {
     //ok, then just try regular url params
     urlParams = $.deparam(window.location.search.substring(1));
   }
@@ -334,9 +317,7 @@ var getUrlParams = function() {
 
 var updateButtonsTransparency = function(yasqe) {
   yasqe.cursor = $(".CodeMirror-cursor");
-  if (
-    yasqe.buttons && yasqe.buttons.is(":visible") && yasqe.cursor.length > 0
-  ) {
+  if (yasqe.buttons && yasqe.buttons.is(":visible") && yasqe.cursor.length > 0) {
     if (utils.elementsOverlap(yasqe.cursor, yasqe.buttons)) {
       yasqe.buttons.find("svg").attr("opacity", "0.2");
     } else {
@@ -389,13 +370,10 @@ var checkSyntax = function(yasqe, deepcheck) {
           var expectedEncoded = [];
           state.possibleCurrent.forEach(function(expected) {
             expectedEncoded.push(
-              "<strong style='text-decoration:underline'>" +
-                $("<div/>").text(expected).html() +
-                "</strong>"
+              "<strong style='text-decoration:underline'>" + $("<div/>").text(expected).html() + "</strong>"
             );
           });
-          return "This line is invalid. Expected: " +
-            expectedEncoded.join(", ");
+          return "This line is invalid. Expected: " + expectedEncoded.join(", ");
         });
       }
       warningEl.style.marginTop = "2px";
@@ -417,11 +395,7 @@ var checkSyntax = function(yasqe, deepcheck) {
       if (len > 1)
         yasqe.queryValid = false;
       else if (len == 1) {
-        if (
-          stack[0] != "solutionModifier" &&
-          stack[0] != "?limitOffsetClauses" &&
-          stack[0] != "?offsetClause"
-        )
+        if (stack[0] != "solutionModifier" && stack[0] != "?limitOffsetClauses" && stack[0] != "?offsetClause")
           yasqe.queryValid = false;
       }
     }
@@ -446,15 +420,9 @@ root.autoComplete = function(yasqe) {
 };
 //include the autocompleters we provide out-of-the-box
 root.registerAutocompleter("prefixes", require("./autocompleters/prefixes.js"));
-root.registerAutocompleter(
-  "properties",
-  require("./autocompleters/properties.js")
-);
+root.registerAutocompleter("properties", require("./autocompleters/properties.js"));
 root.registerAutocompleter("classes", require("./autocompleters/classes.js"));
-root.registerAutocompleter(
-  "variables",
-  require("./autocompleters/variables.js")
-);
+root.registerAutocompleter("variables", require("./autocompleters/variables.js"));
 
 root.positionButtons = function(yasqe) {
   var scrollBar = $(yasqe.getWrapperElement()).find(".CodeMirror-vscrollbar");
@@ -476,8 +444,7 @@ root.positionButtons = function(yasqe) {
 root.createShareLink = function(yasqe) {
   //extend existing link, so first fetch current arguments
   var urlParams = {};
-  if (window.location.hash.length > 1)
-    urlParams = $.deparam(window.location.hash.substring(1));
+  if (window.location.hash.length > 1) urlParams = $.deparam(window.location.hash.substring(1));
   urlParams["query"] = yasqe.getValue();
   return urlParams;
 };
@@ -497,9 +464,7 @@ root.consumeShareLink = function(yasqe, urlParams) {
   }
 };
 root.drawButtons = function(yasqe) {
-  yasqe.buttons = $("<div class='yasqe_buttons'></div>").appendTo(
-    $(yasqe.getWrapperElement())
-  );
+  yasqe.buttons = $("<div class='yasqe_buttons'></div>").appendTo($(yasqe.getWrapperElement()));
 
   /**
 	 * draw share link button
@@ -509,9 +474,7 @@ root.drawButtons = function(yasqe) {
     svgShare
       .click(function(event) {
         event.stopPropagation();
-        var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(
-          yasqe.buttons
-        );
+        var popup = $("<div class='yasqe_sharePopup'></div>").appendTo(yasqe.buttons);
         $("html").click(function() {
           if (popup) popup.remove();
         });
@@ -541,26 +504,17 @@ root.drawButtons = function(yasqe) {
           });
         });
 
-        popup
-          .empty()
-          .append($("<div>", { class: "inputWrapper" }).append($input));
+        popup.empty().append($("<div>", { class: "inputWrapper" }).append($input));
         if (yasqe.options.createShortLink) {
           popup.addClass("enableShort");
           $("<button>Shorten</button>")
             .addClass("yasqe_btn yasqe_btn-sm yasqe_btn-primary")
             .click(function() {
               $(this).parent().find("button").attr("disabled", "disabled");
-              yasqe.options.createShortLink($input.val(), function(
-                errString,
-                shortLink
-              ) {
+              yasqe.options.createShortLink($input.val(), function(errString, shortLink) {
                 if (errString) {
                   $input.remove();
-                  popup
-                    .find(".inputWrapper")
-                    .append(
-                      $("<span>", { class: "shortlinkErr" }).text(errString)
-                    );
+                  popup.find(".inputWrapper").append($("<span>", { class: "shortlinkErr" }).text(errString));
                 } else {
                   $input.val(shortLink).focus();
                 }
@@ -577,17 +531,8 @@ root.drawButtons = function(yasqe) {
           .appendTo(popup);
         var positions = svgShare.position();
         popup
-          .css(
-            "top",
-            positions.top +
-              svgShare.outerHeight() +
-              parseInt(popup.css("padding-top")) +
-              "px"
-          )
-          .css(
-            "left",
-            positions.left + svgShare.outerWidth() - popup.outerWidth() + "px"
-          );
+          .css("top", positions.top + svgShare.outerHeight() + parseInt(popup.css("padding-top")) + "px")
+          .css("left", positions.left + svgShare.outerWidth() - popup.outerWidth() + "px");
         $input.focus();
       })
       .addClass("yasqe_share")
@@ -834,10 +779,7 @@ var autoFormatLineBreaks = function(text, start, end) {
   var breakBeforeCharacters = ["}"];
   var getBreakType = function(stringVal, type) {
     for (var i = 0; i < breakAfterArray.length; i++) {
-      if (
-        stackTrace.valueOf().toString() ==
-        breakAfterArray[i].valueOf().toString()
-      ) {
+      if (stackTrace.valueOf().toString() == breakAfterArray[i].valueOf().toString()) {
         return 1;
       }
     }
