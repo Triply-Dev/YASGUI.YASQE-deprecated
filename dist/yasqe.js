@@ -5453,10 +5453,11 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
 
   var indentTable = {
     "}": 1,
-    "]": 0,
+    "]": 1,
     ")": 1,
     "{": -1,
-    "(": -1
+    "(": -1,
+    "[": -1
     //		"*[;,?[or([verbPath,verbSimple]),objectList]]": 1,
   };
 
@@ -7644,7 +7645,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.9",
+  "version": "2.11.10",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -9356,27 +9357,12 @@ root.copyLineDown = function(yasqe) {
   yasqe.setCursor(cursor);
 };
 root.doAutoFormat = function(yasqe) {
-  if (yasqe.somethingSelected()) {
-    var to = {
-      line: yasqe.getCursor(false).line,
-      ch: yasqe.getSelection().length
-    };
-    autoFormatRange(yasqe, yasqe.getCursor(true), to);
-  } else {
-    var totalLines = yasqe.lineCount();
-    var totalChars = yasqe.getTextArea().value.length;
-    autoFormatRange(
-      yasqe,
-      {
-        line: 0,
-        ch: 0
-      },
-      {
-        line: totalLines,
-        ch: totalChars
-      }
-    );
-  }
+  if (!yasqe.somethingSelected()) yasqe.execCommand("selectAll");
+  var to = {
+    line: yasqe.getCursor(false).line,
+    ch: yasqe.getSelection().length
+  };
+  autoFormatRange(yasqe, yasqe.getCursor(true), to);
 };
 
 var autoFormatRange = function(yasqe, from, to) {
