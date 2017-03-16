@@ -728,27 +728,12 @@ root.copyLineDown = function(yasqe) {
   yasqe.setCursor(cursor);
 };
 root.doAutoFormat = function(yasqe) {
-  if (yasqe.somethingSelected()) {
-    var to = {
-      line: yasqe.getCursor(false).line,
-      ch: yasqe.getSelection().length
-    };
-    autoFormatRange(yasqe, yasqe.getCursor(true), to);
-  } else {
-    var totalLines = yasqe.lineCount();
-    var totalChars = yasqe.getTextArea().value.length;
-    autoFormatRange(
-      yasqe,
-      {
-        line: 0,
-        ch: 0
-      },
-      {
-        line: totalLines,
-        ch: totalChars
-      }
-    );
-  }
+  if (!yasqe.somethingSelected()) yasqe.execCommand("selectAll");
+  var to = {
+    line: yasqe.getCursor(false).line,
+    ch: yasqe.getSelection().length
+  };
+  autoFormatRange(yasqe, yasqe.getCursor(true), to);
 };
 
 var autoFormatRange = function(yasqe, from, to) {
