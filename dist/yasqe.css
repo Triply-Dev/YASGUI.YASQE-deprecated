@@ -483,7 +483,6 @@
   .yasqe .matchingVar {
     background-color: #DBDEED;
     border-radius: 6px;
-    -webkit-transition: background 0.5s linear;
     transition: background 0.5s linear; }
   .yasqe .backdrop {
     background-color: #000;
