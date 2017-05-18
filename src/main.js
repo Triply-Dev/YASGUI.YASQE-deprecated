@@ -35,7 +35,7 @@ require("../lib/grammar/tokenizer.js");
  * @class YASQE
  * @return {doc} YASQE document
  */
-var root = module.exports = function(parent, config) {
+var root = (module.exports = function(parent, config) {
   var rootEl = $("<div>", {
     class: "yasqe"
   }).appendTo($(parent));
@@ -43,7 +43,7 @@ var root = module.exports = function(parent, config) {
   var yasqe = extendCmInstance(CodeMirror(rootEl[0], config));
   postProcessCmElement(yasqe);
   return yasqe;
-};
+});
 
 /**
  * Extend config object, which we will pass on to the CM constructor later on.
@@ -392,8 +392,7 @@ var checkSyntax = function(yasqe, deepcheck) {
       // Because incremental parser doesn't receive end-of-input
       // it can't clear stack, so we have to check that whatever
       // is left on the stack is nillable
-      if (len > 1)
-        yasqe.queryValid = false;
+      if (len > 1) yasqe.queryValid = false;
       else if (len == 1) {
         if (stack[0] != "solutionModifier" && stack[0] != "?limitOffsetClauses" && stack[0] != "?offsetClause")
           yasqe.queryValid = false;
@@ -654,7 +653,7 @@ root.fromTextArea = function(textAreaEl, config) {
 root.storeQuery = function(yasqe) {
   var storageId = utils.getPersistencyId(yasqe, yasqe.options.persistent);
   if (storageId) {
-    yutils.storage.set(storageId, yasqe.getValue(), "month");
+    yutils.storage.set(storageId, yasqe.getValue(), "month", yasqe.options.onQuotaExceeded);
   }
 };
 root.commentLines = function(yasqe) {

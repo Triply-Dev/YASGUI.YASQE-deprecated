@@ -32,6 +32,9 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * @property extraKeys
 	 * @type object
 	 */
+  onQuotaExceeded: function() {
+    //fail silently
+  },
   extraKeys: {
     //					"Ctrl-Space" : function(yasqe) {
     //						YASQE.autoComplete(yasqe);

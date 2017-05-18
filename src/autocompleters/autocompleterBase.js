@@ -35,7 +35,7 @@ module.exports = function(YASQE, yasqe) {
 
   /**
 	 * Store bulk completions in memory as trie, and store these in localstorage as well (if enabled)
-	 * 
+	 *
 	 * @method doc.storeBulkCompletions
 	 * @param completions {array}
 	 */
@@ -47,11 +47,11 @@ module.exports = function(YASQE, yasqe) {
     }
     // store in localstorage as well
     var storageId = utils.getPersistencyId(yasqe, completer.persistent);
-    if (storageId) yutils.storage.set(storageId, completions, "month");
+    if (storageId) yutils.storage.set(storageId, completions, "month", yasqe.options.onQuotaExceeded);
   };
 
   var initCompleter = function(name, completionInit) {
-    var completer = completers[name] = new completionInit(yasqe, name);
+    var completer = (completers[name] = new completionInit(yasqe, name));
     completer.name = name;
     if (completer.bulk) {
       var storeArrayAsBulk = function(suggestions) {
