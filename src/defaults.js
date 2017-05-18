@@ -26,15 +26,16 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
   matchBrackets: true,
   fixedGutter: true,
   syntaxErrorCheck: true,
+  onQuotaExceeded: function(e) {
+    //fail silently
+    console.warn("Could not store in localstorage. Skipping..", e);
+  },
   /**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
 	 *
 	 * @property extraKeys
 	 * @type object
 	 */
-  onQuotaExceeded: function() {
-    //fail silently
-  },
   extraKeys: {
     //					"Ctrl-Space" : function(yasqe) {
     //						YASQE.autoComplete(yasqe);

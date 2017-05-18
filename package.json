@@ -74,7 +74,7 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~1.1.0",
     "vinyl-transform": "1.0.0",
-    "yasgui-utils": "^1.6.5"
+    "yasgui-utils": "^1.6.6"
   },
   "optionalShim": {
     "codemirror": {
