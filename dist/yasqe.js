@@ -7453,43 +7453,49 @@ module.exports={
   "_args": [
     [
       {
-        "raw": "yasgui-utils@^1.6.0",
+        "raw": "yasgui-utils@1.6.4",
         "scope": null,
         "escapedName": "yasgui-utils",
         "name": "yasgui-utils",
-        "rawSpec": "^1.6.0",
-        "spec": ">=1.6.0 <2.0.0",
-        "type": "range"
+        "rawSpec": "1.6.4",
+        "spec": "1.6.4",
+        "type": "version"
       },
       "/home/lrd900/yasgui/yasqe"
     ]
   ],
-  "_from": "yasgui-utils@>=1.6.0 <2.0.0",
-  "_id": "yasgui-utils@1.6.0",
+  "_from": "yasgui-utils@1.6.4",
+  "_id": "yasgui-utils@1.6.4",
   "_inCache": true,
   "_location": "/yasgui-utils",
+  "_nodeVersion": "7.10.0",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/yasgui-utils-1.6.4.tgz_1495118339480_0.5133819875773042"
+  },
   "_npmUser": {
     "name": "laurens.rietveld",
     "email": "laurens.rietveld@gmail.com"
   },
-  "_npmVersion": "1.4.3",
+  "_npmVersion": "4.2.0",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "yasgui-utils@^1.6.0",
+    "raw": "yasgui-utils@1.6.4",
     "scope": null,
     "escapedName": "yasgui-utils",
     "name": "yasgui-utils",
-    "rawSpec": "^1.6.0",
-    "spec": ">=1.6.0 <2.0.0",
-    "type": "range"
+    "rawSpec": "1.6.4",
+    "spec": "1.6.4",
+    "type": "version"
   },
   "_requiredBy": [
+    "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz",
-  "_shasum": "bcb9091109c233e3e82737c94c202e6512389c47",
+  "_resolved": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.4.tgz",
+  "_shasum": "6d99d35c903cb00212ef57f024ff079901c2c73b",
   "_shrinkwrap": null,
-  "_spec": "yasgui-utils@^1.6.0",
+  "_spec": "yasgui-utils@1.6.4",
   "_where": "/home/lrd900/yasgui/yasqe",
   "author": {
     "name": "Laurens Rietveld"
@@ -7504,9 +7510,10 @@ module.exports={
   "devDependencies": {},
   "directories": {},
   "dist": {
-    "shasum": "bcb9091109c233e3e82737c94c202e6512389c47",
-    "tarball": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.0.tgz"
+    "shasum": "6d99d35c903cb00212ef57f024ff079901c2c73b",
+    "tarball": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.4.tgz"
   },
+  "gitHead": "7437285878000b4007ca9381c179f9e1fbe3cf3a",
   "homepage": "https://github.com/YASGUI/Utils",
   "licenses": [
     {
@@ -7528,7 +7535,8 @@ module.exports={
     "type": "git",
     "url": "git://github.com/YASGUI/Utils.git"
   },
-  "version": "1.6.0"
+  "scripts": {},
+  "version": "1.6.4"
 }
 
 },{}],16:[function(require,module,exports){
@@ -7555,62 +7563,92 @@ module.exports = {
 },{"../package.json":15,"./storage.js":17,"./svg.js":18}],17:[function(require,module,exports){
 var store = require("store");
 var times = {
-	day: function() {
-		return 1000 * 3600 * 24;//millis to day
-	},
-	month: function() {
-		times.day() * 30;
-	},
-	year: function() {
-		times.month() * 12;
-	}
+  day: function() {
+    return 1000 * 3600 * 24; //millis to day
+  },
+  month: function() {
+    times.day() * 30;
+  },
+  year: function() {
+    times.month() * 12;
+  }
 };
-
-var root = module.exports = {
-	set : function(key, val, exp) {
-    if (!store.enabled) return;//this is probably in private mode. Don't run, as we might get Js errors
-		if (key && val !== undefined) {
-			if (typeof exp == "string") {
-				exp = times[exp]();
-			}
-			//try to store string for dom objects (e.g. XML result). Otherwise, we might get a circular reference error when stringifying this
-			if (val.documentElement) val = new XMLSerializer().serializeToString(val.documentElement);
-			store.set(key, {
-				val : val,
-				exp : exp,
-				time : new Date().getTime()
-			});
-		}
-	},
-	remove: function(key) {
-		if (!store.enabled) return;//this is probably in private mode. Don't run, as we might get Js errors
-		if (key) store.remove(key)
-	},
-	removeAll: function(filter) {
-		if (!store.enabled) return;//this is probably in private mode. Don't run, as we might get Js errors
-		if (typeof filter === 'function') {
-			for (var key in store.getAll()) {
-				if (filter(key, root.get(key))) root.remove(key);
-			}
-		}
-	},
-	get : function(key) {
-    if (!store.enabled) return null;//this is probably in private mode. Don't run, as we might get Js errors
-		if (key) {
-			var info = store.get(key);
-			if (!info) {
-				return null;
-			}
-			if (info.exp && new Date().getTime() - info.time > info.exp) {
-				return null;
-			}
-			return info.val;
-		} else {
-			return null;
-		}
-	}
-
-};
+function isQuotaExceeded(e) {
+  var quotaExceeded = false;
+  if (e) {
+    if (e.code) {
+      switch (e.code) {
+        case 22:
+          quotaExceeded = true;
+          break;
+        case 1014:
+          // Firefox
+          if (e.name === "NS_ERROR_DOM_QUOTA_REACHED") {
+            quotaExceeded = true;
+          }
+          break;
+      }
+    } else if (e.number === -2147024882) {
+      // Internet Explorer 8
+      quotaExceeded = true;
+    }
+  }
+}
+var root = (module.exports = {
+  set: function(key, val, exp, onQuotaExceeded) {
+    if (!store.enabled) return; //this is probably in private mode. Don't run, as we might get Js errors
+    if (key && val !== undefined) {
+      if (typeof exp == "string") {
+        exp = times[exp]();
+      }
+      //try to store string for dom objects (e.g. XML result). Otherwise, we might get a circular reference error when stringifying this
+      if (val.documentElement) val = new XMLSerializer().serializeToString(val.documentElement);
+      try {
+        store.set(key, {
+          val: val,
+          exp: exp,
+          time: new Date().getTime()
+        });
+      } catch (e) {
+        e.quotaExceeded = isQuotaExceeded(e);
+        if (e.quotaExceeded && onQuotaExceeded) {
+          onQuotaExceeded(e);
+        } else {
+          throw e;
+        }
+      }
+    }
+  },
+  remove: function(key) {
+    if (!store.enabled) return; //this is probably in private mode. Don't run, as we might get Js errors
+    if (key) store.remove(key);
+  },
+  removeAll: function(filter) {
+    if (!store.enabled) return; //this is probably in private mode. Don't run, as we might get Js errors
+    if (!filter) {
+      store.clearAll();
+    } else if (typeof filter === "function") {
+      for (var key in store.getAll()) {
+        if (filter(key, root.get(key))) root.remove(key);
+      }
+    }
+  },
+  get: function(key) {
+    if (!store.enabled) return null; //this is probably in private mode. Don't run, as we might get Js errors
+    if (key) {
+      var info = store.get(key);
+      if (!info) {
+        return null;
+      }
+      if (info.exp && new Date().getTime() - info.time > info.exp) {
+        return null;
+      }
+      return info.val;
+    } else {
+      return null;
+    }
+  }
+});
 
 },{"store":14}],18:[function(require,module,exports){
 module.exports = {
@@ -7645,7 +7683,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.10",
+  "version": "2.11.11",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -7658,12 +7696,36 @@ module.exports={
     "major": "gulp major"
   },
   "devDependencies": {
+    "bootstrap-sass": "^3.3.7",
+    "browserify": "^13.1.0",
+    "browserify-shim": "^3.8.12",
+    "browserify-transform-tools": "^1.6.0",
+    "exorcist": "^0.4.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssimport": "^3.1.0",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-filter": "^4.0.0",
+    "gulp-jsvalidate": "^2.1.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-streamify": "1.0.2",
+    "gulp-uglify": "^1.5.4",
     "gulp-bump": "^2.2.0",
     "gulp-connect": "^4.2.0",
     "gulp-embedlr": "^0.5.2",
     "gulp-git": "^1.10.0",
     "gulp-livereload": "^3.8.1",
     "gulp-tag-version": "^1.3.0",
+    "node-sass": "^3.8.0",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.2.2",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "~1.1.0",
+    "vinyl-transform": "1.0.0",
     "watchify": "^3.7.0"
   },
   "bugs": "https://github.com/YASGUI/YASQE/issues/",
@@ -7686,25 +7748,7 @@ module.exports={
     "url": "https://github.com/YASGUI/YASQE.git"
   },
   "dependencies": {
-    "bootstrap-sass": "^3.3.7",
-    "browserify": "^13.1.0",
-    "browserify-shim": "^3.8.12",
-    "browserify-transform-tools": "^1.6.0",
     "codemirror": "5.17.0",
-    "exorcist": "^0.4.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-cssimport": "^3.1.0",
-    "gulp-cssnano": "^2.1.2",
-    "gulp-filter": "^4.0.0",
-    "gulp-jsvalidate": "^2.1.0",
-    "gulp-notify": "^2.2.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.3.2",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-streamify": "1.0.2",
-    "gulp-uglify": "^1.5.4",
     "jquery": "^2.2.4",
     "node-sass": "^3.8.0",
     "require-dir": "^0.3.0",
@@ -7712,7 +7756,7 @@ module.exports={
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~1.1.0",
     "vinyl-transform": "1.0.0",
-    "yasgui-utils": "^1.6.0"
+    "yasgui-utils": "^1.6.4"
   },
   "optionalShim": {
     "codemirror": {
@@ -7768,7 +7812,7 @@ module.exports = function(YASQE, yasqe) {
 
   /**
 	 * Store bulk completions in memory as trie, and store these in localstorage as well (if enabled)
-	 * 
+	 *
 	 * @method doc.storeBulkCompletions
 	 * @param completions {array}
 	 */
@@ -7780,11 +7824,11 @@ module.exports = function(YASQE, yasqe) {
     }
     // store in localstorage as well
     var storageId = utils.getPersistencyId(yasqe, completer.persistent);
-    if (storageId) yutils.storage.set(storageId, completions, "month");
+    if (storageId) yutils.storage.set(storageId, completions, "month", yasqe.options.onQuotaExceeded);
   };
 
   var initCompleter = function(name, completionInit) {
-    var completer = completers[name] = new completionInit(yasqe, name);
+    var completer = (completers[name] = new completionInit(yasqe, name));
     completer.name = name;
     if (completer.bulk) {
       var storeArrayAsBulk = function(suggestions) {
@@ -8473,6 +8517,9 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
 	 * @property extraKeys
 	 * @type object
 	 */
+  onQuotaExceeded: function() {
+    //fail silently
+  },
   extraKeys: {
     //					"Ctrl-Space" : function(yasqe) {
     //						YASQE.autoComplete(yasqe);
@@ -8664,7 +8711,7 @@ require("../lib/grammar/tokenizer.js");
  * @class YASQE
  * @return {doc} YASQE document
  */
-var root = module.exports = function(parent, config) {
+var root = (module.exports = function(parent, config) {
   var rootEl = $("<div>", {
     class: "yasqe"
   }).appendTo($(parent));
@@ -8672,7 +8719,7 @@ var root = module.exports = function(parent, config) {
   var yasqe = extendCmInstance(CodeMirror(rootEl[0], config));
   postProcessCmElement(yasqe);
   return yasqe;
-};
+});
 
 /**
  * Extend config object, which we will pass on to the CM constructor later on.
@@ -9021,8 +9068,7 @@ var checkSyntax = function(yasqe, deepcheck) {
       // Because incremental parser doesn't receive end-of-input
       // it can't clear stack, so we have to check that whatever
       // is left on the stack is nillable
-      if (len > 1)
-        yasqe.queryValid = false;
+      if (len > 1) yasqe.queryValid = false;
       else if (len == 1) {
         if (stack[0] != "solutionModifier" && stack[0] != "?limitOffsetClauses" && stack[0] != "?offsetClause")
           yasqe.queryValid = false;
@@ -9283,7 +9329,7 @@ root.fromTextArea = function(textAreaEl, config) {
 root.storeQuery = function(yasqe) {
   var storageId = utils.getPersistencyId(yasqe, yasqe.options.persistent);
   if (storageId) {
-    yutils.storage.set(storageId, yasqe.getValue(), "month");
+    yutils.storage.set(storageId, yasqe.getValue(), "month", yasqe.options.onQuotaExceeded);
   }
 };
 root.commentLines = function(yasqe) {
