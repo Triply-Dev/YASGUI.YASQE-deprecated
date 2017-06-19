@@ -228,7 +228,7 @@ module.exports = function(YASQE, yasqe) {
             completionNotifications[completer.name] = $("<div class='completionNotification'></div>");
           completionNotifications[completer.name]
             .show()
-            .text("Press CTRL - <spacebar> to autocomplete")
+            .text(yasqe.options.language.autocomplete.trigger)
             .appendTo($(yasqe.getWrapperElement()));
         }
       },
