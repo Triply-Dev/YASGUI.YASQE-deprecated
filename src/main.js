@@ -557,7 +557,7 @@ root.drawButtons = function(yasqe) {
     .append(
       $(yutils.svg.getElement(imgs.smallscreen))
         .addClass("yasqe_smallscreenBtn")
-        .attr("title", "Set editor to normale size")
+        .attr("title", "Set editor to normal size")
         .click(function() {
           yasqe.setOption("fullScreen", false);
         })
