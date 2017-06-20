@@ -1,5 +1,7 @@
 "use strict";
-var $ = require("jquery"), utils = require("./utils.js"), YASQE = require("./main.js");
+var $ = require("jquery"),
+  utils = require("./utils.js"),
+  YASQE = require("./main.js");
 
 YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
   var callback = typeof callbackOrConfig == "function" ? callbackOrConfig : null;
@@ -11,13 +13,15 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
   if (config.handlers) $.extend(true, config.callbacks, config.handlers);
 
   if (!config.endpoint || config.endpoint.length == 0) return; // nothing to query!
-
+  var queryMode = yasqe.getQueryMode();
   /**
 	 * initialize ajax config
 	 */
   var ajaxConfig = {
     url: typeof config.endpoint == "function" ? config.endpoint(yasqe) : config.endpoint,
-    type: typeof config.requestMethod == "function" ? config.requestMethod(yasqe) : config.requestMethod,
+    type: queryMode == "update"
+      ? "POST"
+      : typeof config.requestMethod == "function" ? config.requestMethod(yasqe) : config.requestMethod,
     headers: {
       Accept: getAcceptHeader(yasqe, config)
     }
