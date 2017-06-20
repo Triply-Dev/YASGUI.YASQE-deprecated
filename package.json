@@ -69,6 +69,7 @@
     "codemirror": "5.17.0",
     "jquery": "^2.2.4",
     "node-sass": "^3.8.0",
+    "prettier": "^1.4.4",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.2.2",
     "vinyl-buffer": "^1.0.0",
