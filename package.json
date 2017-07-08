@@ -68,12 +68,7 @@
   "dependencies": {
     "codemirror": "5.17.0",
     "jquery": "^2.2.4",
-    "node-sass": "^3.8.0",
     "prettier": "^1.4.4",
-    "run-sequence": "^1.2.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "~1.1.0",
-    "vinyl-transform": "1.0.0",
     "yasgui-utils": "^1.6.7"
   },
   "optionalShim": {
