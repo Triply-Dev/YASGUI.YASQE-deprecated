@@ -26022,6 +26022,8 @@ function json2Plugin() {
 }
 
 },{"./lib/json2":18}],18:[function(require,module,exports){
+/* eslint-disable */
+
 //  json2.js
 //  2016-10-28
 //  Public Domain.
@@ -26533,76 +26535,24 @@ var util = require('./util')
 var slice = util.slice
 var pluck = util.pluck
 var each = util.each
+var bind = util.bind
 var create = util.create
 var isList = util.isList
 var isFunction = util.isFunction
 var isObject = util.isObject
 
 module.exports = {
-	createStore: createStore,
+	createStore: createStore
 }
 
 var storeAPI = {
-	version: '2.0.4',
+	version: '2.0.12',
 	enabled: false,
-	storage: null,
-
-	// addStorage adds another storage to this store. The store
-	// will use the first storage it receives that is enabled, so
-	// call addStorage in the order of preferred storage.
-	addStorage: function(storage) {
-		if (this.enabled) { return }
-		if (this._testStorage(storage)) {
-			this._storage.resolved = storage
-			this.enabled = true
-			this.storage = storage.name
-		}
-	},
-
-	// addPlugin will add a plugin to this store.
-	addPlugin: function(plugin) {
-		var self = this
-
-		// If the plugin is an array, then add all plugins in the array.
-		// This allows for a plugin to depend on other plugins.
-		if (isList(plugin)) {
-			each(plugin, function(plugin) {
-				self.addPlugin(plugin)
-			})
-			return
-		}
-
-		// Keep track of all plugins we've seen so far, so that we
-		// don't add any of them twice.
-		var seenPlugin = pluck(this._seenPlugins, function(seenPlugin) { return (plugin === seenPlugin) })
-		if (seenPlugin) {
-			return
-		}
-		this._seenPlugins.push(plugin)
-
-		// Check that the plugin is properly formed
-		if (!isFunction(plugin)) {
-			throw new Error('Plugins must be function values that return objects')
-		}
-
-		var pluginProperties = plugin.call(this)
-		if (!isObject(pluginProperties)) {
-			throw new Error('Plugins must return an object of function properties')
-		}
-
-		// Add the plugin function properties to this store instance.
-		each(pluginProperties, function(pluginFnProp, propName) {
-			if (!isFunction(pluginFnProp)) {
-				throw new Error('Bad plugin property: '+propName+' from plugin '+plugin.name+'. Plugins should only return functions.')
-			}
-			self._assignPluginFnProp(pluginFnProp, propName)
-		})
-	},
-
+	
 	// get returns the value of the given key. If that value
 	// is undefined, it returns optionalDefaultValue instead.
 	get: function(key, optionalDefaultValue) {
-		var data = this._storage().read(this._namespacePrefix + key)
+		var data = this.storage.read(this._namespacePrefix + key)
 		return this._deserialize(data, optionalDefaultValue)
 	},
 
@@ -26612,27 +26562,27 @@ var storeAPI = {
 		if (value === undefined) {
 			return this.remove(key)
 		}
-		this._storage().write(this._namespacePrefix + key, this._serialize(value))
+		this.storage.write(this._namespacePrefix + key, this._serialize(value))
 		return value
 	},
 
 	// remove deletes the key and value stored at the given key.
 	remove: function(key) {
-		this._storage().remove(this._namespacePrefix + key)
+		this.storage.remove(this._namespacePrefix + key)
 	},
 
 	// each will call the given callback once for each key-value pair
 	// in this store.
 	each: function(callback) {
 		var self = this
-		this._storage().each(function(val, namespacedKey) {
-			callback(self._deserialize(val), namespacedKey.replace(self._namespaceRegexp, ''))
+		this.storage.each(function(val, namespacedKey) {
+			callback.call(self, self._deserialize(val), (namespacedKey || '').replace(self._namespaceRegexp, ''))
 		})
 	},
 
 	// clearAll will remove all the stored key-value pairs in this store.
 	clearAll: function() {
-		this._storage().clearAll()
+		this.storage.clearAll()
 	},
 
 	// additional functionality that can't live in plugins
@@ -26643,43 +26593,50 @@ var storeAPI = {
 		return (this._namespacePrefix == '__storejs_'+namespace+'_')
 	},
 
-	// namespace clones the current store and assigns it the given namespace
-	namespace: function(namespace) {
-		if (!this._legalNamespace.test(namespace)) {
-			throw new Error('store.js namespaces can only have alhpanumerics + underscores and dashes')
-		}
-		// create a prefix that is very unlikely to collide with un-namespaced keys
-		var namespacePrefix = '__storejs_'+namespace+'_'
-		return create(this, {
-			_namespacePrefix: namespacePrefix,
-			_namespaceRegexp: namespacePrefix ? new RegExp('^'+namespacePrefix) : null
-		})
-	},
-
 	// createStore creates a store.js instance with the first
 	// functioning storage in the list of storage candidates,
 	// and applies the the given mixins to the instance.
-	createStore: function(storages, plugins) {
-		return createStore(storages, plugins)
+	createStore: function() {
+		return createStore.apply(this, arguments)
 	},
+	
+	addPlugin: function(plugin) {
+		this._addPlugin(plugin)
+	},
+	
+	namespace: function(namespace) {
+		return createStore(this.storage, this.plugins, namespace)
+	}
 }
 
-function createStore(storages, plugins) {
-	var _privateStoreProps = {
-		_seenPlugins: [],
-		_namespacePrefix: '',
-		_namespaceRegexp: null,
-		_legalNamespace: /^[a-zA-Z0-9_\-]+$/, // alpha-numeric + underscore and dash
+function _warn() {
+	var _console = (typeof console == 'undefined' ? null : console)
+	if (!_console) { return }
+	var fn = (_console.warn ? _console.warn : _console.log)
+	fn.apply(_console, arguments)
+}
 
-		_storage: function() {
-			if (!this.enabled) {
-				throw new Error("store.js: No supported storage has been added! "+
-					"Add one (e.g store.addStorage(require('store/storages/cookieStorage')) "+
-					"or use a build with more built-in storages (e.g "+
-					"https://github.com/marcuswestin/store.js/tree/master/dist/store.legacy.min.js)")
-			}
-			return this._storage.resolved
-		},
+function createStore(storages, plugins, namespace) {
+	if (!namespace) {
+		namespace = ''
+	}
+	if (storages && !isList(storages)) {
+		storages = [storages]
+	}
+	if (plugins && !isList(plugins)) {
+		plugins = [plugins]
+	}
+
+	var namespacePrefix = (namespace ? '__storejs_'+namespace+'_' : '')
+	var namespaceRegexp = (namespace ? new RegExp('^'+namespacePrefix) : null)
+	var legalNamespaces = /^[a-zA-Z0-9_\-]*$/ // alpha-numeric + underscore and dash
+	if (!legalNamespaces.test(namespace)) {
+		throw new Error('store.js namespaces can only have alphanumerics + underscores and dashes')
+	}
+	
+	var _privateStoreProps = {
+		_namespacePrefix: namespacePrefix,
+		_namespaceRegexp: namespaceRegexp,
 
 		_testStorage: function(storage) {
 			try {
@@ -26734,14 +26691,80 @@ function createStore(storages, plugins) {
 
 			return (val !== undefined ? val : defaultVal)
 		},
+		
+		_addStorage: function(storage) {
+			if (this.enabled) { return }
+			if (this._testStorage(storage)) {
+				this.storage = storage
+				this.enabled = true
+			}
+		},
+
+		_addPlugin: function(plugin) {
+			var self = this
+
+			// If the plugin is an array, then add all plugins in the array.
+			// This allows for a plugin to depend on other plugins.
+			if (isList(plugin)) {
+				each(plugin, function(plugin) {
+					self._addPlugin(plugin)
+				})
+				return
+			}
+
+			// Keep track of all plugins we've seen so far, so that we
+			// don't add any of them twice.
+			var seenPlugin = pluck(this.plugins, function(seenPlugin) {
+				return (plugin === seenPlugin)
+			})
+			if (seenPlugin) {
+				return
+			}
+			this.plugins.push(plugin)
+
+			// Check that the plugin is properly formed
+			if (!isFunction(plugin)) {
+				throw new Error('Plugins must be function values that return objects')
+			}
+
+			var pluginProperties = plugin.call(this)
+			if (!isObject(pluginProperties)) {
+				throw new Error('Plugins must return an object of function properties')
+			}
+
+			// Add the plugin function properties to this store instance.
+			each(pluginProperties, function(pluginFnProp, propName) {
+				if (!isFunction(pluginFnProp)) {
+					throw new Error('Bad plugin property: '+propName+' from plugin '+plugin.name+'. Plugins should only return functions.')
+				}
+				self._assignPluginFnProp(pluginFnProp, propName)
+			})
+		},
+		
+		// Put deprecated properties in the private API, so as to not expose it to accidential
+		// discovery through inspection of the store object.
+		
+		// Deprecated: addStorage
+		addStorage: function(storage) {
+			_warn('store.addStorage(storage) is deprecated. Use createStore([storages])')
+			this._addStorage(storage)
+		}
 	}
 
-	var store = create(_privateStoreProps, storeAPI)
+	var store = create(_privateStoreProps, storeAPI, {
+		plugins: []
+	})
+	store.raw = {}
+	each(store, function(prop, propName) {
+		if (isFunction(prop)) {
+			store.raw[propName] = bind(store, prop)			
+		}
+	})
 	each(storages, function(storage) {
-		store.addStorage(storage)
+		store._addStorage(storage)
 	})
 	each(plugins, function(plugin) {
-		store.addPlugin(plugin)
+		store._addPlugin(plugin)
 	})
 	return store
 }
@@ -26765,7 +26788,7 @@ module.exports = {
 	isList: isList,
 	isFunction: isFunction,
 	isObject: isObject,
-	Global: Global,
+	Global: Global
 }
 
 function make_assign() {
@@ -26822,8 +26845,8 @@ function slice(arr, index) {
 }
 
 function each(obj, fn) {
-	pluck(obj, function(key, val) {
-		fn(key, val)
+	pluck(obj, function(val, key) {
+		fn(val, key)
 		return false
 	})
 }
@@ -26870,15 +26893,15 @@ function isObject(val) {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{}],21:[function(require,module,exports){
-module.exports = {
+module.exports = [
 	// Listed in order of usage preference
-	'localStorage': require('./localStorage'),
-	'oldFF-globalStorage': require('./oldFF-globalStorage'),
-	'oldIE-userDataStorage': require('./oldIE-userDataStorage'),
-	'cookieStorage': require('./cookieStorage'),
-	'sessionStorage': require('./sessionStorage'),
-	'memoryStorage': require('./memoryStorage'),
-}
+	require('./localStorage'),
+	require('./oldFF-globalStorage'),
+	require('./oldIE-userDataStorage'),
+	require('./cookieStorage'),
+	require('./sessionStorage'),
+	require('./memoryStorage')
+]
 
 },{"./cookieStorage":22,"./localStorage":23,"./memoryStorage":24,"./oldFF-globalStorage":25,"./oldIE-userDataStorage":26,"./sessionStorage":27}],22:[function(require,module,exports){
 // cookieStorage is useful Safari private browser mode, where localStorage
@@ -27207,7 +27230,7 @@ module.exports = {
 	write: write,
 	each: each,
 	remove: remove,
-	clearAll: clearAll,
+	clearAll: clearAll
 }
 
 function sessionStorage() {
@@ -27239,52 +27262,28 @@ function clearAll() {
 
 },{"../src/util":20}],28:[function(require,module,exports){
 module.exports={
-  "_args": [
-    [
-      {
-        "raw": "yasgui-utils@1.6.7",
-        "scope": null,
-        "escapedName": "yasgui-utils",
-        "name": "yasgui-utils",
-        "rawSpec": "1.6.7",
-        "spec": "1.6.7",
-        "type": "version"
-      },
-      "/home/lrd900/yasgui/yasqe"
-    ]
-  ],
-  "_from": "yasgui-utils@1.6.7",
+  "_from": "yasgui-utils@^1.6.7",
   "_id": "yasgui-utils@1.6.7",
-  "_inCache": true,
+  "_inBundle": false,
+  "_integrity": "sha1-K8/FoxVojeOuYFeIPZrjQrIF8mc=",
   "_location": "/yasgui-utils",
-  "_nodeVersion": "7.10.0",
-  "_npmOperationalInternal": {
-    "host": "s3://npm-registry-packages",
-    "tmp": "tmp/yasgui-utils-1.6.7.tgz_1495459781202_0.06725964159704745"
-  },
-  "_npmUser": {
-    "name": "laurens.rietveld",
-    "email": "laurens.rietveld@gmail.com"
-  },
-  "_npmVersion": "4.2.0",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "yasgui-utils@1.6.7",
-    "scope": null,
-    "escapedName": "yasgui-utils",
+    "type": "range",
+    "registry": true,
+    "raw": "yasgui-utils@^1.6.7",
     "name": "yasgui-utils",
-    "rawSpec": "1.6.7",
-    "spec": "1.6.7",
-    "type": "version"
+    "escapedName": "yasgui-utils",
+    "rawSpec": "^1.6.7",
+    "saveSpec": null,
+    "fetchSpec": "^1.6.7"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.7.tgz",
   "_shasum": "2bcfc5a315688de3ae6057883d9ae342b205f267",
-  "_shrinkwrap": null,
-  "_spec": "yasgui-utils@1.6.7",
+  "_spec": "yasgui-utils@^1.6.7",
   "_where": "/home/lrd900/yasgui/yasqe",
   "author": {
     "name": "Laurens Rietveld"
@@ -27292,17 +27291,12 @@ module.exports={
   "bugs": {
     "url": "https://github.com/YASGUI/Utils/issues"
   },
+  "bundleDependencies": false,
   "dependencies": {
     "store": "^2.0.4"
   },
+  "deprecated": false,
   "description": "Utils for YASGUI libs",
-  "devDependencies": {},
-  "directories": {},
-  "dist": {
-    "shasum": "2bcfc5a315688de3ae6057883d9ae342b205f267",
-    "tarball": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.7.tgz"
-  },
-  "gitHead": "6031b1cb732d390b29cd5376dceb9a9d665bbd11",
   "homepage": "https://github.com/YASGUI/Utils",
   "licenses": [
     {
@@ -27313,18 +27307,16 @@ module.exports={
   "main": "src/main.js",
   "maintainers": [
     {
-      "name": "laurens.rietveld",
-      "email": "laurens.rietveld@gmail.com"
+      "name": "Laurens Rietveld",
+      "email": "laurens.rietveld@gmail.com",
+      "url": "http://laurensrietveld.nl"
     }
   ],
   "name": "yasgui-utils",
-  "optionalDependencies": {},
-  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
     "url": "git://github.com/YASGUI/Utils.git"
   },
-  "scripts": {},
   "version": "1.6.7"
 }
 
@@ -27473,7 +27465,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.14",
+  "version": "2.11.15",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -27493,25 +27485,25 @@ module.exports={
     "exorcist": "^0.4.0",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.0",
+    "gulp-bump": "^2.2.0",
     "gulp-concat": "^2.6.0",
+    "gulp-connect": "^4.2.0",
     "gulp-cssimport": "^3.1.0",
     "gulp-cssnano": "^2.1.2",
+    "gulp-embedlr": "^0.5.2",
     "gulp-filter": "^4.0.0",
+    "gulp-git": "^2.4.1",
     "gulp-jsvalidate": "^2.1.0",
+    "gulp-livereload": "^3.8.1",
     "gulp-notify": "^2.2.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.3.2",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-streamify": "1.0.2",
-    "gulp-uglify": "^1.5.4",
-    "gulp-bump": "^2.2.0",
-    "gulp-connect": "^4.2.0",
-    "gulp-embedlr": "^0.5.2",
-    "gulp-git": "^1.10.0",
-    "gulp-livereload": "^3.8.1",
     "gulp-tag-version": "^1.3.0",
+    "gulp-uglify": "^1.5.4",
     "node-sass": "^3.8.0",
-    "require-dir": "^0.3.0",
+    "require-dir": "^0.3.2",
     "run-sequence": "^1.2.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "~1.1.0",
@@ -27540,13 +27532,7 @@ module.exports={
   "dependencies": {
     "codemirror": "5.17.0",
     "jquery": "^2.2.4",
-    "node-sass": "^3.8.0",
     "prettier": "^1.4.4",
-    "require-dir": "^0.3.0",
-    "run-sequence": "^1.2.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "~1.1.0",
-    "vinyl-transform": "1.0.0",
     "yasgui-utils": "^1.6.7"
   },
   "optionalShim": {
@@ -28818,7 +28804,7 @@ var checkSyntax = function(yasqe, deepcheck) {
     if (state.OK == false) {
       if (!yasqe.options.syntaxErrorCheck) {
         //the library we use already marks everything as being an error. Overwrite this class attribute.
-        $(yasqe.getWrapperElement).find(".sp-error").css("color", "black");
+        $(yasqe.getWrapperElement()).find(".sp-error").css("color", "black");
         //we don't want to gutter error, so return
         return;
       }
