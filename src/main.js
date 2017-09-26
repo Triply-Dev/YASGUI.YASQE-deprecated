@@ -354,7 +354,7 @@ var checkSyntax = function(yasqe, deepcheck) {
     if (state.OK == false) {
       if (!yasqe.options.syntaxErrorCheck) {
         //the library we use already marks everything as being an error. Overwrite this class attribute.
-        $(yasqe.getWrapperElement).find(".sp-error").css("color", "black");
+        $(yasqe.getWrapperElement()).find(".sp-error").css("color", "black");
         //we don't want to gutter error, so return
         return;
       }
