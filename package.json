@@ -11,7 +11,8 @@
     "build": "gulp",
     "patch": "gulp patch",
     "minor": "gulp minor",
-    "major": "gulp major"
+    "major": "gulp major",
+    "update-interactive": "npm-check --skip-unused -u"
   },
   "devDependencies": {
     "bootstrap-sass": "^3.3.7",
