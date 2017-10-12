@@ -1,7 +1,7 @@
 var CodeMirror = require("codemirror"), tokenUtils = require("./tokenUtils.js");
 
 ("use strict");
-var lookFor = "PREFIX";
+var lookFor = "PREFIX ";
 module.exports = {
   findFirstPrefixLine: function(cm) {
     var lastLine = cm.lastLine();
