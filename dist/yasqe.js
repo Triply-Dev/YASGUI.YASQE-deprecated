@@ -8712,7 +8712,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.15",
+  "version": "2.11.16",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -8722,7 +8722,8 @@ module.exports={
     "build": "gulp",
     "patch": "gulp patch",
     "minor": "gulp minor",
-    "major": "gulp major"
+    "major": "gulp major",
+    "update-interactive": "npm-check --skip-unused -u"
   },
   "devDependencies": {
     "bootstrap-sass": "^3.3.7",
@@ -10516,7 +10517,7 @@ root.version = {
 var CodeMirror = (function(){try{return require('codemirror')}catch(e){return window.CodeMirror}})(), tokenUtils = require("./tokenUtils.js");
 
 ("use strict");
-var lookFor = "PREFIX";
+var lookFor = "PREFIX ";
 module.exports = {
   findFirstPrefixLine: function(cm) {
     var lastLine = cm.lastLine();
