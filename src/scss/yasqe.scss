@@ -13,7 +13,9 @@
 	.svgImg {
 		display:inline-block;
 	}
-
+.CodeMirror-fullscreen {
+	z-index:1100;//this way, we're higher than the leaflet z-index used in YASR (1000)
+}
   	span.shortlinkErr {
   		font-size: small;
   		color: red;
