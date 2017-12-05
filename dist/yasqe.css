@@ -497,6 +497,8 @@
     display: none; }
   .yasqe .svgImg {
     display: inline-block; }
+  .yasqe .CodeMirror-fullscreen {
+    z-index: 1100; }
   .yasqe span.shortlinkErr {
     font-size: small;
     color: red;

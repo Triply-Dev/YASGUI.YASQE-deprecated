@@ -8712,7 +8712,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.16",
+  "version": "2.11.17",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
