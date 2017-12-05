@@ -53,3 +53,11 @@ publishers.  Here is a partial list:
   * [**LOD Laundromat**](http://lodlaundromat.org/sparql)
   * [**MetaLex**](http://doc.metalex.eu/query)
   * [**CEDAR project**](http://lod.cedar-project.nl/cedar/data.html)
+
+
+## Forked by
+
+*YASGUI* has been forked for other languages:
+
+ * [**YATE**](https://perfectkb.github.io/yate/) is a fork for the RDF 1.1 Turtle syntax
+ * [**YASQE for SPARQL-Generate**](https://thesmartenergy.github.io/sparql-generate-yasqe/) is a fork for the [**SPARQL-Generate language**](https://w3id.org/sparql-generate), an extension of SPARQL 1.1 for querying not only RDF datasets but also documents in arbitrary formats.  
