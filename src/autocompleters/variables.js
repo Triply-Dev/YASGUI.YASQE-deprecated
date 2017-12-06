@@ -6,7 +6,7 @@ module.exports = function(yasqe) {
       var token = yasqe.getTokenAt(yasqe.getCursor());
       if (token.type != "ws") {
         token = yasqe.getCompleteToken(token);
-        if (token && token.string.indexOf("?") == 0) {
+        if (token && (token.string[0] === '?' || token.string[0] === '$')) {
           return true;
         }
       }
@@ -16,9 +16,10 @@ module.exports = function(yasqe) {
       if (token.trim().length == 0) return []; //nothing to autocomplete
       var distinctVars = {};
       //do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
+      //and: this'll still work when the query is incorrect (i.e., when simply typing '?')
       $(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
         var variable = this.innerHTML;
-        if (variable.indexOf("?") == 0) {
+        if (variable[0] === '?' || variable[0] === '$') {
           //ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
           var nextEl = $(this).next();
           var nextElClass = nextEl.attr("class");

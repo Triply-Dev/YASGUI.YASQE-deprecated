@@ -156,6 +156,13 @@ var extendCmInstance = function(yasqe) {
   yasqe.removePrefixes = function(prefixes) {
     return require("./prefixUtils.js").removePrefixes(yasqe, prefixes);
   };
+  yasqe.getVariablesFromQuery = function() {
+    //Use precise here. We want to be sure we use the most up to date state. If we're
+    //not, we might get outdated info from the current query (creating loops such
+    //as https://github.com/OpenTriply/YASGUI/issues/84)
+    //on caveat: this function won't work when query is invalid (i.e. when typing)
+    return $.map(yasqe.getTokenAt({ line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length }, true).state.variables, function(val,key) {return key});
+  }
 
   yasqe.getValueWithoutComments = function() {
     var cleanedQuery = "";
