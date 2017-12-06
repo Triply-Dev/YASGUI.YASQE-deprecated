@@ -163,6 +163,54 @@ var extendCmInstance = function(yasqe) {
     //on caveat: this function won't work when query is invalid (i.e. when typing)
     return $.map(yasqe.getTokenAt({ line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length }, true).state.variables, function(val,key) {return key});
   }
+  //values in the form of {?var: 'value'}, or [{?var: 'value'}]
+  yasqe.getQueryWithValues = function(values) {
+    if (!values) return yasqe.getValue();
+    var injectString;
+    if (typeof values === 'string') {
+      injectString = values;
+    } else {
+      //start building inject string
+      if (!Array.isArray(values)) values = [values];
+      var variables = values.reduce(function(vars, valueObj) {
+        for (var v in valueObj) {
+          vars[v] = v;
+        }
+        return vars;
+      }, {})
+      var varArray = [];
+      for (var v in variables) {
+        varArray.push(v);
+      }
+
+      if (!varArray.length) return yasqe.getValue() ;
+      //ok, we've got enough info to start building the string now
+      injectString = "VALUES (" + varArray.join(' ') + ") {\n";
+      values.forEach(function(valueObj) {
+        injectString += "( ";
+        varArray.forEach(function(variable) {
+          injectString += valueObj[variable] || "UNDEF"
+        })
+        injectString += " )\n"
+      })
+      injectString += "}\n"
+    }
+    if (!injectString) return yasqe.getValue();
+
+    var newQuery = ""
+    var injected = false;
+    var gotSelect = false;
+    root.runMode(yasqe.getValue(), "sparql11", function(stringVal, className, row, col, state) {
+      if (className === "keyword" && stringVal.toLowerCase() === 'select') gotSelect = true;
+      newQuery += stringVal;
+      if (gotSelect && !injected && className === "punc" && stringVal === "{") {
+        injected = true;
+        //start injecting
+        newQuery += "\n" + injectString;
+      }
+    });
+    return newQuery
+  }
 
   yasqe.getValueWithoutComments = function() {
     var cleanedQuery = "";
