@@ -77,6 +77,9 @@ var extendCmInstance = function(yasqe) {
       if (root.Autocompleters[name]) yasqe.autocompleters.init(name, root.Autocompleters[name]);
     });
   }
+  yasqe.emit = function(event, data) {
+    root.signal(yasqe, event, data)
+  }
   yasqe.lastQueryDuration = null;
   yasqe.getCompleteToken = function(token, cur) {
     return require("./tokenUtils.js").getCompleteToken(yasqe, token, cur);
@@ -607,6 +610,7 @@ root.drawButtons = function(yasqe) {
         .attr("title", "Set editor full screen")
         .click(function() {
           yasqe.setOption("fullScreen", true);
+          yasqe.emit('fullscreen-enter')
         })
     )
     .append(
@@ -615,6 +619,7 @@ root.drawButtons = function(yasqe) {
         .attr("title", "Set editor to normal size")
         .click(function() {
           yasqe.setOption("fullScreen", false);
+          yasqe.emit('fullscreen-leave')
         })
     );
   yasqe.buttons.append(toggleFullscreen);
