@@ -5345,7 +5345,7 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
       // Incremental LL1 parse
       while (state.stack.length > 0 && token && state.OK && !finished) {
         topSymbol = state.stack.pop();
-
+        if (topSymbol === 'var' && tokenOb.text) state.variables[tokenOb.text] = tokenOb.text;
         if (!ll1_table[topSymbol]) {
           // Top symbol is a terminal
           if (topSymbol == token) {
@@ -5516,7 +5516,8 @@ CodeMirror.defineMode("sparql11", function(config, parserConfig) {
         inLiteral: false,
         stack: [grammar.startSymbol],
         lastPredicateOffset: config.indentUnit,
-        prefixes: {}
+        prefixes: {},
+        variables: {}
       };
     },
     indent: indent,
@@ -8712,7 +8713,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.17",
+  "version": "2.11.18",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -9425,7 +9426,7 @@ module.exports = function(yasqe) {
       var token = yasqe.getTokenAt(yasqe.getCursor());
       if (token.type != "ws") {
         token = yasqe.getCompleteToken(token);
-        if (token && token.string.indexOf("?") == 0) {
+        if (token && (token.string[0] === '?' || token.string[0] === '$')) {
           return true;
         }
       }
@@ -9435,9 +9436,10 @@ module.exports = function(yasqe) {
       if (token.trim().length == 0) return []; //nothing to autocomplete
       var distinctVars = {};
       //do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
+      //and: this'll still work when the query is incorrect (i.e., when simply typing '?')
       $(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
         var variable = this.innerHTML;
-        if (variable.indexOf("?") == 0) {
+        if (variable[0] === '?' || variable[0] === '$') {
           //ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
           var nextEl = $(this).next();
           var nextElClass = nextEl.attr("class");
@@ -9775,6 +9777,9 @@ var extendCmInstance = function(yasqe) {
       if (root.Autocompleters[name]) yasqe.autocompleters.init(name, root.Autocompleters[name]);
     });
   }
+  yasqe.emit = function(event, data) {
+    root.signal(yasqe, event, data)
+  }
   yasqe.lastQueryDuration = null;
   yasqe.getCompleteToken = function(token, cur) {
     return require("./tokenUtils.js").getCompleteToken(yasqe, token, cur);
@@ -9854,6 +9859,61 @@ var extendCmInstance = function(yasqe) {
   yasqe.removePrefixes = function(prefixes) {
     return require("./prefixUtils.js").removePrefixes(yasqe, prefixes);
   };
+  yasqe.getVariablesFromQuery = function() {
+    //Use precise here. We want to be sure we use the most up to date state. If we're
+    //not, we might get outdated info from the current query (creating loops such
+    //as https://github.com/OpenTriply/YASGUI/issues/84)
+    //on caveat: this function won't work when query is invalid (i.e. when typing)
+    return $.map(yasqe.getTokenAt({ line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length }, true).state.variables, function(val,key) {return key});
+  }
+  //values in the form of {?var: 'value'}, or [{?var: 'value'}]
+  yasqe.getQueryWithValues = function(values) {
+    if (!values) return yasqe.getValue();
+    var injectString;
+    if (typeof values === 'string') {
+      injectString = values;
+    } else {
+      //start building inject string
+      if (!Array.isArray(values)) values = [values];
+      var variables = values.reduce(function(vars, valueObj) {
+        for (var v in valueObj) {
+          vars[v] = v;
+        }
+        return vars;
+      }, {})
+      var varArray = [];
+      for (var v in variables) {
+        varArray.push(v);
+      }
+
+      if (!varArray.length) return yasqe.getValue() ;
+      //ok, we've got enough info to start building the string now
+      injectString = "VALUES (" + varArray.join(' ') + ") {\n";
+      values.forEach(function(valueObj) {
+        injectString += "( ";
+        varArray.forEach(function(variable) {
+          injectString += valueObj[variable] || "UNDEF"
+        })
+        injectString += " )\n"
+      })
+      injectString += "}\n"
+    }
+    if (!injectString) return yasqe.getValue();
+
+    var newQuery = ""
+    var injected = false;
+    var gotSelect = false;
+    root.runMode(yasqe.getValue(), "sparql11", function(stringVal, className, row, col, state) {
+      if (className === "keyword" && stringVal.toLowerCase() === 'select') gotSelect = true;
+      newQuery += stringVal;
+      if (gotSelect && !injected && className === "punc" && stringVal === "{") {
+        injected = true;
+        //start injecting
+        newQuery += "\n" + injectString;
+      }
+    });
+    return newQuery
+  }
 
   yasqe.getValueWithoutComments = function() {
     var cleanedQuery = "";
@@ -10250,6 +10310,7 @@ root.drawButtons = function(yasqe) {
         .attr("title", "Set editor full screen")
         .click(function() {
           yasqe.setOption("fullScreen", true);
+          yasqe.emit('fullscreen-enter')
         })
     )
     .append(
@@ -10258,6 +10319,7 @@ root.drawButtons = function(yasqe) {
         .attr("title", "Set editor to normal size")
         .click(function() {
           yasqe.setOption("fullScreen", false);
+          yasqe.emit('fullscreen-leave')
         })
     );
   yasqe.buttons.append(toggleFullscreen);
