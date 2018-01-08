@@ -118,6 +118,7 @@
 			margin-left: 10px;
 			.svgImg {
 				display:block;
+				height: inherit;
 			}
 			.loader {
 			  @include spinner($queryButtonWidth, $queryButtonHeight);
