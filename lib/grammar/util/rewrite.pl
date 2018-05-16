@@ -8,7 +8,7 @@ stephen.cresswell@tso.co.uk
 
 
 ebnf_to_bnf:-
-	retractall(_'=>'_),
+	retractall(_=>_),
 	remember(change),
 	rewrite_until_stable.
 
@@ -45,7 +45,7 @@ rewrite_any.
 	remember(A_qm=>[]),
 	remember(A_qm=>[A]).
 
-A \ B '===>' A_or_B :-
+A \ B ===> A_or_B :-
 	format(atom(A_or_B),"(~w or ~w)",[A,B]),
 	remember(A_or_B=>[A]),
 	remember(A_or_B=>[B]).
