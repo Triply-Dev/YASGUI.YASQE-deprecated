@@ -31,6 +31,23 @@ YASQE.defaults = $.extend(true, {}, YASQE.defaults, {
     console.warn("Could not store in localstorage. Skipping..", e);
   },
   /**
+   * Default locale
+   */
+  language: {
+    invalidLine: "This line is invalid. Expected:",
+    setFullScreen: "Set editor to full screen",
+    setSmallScreen: "Set editor to normal size",
+    shareQuery: "Share your query",
+    shorten: "Shorten",
+    autocomplete: {
+      failedSuggestions: "Failed fetching suggestions..",
+      fetching: "Fetching autocompletions",
+      nothing: "Nothing to autocomplete yet!",
+      trigger: "Press CTRL - <space> to autocomplete",
+      zeroMatches: "0 matches found..."
+    }
+  },
+  /**
 	 * Extra shortcut keys. Check the CodeMirror manual on how to add your own
 	 *
 	 * @property extraKeys

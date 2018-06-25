@@ -52,7 +52,10 @@ var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedStri
 var reqProtocol = window.location.protocol.indexOf("http") === 0 ? "//" : "http://";
 var fetchFromLov = function(yasqe, completer, token, callback) {
   if (!token || !token.string || token.string.trim().length == 0) {
-    yasqe.autocompleters.notifications.getEl(completer).empty().append("Nothing to autocomplete yet!");
+    yasqe.autocompleters.notifications
+      .getEl(completer)
+      .empty()
+      .append(yasqe.options.language.autocomplete.nothing);
     return false;
   }
   var maxResults = 50;
@@ -93,20 +96,25 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
         if (results.length > 0) {
           yasqe.autocompleters.notifications.hide(yasqe, completer);
         } else {
-          yasqe.autocompleters.notifications.getEl(completer).text("0 matches found...");
+          yasqe.autocompleters.notifications
+            .getEl(completer)
+            .text(yasqe.options.language.autocomplete.zeroMatches);
         }
         callback(results);
         // requests done! Don't call this function again
       }
     }).fail(function(jqXHR, textStatus, errorThrown) {
-      yasqe.autocompleters.notifications.getEl(completer).empty().append("Failed fetching suggestions..");
+      yasqe.autocompleters.notifications
+        .getEl(completer)
+        .empty()
+        .append(yasqe.options.language.autocomplete.failedSuggestions);
     });
   };
   //if notification bar is there, show a loader
   yasqe.autocompleters.notifications
     .getEl(completer)
     .empty()
-    .append($("<span>Fetchting autocompletions &nbsp;</span>"))
+    .append($("<span>" + yasqe.options.language.autocomplete.fetching + "&nbsp;</span>"))
     .append($(yutils.svg.getElement(require("../imgs.js").loader)).addClass("notificationLoader"));
   doRequests();
 };

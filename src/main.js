@@ -431,7 +431,7 @@ var checkSyntax = function(yasqe, deepcheck) {
               "<strong style='text-decoration:underline'>" + $("<div/>").text(expected).html() + "</strong>"
             );
           });
-          return "This line is invalid. Expected: " + expectedEncoded.join(", ");
+          return yasqe.options.language.invalidLine + expectedEncoded.join(", ");
         });
       }
       warningEl.style.marginTop = "2px";
@@ -564,7 +564,7 @@ root.drawButtons = function(yasqe) {
         popup.empty().append($("<div>", { class: "inputWrapper" }).append($input));
         if (yasqe.options.createShortLink) {
           popup.addClass("enableShort");
-          $("<button>Shorten</button>")
+          $("<button>" + yasqe.options.language.shorten + "</button>")
             .addClass("yasqe_btn yasqe_btn-sm yasqe_btn-primary")
             .click(function() {
               $(this).parent().find("button").attr("disabled", "disabled");
@@ -593,7 +593,7 @@ root.drawButtons = function(yasqe) {
         $input.focus();
       })
       .addClass("yasqe_share")
-      .attr("title", "Share your query")
+      .attr("title", yasqe.options.language.shareQuery)
       .appendTo(yasqe.buttons);
   }
 
@@ -607,7 +607,7 @@ root.drawButtons = function(yasqe) {
     .append(
       $(yutils.svg.getElement(imgs.fullscreen))
         .addClass("yasqe_fullscreenBtn")
-        .attr("title", "Set editor full screen")
+        .attr("title", yasqe.options.language.setFullScreen)
         .click(function() {
           yasqe.setOption("fullScreen", true);
           yasqe.emit('fullscreen-enter')
@@ -616,7 +616,7 @@ root.drawButtons = function(yasqe) {
     .append(
       $(yutils.svg.getElement(imgs.smallscreen))
         .addClass("yasqe_smallscreenBtn")
-        .attr("title", "Set editor to normal size")
+        .attr("title", yasqe.options.language.setSmallScreen)
         .click(function() {
           yasqe.setOption("fullScreen", false);
           yasqe.emit('fullscreen-leave')
