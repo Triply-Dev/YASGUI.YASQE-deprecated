@@ -445,7 +445,8 @@
       .yasqe .yasqe_buttons .yasqe_queryButton div {
         margin-left: 0px; }
       .yasqe .yasqe_buttons .yasqe_queryButton .svgImg {
-        display: block; }
+        display: block;
+        height: inherit; }
       .yasqe .yasqe_buttons .yasqe_queryButton .loader {
         width: 36px;
         height: 36px;

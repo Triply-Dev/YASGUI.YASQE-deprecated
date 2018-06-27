@@ -166,7 +166,10 @@ module.exports = {
       DOUBLE_NEGATIVE: []
     },
     "*[;,?[or([verbPath,verbSimple]),objectList]]": {
-      ";": ["[;,?[or([verbPath,verbSimple]),objectList]]", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
+      ";": [
+        "[;,?[or([verbPath,verbSimple]),objectList]]",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
       ".": [],
       "]": [],
       "{": [],
@@ -232,18 +235,45 @@ module.exports = {
       "}": []
     },
     "*[graphPatternNotTriples,?.,?triplesBlock]": {
-      "{": ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      OPTIONAL: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      MINUS: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      GRAPH: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      SERVICE: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      FILTER: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      BIND: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      VALUES: ["[graphPatternNotTriples,?.,?triplesBlock]", "*[graphPatternNotTriples,?.,?triplesBlock]"],
+      "{": [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      OPTIONAL: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      MINUS: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      GRAPH: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      SERVICE: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      FILTER: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      BIND: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      VALUES: [
+        "[graphPatternNotTriples,?.,?triplesBlock]",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
       "}": []
     },
     "*[quadsNotTriples,?.,?triplesTemplate]": {
-      GRAPH: ["[quadsNotTriples,?.,?triplesTemplate]", "*[quadsNotTriples,?.,?triplesTemplate]"],
+      GRAPH: [
+        "[quadsNotTriples,?.,?triplesTemplate]",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
       "}": []
     },
     "*[|,pathOneInPropertySet]": {
@@ -517,14 +547,26 @@ module.exports = {
       $: [],
       "}": []
     },
-    "*or([[ (,*dataBlockValue,)],NIL])": {
-      "(": ["or([[ (,*dataBlockValue,)],NIL])", "*or([[ (,*dataBlockValue,)],NIL])"],
-      NIL: ["or([[ (,*dataBlockValue,)],NIL])", "*or([[ (,*dataBlockValue,)],NIL])"],
+    "*or([[(,*dataBlockValue,)],NIL])": {
+      "(": [
+        "or([[(,*dataBlockValue,)],NIL])",
+        "*or([[(,*dataBlockValue,)],NIL])"
+      ],
+      NIL: [
+        "or([[(,*dataBlockValue,)],NIL])",
+        "*or([[(,*dataBlockValue,)],NIL])"
+      ],
       "}": []
     },
     "*or([[*,unaryExpression],[/,unaryExpression]])": {
-      "*": ["or([[*,unaryExpression],[/,unaryExpression]])", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      "/": ["or([[*,unaryExpression],[/,unaryExpression]])", "*or([[*,unaryExpression],[/,unaryExpression]])"],
+      "*": [
+        "or([[*,unaryExpression],[/,unaryExpression]])",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      "/": [
+        "or([[*,unaryExpression],[/,unaryExpression]])",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
       AS: [],
       ")": [],
       ",": [],
@@ -615,10 +657,19 @@ module.exports = {
       CREATE: [],
       WITH: []
     },
-    "*or([var,[ (,expression,AS,var,)]])": {
-      "(": ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"],
-      VAR1: ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"],
-      VAR2: ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"],
+    "*or([var,[(,expression,AS,var,)]])": {
+      "(": [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ],
+      VAR1: [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ],
+      VAR2: [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ],
       WHERE: [],
       "{": [],
       FROM: []
@@ -894,10 +945,19 @@ module.exports = {
       PNAME_LN: ["havingCondition", "*havingCondition"],
       PNAME_NS: ["havingCondition", "*havingCondition"]
     },
-    "+or([var,[ (,expression,AS,var,)]])": {
-      "(": ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"],
-      VAR1: ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"],
-      VAR2: ["or([var,[ (,expression,AS,var,)]])", "*or([var,[ (,expression,AS,var,)]])"]
+    "+or([var,[(,expression,AS,var,)]])": {
+      "(": [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ],
+      VAR1: [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ],
+      VAR2: [
+        "or([var,[(,expression,AS,var,)]])",
+        "*or([var,[(,expression,AS,var,)]])"
+      ]
     },
     "+orderCondition": {
       ASC: ["orderCondition", "*orderCondition"],
@@ -1590,30 +1650,44 @@ module.exports = {
       VALUES: [],
       $: []
     },
-    "[ (,*dataBlockValue,)]": {
-      "(": ["(", "*dataBlockValue", ")"]
-    },
-    "[ (,*var,)]": {
-      "(": ["(", "*var", ")"]
-    },
-    "[ (,expression,)]": {
-      "(": ["(", "expression", ")"]
-    },
-    "[ (,expression,AS,var,)]": {
-      "(": ["(", "expression", "AS", "var", ")"]
-    },
     "[!=,numericExpression]": {
       "!=": ["!=", "numericExpression"]
     },
     "[&&,valueLogical]": {
       "&&": ["&&", "valueLogical"]
     },
+    "[(,*dataBlockValue,)]": {
+      "(": ["(", "*dataBlockValue", ")"]
+    },
+    "[(,*var,)]": {
+      "(": ["(", "*var", ")"]
+    },
+    "[(,expression,)]": {
+      "(": ["(", "expression", ")"]
+    },
+    "[(,expression,AS,var,)]": {
+      "(": ["(", "expression", "AS", "var", ")"]
+    },
     "[*,unaryExpression]": {
       "*": ["*", "unaryExpression"]
     },
     "[*datasetClause,WHERE,{,?triplesTemplate,},solutionModifier]": {
-      WHERE: ["*datasetClause", "WHERE", "{", "?triplesTemplate", "}", "solutionModifier"],
-      FROM: ["*datasetClause", "WHERE", "{", "?triplesTemplate", "}", "solutionModifier"]
+      WHERE: [
+        "*datasetClause",
+        "WHERE",
+        "{",
+        "?triplesTemplate",
+        "}",
+        "solutionModifier"
+      ],
+      FROM: [
+        "*datasetClause",
+        "WHERE",
+        "{",
+        "?triplesTemplate",
+        "}",
+        "solutionModifier"
+      ]
     },
     "[+,multiplicativeExpression]": {
       "+": ["+", "multiplicativeExpression"]
@@ -1700,7 +1774,12 @@ module.exports = {
       "^^": ["^^", "iriRef"]
     },
     "[constructTemplate,*datasetClause,whereClause,solutionModifier]": {
-      "{": ["constructTemplate", "*datasetClause", "whereClause", "solutionModifier"]
+      "{": [
+        "constructTemplate",
+        "*datasetClause",
+        "whereClause",
+        "solutionModifier"
+      ]
     },
     "[deleteClause,?insertClause]": {
       DELETE: ["deleteClause", "?insertClause"]
@@ -2149,7 +2228,14 @@ module.exports = {
       MAX: ["MAX", "(", "?DISTINCT", "expression", ")"],
       AVG: ["AVG", "(", "?DISTINCT", "expression", ")"],
       SAMPLE: ["SAMPLE", "(", "?DISTINCT", "expression", ")"],
-      GROUP_CONCAT: ["GROUP_CONCAT", "(", "?DISTINCT", "expression", "?[;,SEPARATOR,=,string]", ")"]
+      GROUP_CONCAT: [
+        "GROUP_CONCAT",
+        "(",
+        "?DISTINCT",
+        "expression",
+        "?[;,SEPARATOR,=,string]",
+        ")"
+      ]
     },
     allowBnodes: {
       "}": []
@@ -2195,7 +2281,7 @@ module.exports = {
       BOUND: ["BOUND", "(", "var", ")"],
       IRI: ["IRI", "(", "expression", ")"],
       URI: ["URI", "(", "expression", ")"],
-      BNODE: ["BNODE", "or([[ (,expression,)],NIL])"],
+      BNODE: ["BNODE", "or([[(,expression,)],NIL])"],
       RAND: ["RAND", "NIL"],
       ABS: ["ABS", "(", "expression", ")"],
       CEIL: ["CEIL", "(", "expression", ")"],
@@ -2348,7 +2434,10 @@ module.exports = {
       "(": ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       STR: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       LANG: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      LANGMATCHES: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
+      LANGMATCHES: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
       DATATYPE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       BOUND: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       IRI: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
@@ -2363,7 +2452,10 @@ module.exports = {
       STRLEN: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       UCASE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       LCASE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      ENCODE_FOR_URI: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
+      ENCODE_FOR_URI: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
       CONTAINS: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       STRSTARTS: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       STRENDS: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
@@ -2403,26 +2495,59 @@ module.exports = {
       MAX: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       AVG: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       SAMPLE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      GROUP_CONCAT: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
+      GROUP_CONCAT: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
       SUBSTR: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       REPLACE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       REGEX: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       EXISTS: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       NOT: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       IRI_REF: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      STRING_LITERAL1: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      STRING_LITERAL2: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      STRING_LITERAL_LONG1: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      STRING_LITERAL_LONG2: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
+      STRING_LITERAL1: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      STRING_LITERAL2: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      STRING_LITERAL_LONG1: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      STRING_LITERAL_LONG2: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
       INTEGER: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       DECIMAL: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       DOUBLE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      INTEGER_POSITIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      DECIMAL_POSITIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      DOUBLE_POSITIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      INTEGER_NEGATIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      DECIMAL_NEGATIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
-      DOUBLE_NEGATIVE: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
+      INTEGER_POSITIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      DECIMAL_POSITIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      DOUBLE_POSITIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      INTEGER_NEGATIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      DECIMAL_NEGATIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
+      DOUBLE_NEGATIVE: [
+        "conditionalAndExpression",
+        "*[||,conditionalAndExpression]"
+      ],
       PNAME_LN: ["conditionalAndExpression", "*[||,conditionalAndExpression]"],
       PNAME_NS: ["conditionalAndExpression", "*[||,conditionalAndExpression]"]
     },
@@ -2566,7 +2691,13 @@ module.exports = {
     delete1: {
       DATA: ["DATA", "quadDataNoBnodes"],
       WHERE: ["WHERE", "quadPatternNoBnodes"],
-      "{": ["quadPatternNoBnodes", "?insertClause", "*usingClause", "WHERE", "groupGraphPattern"]
+      "{": [
+        "quadPatternNoBnodes",
+        "?insertClause",
+        "*usingClause",
+        "WHERE",
+        "groupGraphPattern"
+      ]
     },
     deleteClause: {
       DELETE: ["DELETE", "quadPattern"]
@@ -2575,7 +2706,13 @@ module.exports = {
       FROM: ["FROM", "or([defaultGraphClause,namedGraphClause])"]
     },
     describeQuery: {
-      DESCRIBE: ["DESCRIBE", "or([+varOrIRIref,*])", "*describeDatasetClause", "?whereClause", "solutionModifier"]
+      DESCRIBE: [
+        "DESCRIBE",
+        "or([+varOrIRIref,*])",
+        "*describeDatasetClause",
+        "?whereClause",
+        "solutionModifier"
+      ]
     },
     disallowBnodes: {
       "}": [],
@@ -2931,23 +3068,56 @@ module.exports = {
       IRI_REF: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       TRUE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       FALSE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      BLANK_NODE_LABEL: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
+      BLANK_NODE_LABEL: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
       ANON: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       PNAME_LN: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       PNAME_NS: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      STRING_LITERAL1: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      STRING_LITERAL2: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      STRING_LITERAL_LONG1: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      STRING_LITERAL_LONG2: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
+      STRING_LITERAL1: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      STRING_LITERAL2: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      STRING_LITERAL_LONG1: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      STRING_LITERAL_LONG2: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
       INTEGER: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       DECIMAL: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
       DOUBLE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      INTEGER_POSITIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      DECIMAL_POSITIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      DOUBLE_POSITIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      INTEGER_NEGATIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      DECIMAL_NEGATIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
-      DOUBLE_NEGATIVE: ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"],
+      INTEGER_POSITIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      DECIMAL_POSITIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      DOUBLE_POSITIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      INTEGER_NEGATIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      DECIMAL_NEGATIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
+      DOUBLE_NEGATIVE: [
+        "?triplesBlock",
+        "*[graphPatternNotTriples,?.,?triplesBlock]"
+      ],
       "}": ["?triplesBlock", "*[graphPatternNotTriples,?.,?triplesBlock]"]
     },
     groupOrUnionGraphPattern: {
@@ -3020,8 +3190,18 @@ module.exports = {
       VALUES: ["VALUES", "dataBlock"]
     },
     inlineDataFull: {
-      NIL: ["or([NIL,[ (,*var,)]])", "{", "*or([[ (,*dataBlockValue,)],NIL])", "}"],
-      "(": ["or([NIL,[ (,*var,)]])", "{", "*or([[ (,*dataBlockValue,)],NIL])", "}"]
+      NIL: [
+        "or([NIL,[(,*var,)]])",
+        "{",
+        "*or([[(,*dataBlockValue,)],NIL])",
+        "}"
+      ],
+      "(": [
+        "or([NIL,[(,*var,)]])",
+        "{",
+        "*or([[(,*dataBlockValue,)],NIL])",
+        "}"
+      ]
     },
     inlineDataOneVar: {
       VAR1: ["var", "{", "*dataBlockValue", "}"],
@@ -3074,91 +3254,340 @@ module.exports = {
       MOVE: ["MOVE", "?SILENT_4", "graphOrDefault", "TO", "graphOrDefault"]
     },
     multiplicativeExpression: {
-      "!": ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      "+": ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      "-": ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      VAR1: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      VAR2: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      "(": ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STR: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      LANG: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      LANGMATCHES: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DATATYPE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      BOUND: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      IRI: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      URI: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      BNODE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      RAND: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ABS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      CEIL: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      FLOOR: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ROUND: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      CONCAT: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRLEN: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      UCASE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      LCASE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ENCODE_FOR_URI: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      CONTAINS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRSTARTS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRENDS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRBEFORE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRAFTER: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      YEAR: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      MONTH: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DAY: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      HOURS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      MINUTES: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SECONDS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      TIMEZONE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
+      "!": [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      "+": [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      "-": [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      VAR1: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      VAR2: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      "(": [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STR: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      LANG: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      LANGMATCHES: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DATATYPE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      BOUND: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      IRI: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      URI: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      BNODE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      RAND: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ABS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      CEIL: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      FLOOR: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ROUND: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      CONCAT: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRLEN: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      UCASE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      LCASE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ENCODE_FOR_URI: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      CONTAINS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRSTARTS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRENDS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRBEFORE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRAFTER: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      YEAR: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      MONTH: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DAY: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      HOURS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      MINUTES: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SECONDS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      TIMEZONE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
       TZ: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      NOW: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      UUID: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRUUID: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      MD5: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SHA1: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SHA256: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SHA384: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SHA512: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      COALESCE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
+      NOW: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      UUID: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRUUID: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      MD5: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SHA1: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SHA256: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SHA384: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SHA512: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      COALESCE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
       IF: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRLANG: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRDT: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SAMETERM: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ISIRI: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ISURI: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ISBLANK: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ISLITERAL: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      ISNUMERIC: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      TRUE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      FALSE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      COUNT: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SUM: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      MIN: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      MAX: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      AVG: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SAMPLE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      GROUP_CONCAT: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      SUBSTR: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      REPLACE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      REGEX: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      EXISTS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      NOT: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      IRI_REF: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRING_LITERAL1: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRING_LITERAL2: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRING_LITERAL_LONG1: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      STRING_LITERAL_LONG2: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      INTEGER: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DECIMAL: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DOUBLE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      INTEGER_POSITIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DECIMAL_POSITIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DOUBLE_POSITIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      INTEGER_NEGATIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DECIMAL_NEGATIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      DOUBLE_NEGATIVE: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      PNAME_LN: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"],
-      PNAME_NS: ["unaryExpression", "*or([[*,unaryExpression],[/,unaryExpression]])"]
+      STRLANG: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRDT: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SAMETERM: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ISIRI: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ISURI: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ISBLANK: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ISLITERAL: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      ISNUMERIC: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      TRUE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      FALSE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      COUNT: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SUM: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      MIN: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      MAX: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      AVG: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SAMPLE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      GROUP_CONCAT: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      SUBSTR: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      REPLACE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      REGEX: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      EXISTS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      NOT: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      IRI_REF: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRING_LITERAL1: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRING_LITERAL2: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRING_LITERAL_LONG1: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      STRING_LITERAL_LONG2: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      INTEGER: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DECIMAL: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DOUBLE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      INTEGER_POSITIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DECIMAL_POSITIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DOUBLE_POSITIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      INTEGER_NEGATIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DECIMAL_NEGATIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      DOUBLE_NEGATIVE: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      PNAME_LN: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ],
+      PNAME_NS: [
+        "unaryExpression",
+        "*or([[*,unaryExpression],[/,unaryExpression]])"
+      ]
     },
     namedGraphClause: {
       NAMED: ["NAMED", "sourceSelector"]
@@ -3481,10 +3910,10 @@ module.exports = {
       PNAME_LN: ["expression"],
       PNAME_NS: ["expression"]
     },
-    "or([+or([var,[ (,expression,AS,var,)]]),*])": {
-      "(": ["+or([var,[ (,expression,AS,var,)]])"],
-      VAR1: ["+or([var,[ (,expression,AS,var,)]])"],
-      VAR2: ["+or([var,[ (,expression,AS,var,)]])"],
+    "or([+or([var,[(,expression,AS,var,)]]),*])": {
+      "(": ["+or([var,[(,expression,AS,var,)]])"],
+      VAR1: ["+or([var,[(,expression,AS,var,)]])"],
+      VAR2: ["+or([var,[(,expression,AS,var,)]])"],
       "*": ["*"]
     },
     "or([+varOrIRIref,*])": {
@@ -3507,16 +3936,16 @@ module.exports = {
       LANGTAG: ["LANGTAG"],
       "^^": ["[^^,iriRef]"]
     },
-    "or([NIL,[ (,*var,)]])": {
+    "or([NIL,[(,*var,)]])": {
       NIL: ["NIL"],
-      "(": ["[ (,*var,)]"]
+      "(": ["[(,*var,)]"]
     },
-    "or([[ (,*dataBlockValue,)],NIL])": {
-      "(": ["[ (,*dataBlockValue,)]"],
+    "or([[(,*dataBlockValue,)],NIL])": {
+      "(": ["[(,*dataBlockValue,)]"],
       NIL: ["NIL"]
     },
-    "or([[ (,expression,)],NIL])": {
-      "(": ["[ (,expression,)]"],
+    "or([[(,expression,)],NIL])": {
+      "(": ["[(,expression,)]"],
       NIL: ["NIL"]
     },
     "or([[*,unaryExpression],[/,unaryExpression]])": {
@@ -3668,10 +4097,10 @@ module.exports = {
       DOUBLE_NEGATIVE: ["groupGraphPatternSub"],
       "}": ["groupGraphPatternSub"]
     },
-    "or([var,[ (,expression,AS,var,)]])": {
+    "or([var,[(,expression,AS,var,)]])": {
       VAR1: ["var"],
       VAR2: ["var"],
-      "(": ["[ (,expression,AS,var,)]"]
+      "(": ["[(,expression,AS,var,)]"]
     },
     "or([verbPath,verbSimple])": {
       "^": ["verbPath"],
@@ -3794,7 +4223,10 @@ module.exports = {
       "*": ["*"],
       "?": ["?"],
       "+": ["+"],
-      "{": ["{", "or([[integer,or([[,,or([},[integer,}]])],}])],[,,integer,}]])"]
+      "{": [
+        "{",
+        "or([[integer,or([[,,or([},[integer,}]])],}])],[,,integer,}]])"
+      ]
     },
     pathNegatedPropertySet: {
       a: ["pathOneInPropertySet"],
@@ -3976,21 +4408,65 @@ module.exports = {
       "}": []
     },
     propertyListPathNotEmpty: {
-      VAR1: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      VAR2: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      "^": ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      a: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      "!": ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      "(": ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      IRI_REF: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      PNAME_LN: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"],
-      PNAME_NS: ["or([verbPath,verbSimple])", "objectListPath", "*[;,?[or([verbPath,verbSimple]),objectList]]"]
+      VAR1: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      VAR2: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      "^": [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      a: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      "!": [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      "(": [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      IRI_REF: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      PNAME_LN: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ],
+      PNAME_NS: [
+        "or([verbPath,verbSimple])",
+        "objectListPath",
+        "*[;,?[or([verbPath,verbSimple]),objectList]]"
+      ]
     },
     quadData: {
       "{": ["{", "disallowVars", "quads", "allowVars", "}"]
     },
     quadDataNoBnodes: {
-      "{": ["{", "disallowBnodes", "disallowVars", "quads", "allowVars", "allowBnodes", "}"]
+      "{": [
+        "{",
+        "disallowBnodes",
+        "disallowVars",
+        "quads",
+        "allowVars",
+        "allowBnodes",
+        "}"
+      ]
     },
     quadPattern: {
       "{": ["{", "quads", "}"]
@@ -4008,33 +4484,78 @@ module.exports = {
       IRI_REF: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       TRUE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       FALSE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      BLANK_NODE_LABEL: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
+      BLANK_NODE_LABEL: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
       ANON: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       PNAME_LN: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       PNAME_NS: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      STRING_LITERAL1: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      STRING_LITERAL2: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      STRING_LITERAL_LONG1: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      STRING_LITERAL_LONG2: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
+      STRING_LITERAL1: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      STRING_LITERAL2: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      STRING_LITERAL_LONG1: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      STRING_LITERAL_LONG2: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
       INTEGER: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       DECIMAL: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
       DOUBLE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      INTEGER_POSITIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      DECIMAL_POSITIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      DOUBLE_POSITIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      INTEGER_NEGATIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      DECIMAL_NEGATIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
-      DOUBLE_NEGATIVE: ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"],
+      INTEGER_POSITIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      DECIMAL_POSITIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      DOUBLE_POSITIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      INTEGER_NEGATIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      DECIMAL_NEGATIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
+      DOUBLE_NEGATIVE: [
+        "?triplesTemplate",
+        "*[quadsNotTriples,?.,?triplesTemplate]"
+      ],
       "}": ["?triplesTemplate", "*[quadsNotTriples,?.,?triplesTemplate]"]
     },
     quadsNotTriples: {
       GRAPH: ["GRAPH", "varOrIRIref", "{", "?triplesTemplate", "}"]
     },
     queryAll: {
-      CONSTRUCT: ["or([selectQuery,constructQuery,describeQuery,askQuery])", "valuesClause"],
-      DESCRIBE: ["or([selectQuery,constructQuery,describeQuery,askQuery])", "valuesClause"],
-      ASK: ["or([selectQuery,constructQuery,describeQuery,askQuery])", "valuesClause"],
-      SELECT: ["or([selectQuery,constructQuery,describeQuery,askQuery])", "valuesClause"]
+      CONSTRUCT: [
+        "or([selectQuery,constructQuery,describeQuery,askQuery])",
+        "valuesClause"
+      ],
+      DESCRIBE: [
+        "or([selectQuery,constructQuery,describeQuery,askQuery])",
+        "valuesClause"
+      ],
+      ASK: [
+        "or([selectQuery,constructQuery,describeQuery,askQuery])",
+        "valuesClause"
+      ],
+      SELECT: [
+        "or([selectQuery,constructQuery,describeQuery,askQuery])",
+        "valuesClause"
+      ]
     },
     rdfLiteral: {
       STRING_LITERAL1: ["string", "?or([LANGTAG,[^^,iriRef]])"],
@@ -4043,7 +4564,15 @@ module.exports = {
       STRING_LITERAL_LONG2: ["string", "?or([LANGTAG,[^^,iriRef]])"]
     },
     regexExpression: {
-      REGEX: ["REGEX", "(", "expression", ",", "expression", "?[,,expression]", ")"]
+      REGEX: [
+        "REGEX",
+        "(",
+        "expression",
+        ",",
+        "expression",
+        "?[,,expression]",
+        ")"
+      ]
     },
     relationalExpression: {
       "!": [
@@ -4388,23 +4917,72 @@ module.exports = {
       ]
     },
     selectClause: {
-      SELECT: ["SELECT", "?or([DISTINCT,REDUCED])", "or([+or([var,[ (,expression,AS,var,)]]),*])"]
+      SELECT: [
+        "SELECT",
+        "?or([DISTINCT,REDUCED])",
+        "or([+or([var,[(,expression,AS,var,)]]),*])"
+      ]
     },
     selectQuery: {
-      SELECT: ["selectClause", "*datasetClause", "whereClause", "solutionModifier"]
+      SELECT: [
+        "selectClause",
+        "*datasetClause",
+        "whereClause",
+        "solutionModifier"
+      ]
     },
     serviceGraphPattern: {
       SERVICE: ["SERVICE", "?SILENT", "varOrIRIref", "groupGraphPattern"]
     },
     solutionModifier: {
-      LIMIT: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      OFFSET: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      ORDER: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      HAVING: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      GROUP: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      VALUES: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      $: ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"],
-      "}": ["?groupClause", "?havingClause", "?orderClause", "?limitOffsetClauses"]
+      LIMIT: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      OFFSET: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      ORDER: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      HAVING: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      GROUP: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      VALUES: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      $: [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ],
+      "}": [
+        "?groupClause",
+        "?havingClause",
+        "?orderClause",
+        "?limitOffsetClauses"
+      ]
     },
     sourceSelector: {
       IRI_REF: ["iriRef"],
@@ -4439,7 +5017,17 @@ module.exports = {
       a: []
     },
     strReplaceExpression: {
-      REPLACE: ["REPLACE", "(", "expression", ",", "expression", ",", "expression", "?[,,expression]", ")"]
+      REPLACE: [
+        "REPLACE",
+        "(",
+        "expression",
+        ",",
+        "expression",
+        ",",
+        "expression",
+        "?[,,expression]",
+        ")"
+      ]
     },
     string: {
       STRING_LITERAL1: ["STRING_LITERAL1"],
@@ -4448,10 +5036,23 @@ module.exports = {
       STRING_LITERAL_LONG2: ["STRING_LITERAL_LONG2"]
     },
     subSelect: {
-      SELECT: ["selectClause", "whereClause", "solutionModifier", "valuesClause"]
+      SELECT: [
+        "selectClause",
+        "whereClause",
+        "solutionModifier",
+        "valuesClause"
+      ]
     },
     substringExpression: {
-      SUBSTR: ["SUBSTR", "(", "expression", ",", "expression", "?[,,expression]", ")"]
+      SUBSTR: [
+        "SUBSTR",
+        "(",
+        "expression",
+        ",",
+        "expression",
+        "?[,,expression]",
+        ")"
+      ]
     },
     triplesBlock: {
       VAR1: ["triplesSameSubjectPath", "?[.,?triplesBlock]"],
@@ -8510,40 +9111,43 @@ function clearAll() {
 
 },{"../src/util":18}],26:[function(require,module,exports){
 module.exports={
-  "_from": "yasgui-utils@^1.6.7",
+  "_args": [
+    [
+      "yasgui-utils@1.6.7",
+      "/home/lrd900/yasgui/yasqe.opentriply"
+    ]
+  ],
+  "_from": "yasgui-utils@1.6.7",
   "_id": "yasgui-utils@1.6.7",
   "_inBundle": false,
   "_integrity": "sha1-K8/FoxVojeOuYFeIPZrjQrIF8mc=",
   "_location": "/yasgui-utils",
   "_phantomChildren": {},
   "_requested": {
-    "type": "range",
+    "type": "version",
     "registry": true,
-    "raw": "yasgui-utils@^1.6.7",
+    "raw": "yasgui-utils@1.6.7",
     "name": "yasgui-utils",
     "escapedName": "yasgui-utils",
-    "rawSpec": "^1.6.7",
+    "rawSpec": "1.6.7",
     "saveSpec": null,
-    "fetchSpec": "^1.6.7"
+    "fetchSpec": "1.6.7"
   },
   "_requiredBy": [
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/yasgui-utils/-/yasgui-utils-1.6.7.tgz",
-  "_shasum": "2bcfc5a315688de3ae6057883d9ae342b205f267",
-  "_spec": "yasgui-utils@^1.6.7",
-  "_where": "/home/lrd900/yasgui/yasqe",
+  "_spec": "1.6.7",
+  "_where": "/home/lrd900/yasgui/yasqe.opentriply",
   "author": {
     "name": "Laurens Rietveld"
   },
   "bugs": {
     "url": "https://github.com/YASGUI/Utils/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "store": "^2.0.4"
   },
-  "deprecated": false,
   "description": "Utils for YASGUI libs",
   "homepage": "https://github.com/YASGUI/Utils",
   "licenses": [
@@ -8713,7 +9317,7 @@ module.exports = {
 module.exports={
   "name": "yasgui-yasqe",
   "description": "Yet Another SPARQL Query Editor",
-  "version": "2.11.18",
+  "version": "2.11.19",
   "main": "src/main.js",
   "license": "MIT",
   "author": "Laurens Rietveld",
@@ -10708,35 +11312,19 @@ var addPrefixes = function(yasqe, prefixes) {
     addPrefixAsString(yasqe, prefixes);
   } else {
     for (var pref in prefixes) {
-      if (!(pref in existingPrefixes)) addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
+      if (!(pref in existingPrefixes))
+        addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
     }
   }
   yasqe.collapsePrefixes(false);
 };
 
 var addPrefixAsString = function(yasqe, prefixString) {
-  var lastPrefix = null;
-  var lastPrefixLine = 0;
-  var numLines = yasqe.lineCount();
-  for (var i = 0; i < numLines; i++) {
-    var firstToken = yasqe.getNextNonWsToken(i);
-    if (firstToken != null && (firstToken.string == "PREFIX" || firstToken.string == "BASE")) {
-      lastPrefix = firstToken;
-      lastPrefixLine = i;
-    }
-  }
+  yasqe.replaceRange("PREFIX " + prefixString + "\n", {
+    line: 0,
+    ch: 0
+  });
 
-  if (lastPrefix == null) {
-    yasqe.replaceRange("PREFIX " + prefixString + "\n", {
-      line: 0,
-      ch: 0
-    });
-  } else {
-    var previousIndent = getIndentFromLine(yasqe, lastPrefixLine);
-    yasqe.replaceRange("\n" + previousIndent + "PREFIX " + prefixString, {
-      line: lastPrefixLine
-    });
-  }
   yasqe.collapsePrefixes(false);
 };
 var removePrefixes = function(yasqe, prefixes) {
@@ -10748,7 +11336,17 @@ var removePrefixes = function(yasqe, prefixes) {
     yasqe.setValue(
       yasqe
         .getValue()
-        .replace(new RegExp("PREFIX\\s*" + pref + ":\\s*" + escapeRegex("<" + prefixes[pref] + ">") + "\\s*", "ig"), "")
+        .replace(
+          new RegExp(
+            "PREFIX\\s*" +
+              pref +
+              ":\\s*" +
+              escapeRegex("<" + prefixes[pref] + ">") +
+              "\\s*",
+            "ig"
+          ),
+          ""
+        )
     );
   }
   yasqe.collapsePrefixes(false);
@@ -10764,7 +11362,10 @@ var getPrefixesFromQuery = function(yasqe) {
   //Use precise here. We want to be sure we use the most up to date state. If we're
   //not, we might get outdated prefixes from the current query (creating loops such
   //as https://github.com/OpenTriply/YASGUI/issues/84)
-  return yasqe.getTokenAt({ line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length }, true).state.prefixes;
+  return yasqe.getTokenAt(
+    { line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length },
+    true
+  ).state.prefixes;
 };
 
 /**
