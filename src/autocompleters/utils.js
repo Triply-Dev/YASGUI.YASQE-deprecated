@@ -69,7 +69,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
   var results = [];
   var url = "";
   var updateUrl = function() {
-    url = reqProtocol + "lov.okfn.org/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
+    url = reqProtocol + "lov.linkeddata.es/dataset/lov/api/v2/autocomplete/terms?" + $.param(args);
   };
   updateUrl();
   var increasePage = function() {

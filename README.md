@@ -49,7 +49,7 @@ publishers.  Here is a partial list:
   * [**HealthData.gov**](http://www.healthdata.gov/sparql)
   * [**Smithsonian American Art Museum**](http://americanart.si.edu/collections/search/lod/about/sparql.cfm)
   * [**German National Library of Economics (ZWB)**](http://zbw.eu/labs/en/blog/publishing-sparql-queries-live)
-  * [**Linked Open Vocabularies**](http://lov.okfn.org/dataset/lov/sparql)
+  * [**Linked Open Vocabularies**](http://lov.linkeddata.es//dataset/lov/sparql)
   * [**LOD Laundromat**](http://lodlaundromat.org/sparql)
   * [**MetaLex**](http://doc.metalex.eu/query)
   * [**CEDAR project**](http://lod.cedar-project.nl/cedar/data.html)
