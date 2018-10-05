@@ -41,6 +41,9 @@ publishers.  Here is a partial list:
     browser
   * [**Trifid**](https://github.com/zazuko/trifid)
     light-weight Linked Data Server and Proxy
+  * [**Comunica widget**](https://github.com/comunica/jQuery-Widget.js)
+    Web-based Linked Data query engine
+    ([demo](http://query.linkeddatafragments.org/)
   
 ### Data Publishers
 
