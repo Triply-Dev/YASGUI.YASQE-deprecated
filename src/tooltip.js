@@ -3,7 +3,7 @@ var $ = require("jquery"), utils = require("./utils.js");
 
 /**
  * Write our own tooltip, to avoid loading another library for just this functionality. For now, we only use tooltip for showing parse errors, so this is quite a tailored solution
- * Requirements: 
+ * Requirements:
  * 		position tooltip within codemirror frame as much as possible, to avoid z-index issues with external things on page
  * 		use html as content
  */

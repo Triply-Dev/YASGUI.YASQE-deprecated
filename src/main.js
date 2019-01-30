@@ -27,13 +27,13 @@ require("codemirror/addon/display/fullscreen.js");
 require("../lib/grammar/tokenizer.js");
 
 /**
- * Main YASQE constructor. Pass a DOM element as argument to append the editor to, and (optionally) pass along config settings (see the YASQE.defaults object below, as well as the regular CodeMirror documentation, for more information on configurability)
+ * Main YASHE constructor. Pass a DOM element as argument to append the editor to, and (optionally) pass along config settings (see the YASHE.defaults object below, as well as the regular CodeMirror documentation, for more information on configurability)
  *
  * @constructor
  * @param {DOM-Element} parent element to append editor to.
  * @param {object} settings
- * @class YASQE
- * @return {doc} YASQE document
+ * @class YASHE
+ * @return {doc} YASHE document
  */
 var root = (module.exports = function(parent, config) {
   var rootEl = $("<div>", {
@@ -461,7 +461,7 @@ var checkSyntax = function(yasqe, deepcheck) {
 /**
  * Static Utils
  */
-// first take all CodeMirror references and store them in the YASQE object
+// first take all CodeMirror references and store them in the YASHE object
 $.extend(root, CodeMirror);
 
 //add registrar for autocompleters
@@ -493,8 +493,8 @@ root.positionButtons = function(yasqe) {
 /**
  * Create a share link
  *
- * @method YASQE.createShareLink
- * @param {doc} YASQE document
+ * @method YASHE.createShareLink
+ * @param {doc} YASHE document
  * @default {query: doc.getValue()}
  * @return object
  */
@@ -510,10 +510,10 @@ root.getAsCurl = function(yasqe, ajaxConfig) {
   return curl.createCurlString(yasqe, ajaxConfig);
 };
 /**
- * Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASQE doc
+ * Consume the share link, by parsing the document URL for possible yasqe arguments, and setting the appropriate values in the YASHE doc
  *
- * @method YASQE.consumeShareLink
- * @param {doc} YASQE document
+ * @method YASHE.consumeShareLink
+ * @param {doc} YASHE document
  */
 root.consumeShareLink = function(yasqe, urlParams) {
   if (urlParams && urlParams.query) {
@@ -650,7 +650,7 @@ var queryButtonIds = {
 /**
  * Update the query button depending on current query status. If no query status is passed via the parameter, it auto-detects the current query status
  *
- * @param {doc} YASQE document
+ * @param {doc} YASHE document
  * @param status {string|null, "busy"|"valid"|"error"}
  */
 root.updateQueryButton = function(yasqe, status) {
@@ -689,12 +689,12 @@ root.updateQueryButton = function(yasqe, status) {
   }
 };
 /**
- * Initialize YASQE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)
+ * Initialize YASHE from an existing text area (see http://codemirror.net/doc/manual.html#fromTextArea for more info)
  *
- * @method YASQE.fromTextArea
+ * @method YASHE.fromTextArea
  * @param textArea {DOM element}
  * @param config {object}
- * @returns {doc} YASQE document
+ * @returns {doc} YASHE document
  */
 root.fromTextArea = function(textAreaEl, config) {
   config = extendConfig(config);
@@ -870,7 +870,7 @@ require("./sparql.js"), require("./defaults.js");
 root.$ = $;
 root.version = {
   CodeMirror: CodeMirror.version,
-  YASQE: require("../package.json").version,
+  YASHE: require("../package.json").version,
   jquery: $.fn.jquery,
   "yasgui-utils": yutils.version
 };

@@ -3,8 +3,8 @@ var quote = function(string) {
   return "'" + string + "'";
 };
 module.exports = {
-  createCurlString: function(yasqe, config) {
-    var ajaxConfig = sparql.getAjaxConfig(yasqe, config);
+  createCurlString: function(yashe, config) {
+    var ajaxConfig = sparql.getAjaxConfig(yashe, config);
     var url = ajaxConfig.url;
     if (ajaxConfig.url.indexOf("http") !== 0) {
       //this is either a relative or absolute url, which is not supported by CURL.
@@ -18,8 +18,8 @@ module.exports = {
         url += window.location.pathname + ajaxConfig.url;
       }
     }
-    var cmds = ["curl", url, "-X", yasqe.options.sparql.requestMethod];
-    if (yasqe.options.sparql.requestMethod == "POST") {
+    var cmds = ["curl", url, "-X", yashe.options.sparql.requestMethod];
+    if (yashe.options.sparql.requestMethod == "POST") {
       cmds.push("--data " + quote($.param(ajaxConfig.data)));
     }
     for (var header in ajaxConfig.headers) {

@@ -2,39 +2,39 @@
 /**
  * Append prefix declaration to list of prefixes in query window.
  *
- * @param yasqe
+ * @param yashe
  * @param prefix
  */
-var addPrefixes = function(yasqe, prefixes) {
-  var existingPrefixes = yasqe.getPrefixesFromQuery();
+var addPrefixes = function(yashe, prefixes) {
+  var existingPrefixes = yashe.getPrefixesFromQuery();
   //for backwards compatability, we stil support prefixes value as string (e.g. 'rdf: <http://fbfgfgf>'
   if (typeof prefixes == "string") {
-    addPrefixAsString(yasqe, prefixes);
+    addPrefixAsString(yashe, prefixes);
   } else {
     for (var pref in prefixes) {
       if (!(pref in existingPrefixes))
-        addPrefixAsString(yasqe, pref + ": <" + prefixes[pref] + ">");
+        addPrefixAsString(yashe, pref + ": <" + prefixes[pref] + ">");
     }
   }
-  yasqe.collapsePrefixes(false);
+  yashe.collapsePrefixes(false);
 };
 
-var addPrefixAsString = function(yasqe, prefixString) {
-  yasqe.replaceRange("PREFIX " + prefixString + "\n", {
+var addPrefixAsString = function(yashe, prefixString) {
+  yashe.replaceRange("PREFIX " + prefixString + "\n", {
     line: 0,
     ch: 0
   });
 
-  yasqe.collapsePrefixes(false);
+  yashe.collapsePrefixes(false);
 };
-var removePrefixes = function(yasqe, prefixes) {
+var removePrefixes = function(yashe, prefixes) {
   var escapeRegex = function(string) {
     //taken from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
     return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
   };
   for (var pref in prefixes) {
-    yasqe.setValue(
-      yasqe
+    yashe.setValue(
+      yashe
         .getValue()
         .replace(
           new RegExp(
@@ -49,7 +49,7 @@ var removePrefixes = function(yasqe, prefixes) {
         )
     );
   }
-  yasqe.collapsePrefixes(false);
+  yashe.collapsePrefixes(false);
 };
 
 /**
@@ -58,12 +58,12 @@ var removePrefixes = function(yasqe, prefixes) {
  * @param cm
  * @returns {Array}
  */
-var getPrefixesFromQuery = function(yasqe) {
+var getPrefixesFromQuery = function(yashe) {
   //Use precise here. We want to be sure we use the most up to date state. If we're
   //not, we might get outdated prefixes from the current query (creating loops such
   //as https://github.com/OpenTriply/YASGUI/issues/84)
-  return yasqe.getTokenAt(
-    { line: yasqe.lastLine(), ch: yasqe.getLine(yasqe.lastLine()).length },
+  return yashe.getTokenAt(
+    { line: yashe.lastLine(), ch: yashe.getLine(yashe.lastLine()).length },
     true
   ).state.prefixes;
 };
@@ -71,21 +71,21 @@ var getPrefixesFromQuery = function(yasqe) {
 /**
  * Get the used indentation for a certain line
  *
- * @param yasqe
+ * @param yashe
  * @param line
  * @param charNumber
  * @returns
  */
-var getIndentFromLine = function(yasqe, line, charNumber) {
+var getIndentFromLine = function(yashe, line, charNumber) {
   if (charNumber == undefined) charNumber = 1;
-  var token = yasqe.getTokenAt({
+  var token = yashe.getTokenAt({
     line: line,
     ch: charNumber
   });
   if (token == null || token == undefined || token.type != "ws") {
     return "";
   } else {
-    return token.string + getIndentFromLine(yasqe, line, token.end + 1);
+    return token.string + getIndentFromLine(yashe, line, token.end + 1);
   }
 };
 

@@ -1,29 +1,29 @@
 "use strict";
 var $ = require("jquery"),
   utils = require("./utils.js"),
-  YASQE = require("./main.js");
+  YASHE = require("./main.js");
 
-YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
+YASHE.getAjaxConfig = function(yashe, callbackOrConfig) {
   var callback = typeof callbackOrConfig == "function" ? callbackOrConfig : null;
   var config = typeof callbackOrConfig == "object" ? callbackOrConfig : {};
 
-  if (yasqe.options.sparql) config = $.extend({}, yasqe.options.sparql, config);
+  if (yashe.options.sparql) config = $.extend({}, yashe.options.sparql, config);
 
   //for backwards compatability, make sure we copy sparql handlers to sparql callbacks
   if (config.handlers) $.extend(true, config.callbacks, config.handlers);
 
   if (!config.endpoint || config.endpoint.length == 0) return; // nothing to query!
-  var queryMode = yasqe.getQueryMode();
+  var queryMode = yashe.getQueryMode();
   /**
 	 * initialize ajax config
 	 */
   var ajaxConfig = {
-    url: typeof config.endpoint == "function" ? config.endpoint(yasqe) : config.endpoint,
+    url: typeof config.endpoint == "function" ? config.endpoint(yashe) : config.endpoint,
     type: queryMode == "update"
       ? "POST"
-      : typeof config.requestMethod == "function" ? config.requestMethod(yasqe) : config.requestMethod,
+      : typeof config.requestMethod == "function" ? config.requestMethod(yashe) : config.requestMethod,
     headers: {
-      Accept: getAcceptHeader(yasqe, config)
+      Accept: getAcceptHeader(yashe, config)
     }
   };
   if (config.xhrFields) ajaxConfig.xhrFields = config.xhrFields;
@@ -43,12 +43,12 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
     //we need to do encoding ourselve, as jquery does not properly encode the url string
     //https://github.com/OpenTriply/YASGUI/issues/75
     var first = true;
-    $.each(yasqe.getUrlArguments(config), function(key, val) {
+    $.each(yashe.getUrlArguments(config), function(key, val) {
       ajaxConfig.url += (first ? "?" : "&") + val.name + "=" + encodeURIComponent(val.value);
       first = false;
     });
   } else {
-    ajaxConfig.data = yasqe.getUrlArguments(config);
+    ajaxConfig.data = yashe.getUrlArguments(config);
   }
   if (!handlerDefined && !callback) return; // ok, we can query, but have no callbacks. just stop now
 
@@ -62,14 +62,14 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
 
   var queryStart = new Date();
   var updateYasqe = function() {
-    yasqe.lastQueryDuration = new Date() - queryStart;
-    YASQE.updateQueryButton(yasqe);
-    yasqe.setBackdrop(false);
+    yashe.lastQueryDuration = new Date() - queryStart;
+    YASHE.updateQueryButton(yashe);
+    yashe.setBackdrop(false);
   };
   //Make sure the query button is updated again on complete
   var completeCallbacks = [
     function() {
-      require("./main.js").signal(yasqe, "queryFinish", arguments);
+      require("./main.js").signal(yashe, "queryFinish", arguments);
     },
     updateYasqe
   ];
@@ -81,19 +81,19 @@ YASQE.getAjaxConfig = function(yasqe, callbackOrConfig) {
   return ajaxConfig;
 };
 
-YASQE.executeQuery = function(yasqe, callbackOrConfig) {
-  YASQE.signal(yasqe, "query", yasqe, callbackOrConfig);
-  YASQE.updateQueryButton(yasqe, "busy");
-  yasqe.setBackdrop(true);
-  yasqe.xhr = $.ajax(YASQE.getAjaxConfig(yasqe, callbackOrConfig));
+YASHE.executeQuery = function(yashe, callbackOrConfig) {
+  YASHE.signal(yashe, "query", yashe, callbackOrConfig);
+  YASHE.updateQueryButton(yashe, "busy");
+  yashe.setBackdrop(true);
+  yashe.xhr = $.ajax(YASHE.getAjaxConfig(yashe, callbackOrConfig));
 };
 
-YASQE.getUrlArguments = function(yasqe, config) {
-  var queryMode = yasqe.getQueryMode();
+YASHE.getUrlArguments = function(yashe, config) {
+  var queryMode = yashe.getQueryMode();
   var data = [
     {
-      name: utils.getString(yasqe, yasqe.options.sparql.queryName),
-      value: config.getQueryForAjax ? config.getQueryForAjax(yasqe) : yasqe.getValue()
+      name: utils.getString(yashe, yashe.options.sparql.queryName),
+      value: config.getQueryForAjax ? config.getQueryForAjax(yashe) : yashe.getValue()
     }
   ];
 
@@ -127,29 +127,29 @@ YASQE.getUrlArguments = function(yasqe, config) {
 
   return data;
 };
-var getAcceptHeader = function(yasqe, config) {
+var getAcceptHeader = function(yashe, config) {
   var acceptHeader = null;
   if (config.acceptHeader && !config.acceptHeaderGraph && !config.acceptHeaderSelect && !config.acceptHeaderUpdate) {
     //this is the old config. For backwards compatability, keep supporting it
     if (typeof config.acceptHeader == "function") {
-      acceptHeader = config.acceptHeader(yasqe);
+      acceptHeader = config.acceptHeader(yashe);
     } else {
       acceptHeader = config.acceptHeader;
     }
   } else {
-    if (yasqe.getQueryMode() == "update") {
+    if (yashe.getQueryMode() == "update") {
       acceptHeader = typeof config.acceptHeader == "function"
-        ? config.acceptHeaderUpdate(yasqe)
+        ? config.acceptHeaderUpdate(yashe)
         : config.acceptHeaderUpdate;
     } else {
-      var qType = yasqe.getQueryType();
+      var qType = yashe.getQueryType();
       if (qType == "DESCRIBE" || qType == "CONSTRUCT") {
         acceptHeader = typeof config.acceptHeaderGraph == "function"
-          ? config.acceptHeaderGraph(yasqe)
+          ? config.acceptHeaderGraph(yashe)
           : config.acceptHeaderGraph;
       } else {
         acceptHeader = typeof config.acceptHeaderSelect == "function"
-          ? config.acceptHeaderSelect(yasqe)
+          ? config.acceptHeaderSelect(yashe)
           : config.acceptHeaderSelect;
       }
     }
@@ -158,5 +158,5 @@ var getAcceptHeader = function(yasqe, config) {
 };
 
 module.exports = {
-  getAjaxConfig: YASQE.getAjaxConfig
+  getAjaxConfig: YASHE.getAjaxConfig
 };
