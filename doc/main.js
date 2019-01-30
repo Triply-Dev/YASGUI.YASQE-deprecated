@@ -5,7 +5,7 @@ require("../node_modules/bootstrap-sass/assets/javascripts/bootstrap/scrollspy.j
 $(document).ready(function() {
   //get the latest hosted version
   if ($("#cdnDownload").length > 0) {
-    var name = "yasqe";
+    var name = "yashe";
     var npmName = "yasgui-" + name;
     //only draw when we've got some place to print this info (might not be on all pages where we include this js file)
     $.get("https://data.jsdelivr.com/v1/package/npm/" + npmName, function(data) {
@@ -39,12 +39,12 @@ $(document).ready(function() {
   if (gistContainer.length > 0) {
     $.get("https://api.github.com/users/LaurensRietveld/gists", function(data) {
       var processLabel = function(origLabel) {
-        var label = origLabel.replace("#YASQE", "YASQE");
+        var label = origLabel.replace("#YASHE", "YASHE");
         label = label.replace("#YASR", "YASR");
         var splitted = label.split(" ");
         if (splitted.length > 0) {
-          if ((splitted[0].indexOf("YASQE") == 0 || splitted[0].indexOf("YASR") == 0) && splitted[0].slice(-1) == ":") {
-            //we want to change "#YASQE: some gist" into "some gist". So, remove the first item
+          if ((splitted[0].indexOf("YASHE") == 0 || splitted[0].indexOf("YASR") == 0) && splitted[0].slice(-1) == ":") {
+            //we want to change "#YASHE: some gist" into "some gist". So, remove the first item
             return splitted.splice(1).join(" ");
           } else {
             return splitted.join(" ");
@@ -54,7 +54,7 @@ $(document).ready(function() {
         }
       };
       data.forEach(function(gist) {
-        if (gist.description.indexOf("#YASQE") >= 0) {
+        if (gist.description.indexOf("#YASHE") >= 0) {
           var gistDiv = $("<div>").addClass("gist").addClass("well").appendTo(gistContainer);
           $("<h4>").text(processLabel(gist.description)).appendTo(gistDiv);
           if (gist.files["README.md"]) {

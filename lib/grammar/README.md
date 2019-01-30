@@ -6,4 +6,4 @@
 
 * Change EBNF of sparql11-grammar.pl file (i.e., do not change the `_tokenizer-table.js` file!)
 * Run `./build.sh`
-* Finally, rebuild YASQE from the YASQE home dir by running `gulp`
+* Finally, rebuild YASHE from the YASHE home dir by running `gulp`
