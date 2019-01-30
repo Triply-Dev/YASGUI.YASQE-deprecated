@@ -1,12 +1,12 @@
 {
-  "name": "yasqe",
+  "name": "yashe",
   "version": "2.11.19",
-  "homepage": "http://yasqe.yasgui.org",
+  "homepage": "http://yashe.yasgui.org",
   "authors": [
     "Laurens Rietveld <laurens.rietveld@gmail.com>"
   ],
   "description": "Yet Another SPARQL Query Editor",
-  "main": "dist/yasqe.bundled.min.js",
+  "main": "dist/yashe.bundled.min.js",
   "moduleType": [
     "globals"
   ],

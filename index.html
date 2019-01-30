@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>YASQE</title>
+    <title>YASHE</title>
   <link rel="icon"  type="image/png" href="doc/imgs/favicon.png">
-  <link href="dist/yasqe.min.css" rel="stylesheet" type="text/css" />
+  <link href="dist/yashe.min.css" rel="stylesheet" type="text/css" />
   <link href="doc/doc.min.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-  
-  <a href="https://github.com/YASGUI/YASQE" target="_blank"><img style="z-index: 1; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+
+  <a href="https://github.com/YASGUI/YASHE" target="_blank"><img style="z-index: 1; position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
    <!-- Fixed navbar -->
     <div class="navbar navbar-inverse" role="navigation">
       <div class="container">
@@ -22,7 +22,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">YASQE</a>
+          <a class="navbar-brand" href="#">YASHE</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -37,7 +37,7 @@
 <div class="jumbotron ">
 		<div class="row">
 	        <div class="col-md-3">
-	        <img class="img-responsive" src="doc/imgs/yasqe.png">
+	        <img class="img-responsive" src="doc/imgs/yashe.png">
 	        </div>
 	        <div class="col-md-9">
 	        	<h1>Yet Another Sparql Query Editor</h1>
@@ -53,11 +53,11 @@
 
       	<div class="row" id="aboutYQuery">
       	<div class="col-md-12">
-      	<h1>About YASQE</h1>
-      	YASQE is part of the regular <a target="_blank" href='http://about.yasgui.org'>YASGUI</a> web application. YASQE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
+      	<h1>About YASHE</h1>
+      	YASHE is part of the regular <a target="_blank" href='http://about.yasgui.org'>YASGUI</a> web application. YASHE provides a simple syntax highlighted text area, bundled with features such as autocompletion, and the option to query SPARQL endpoints.
       	<div id="showcase"></div>
-      	<code>var yasqe = YASQE(document.getElementById("showcase"));</code> <br>
-      	(or, if you would like to instantiate YASQE from an existing text area, use <code>var yasqe = YASQE.fromTextArea(document.getElementById('textAreaItem'));</code>
+      	<code>var yashe = YASHE(document.getElementById("showcase"));</code> <br>
+      	(or, if you would like to instantiate YASHE from an existing text area, use <code>var yashe = YASHE.fromTextArea(document.getElementById('textAreaItem'));</code>
       	</div>
       	</div>
 
@@ -66,7 +66,7 @@
       	<div class="row" id="features">
       	<div class="col-md-12">
       	<h1>Features</h1>
-      	YASQE features:
+      	YASHE features:
       	<ul>
       	<li>Completely client-side</li>
       	<li>SPARQL syntax highlighting and error checking </li>
@@ -78,7 +78,7 @@
       	<li>Handy <a href="doc/#keyboardShortcuts">keyboard shortcuts</a></li>
       	<li>Possible to execute the query directly</li>
       	</ul>
-      	Combining YASQE with the YASR library (which visualizes SPARQL results) is easy: all you need to do is define YASR as a handler to the YASQE query method.
+      	Combining YASHE with the YASR library (which visualizes SPARQL results) is easy: all you need to do is define YASR as a handler to the YASHE query method.
       	See <a href="https://gist.github.com/LaurensRietveld/7d8beca5dbeb6b909b6f" target="_blank">this example gist</a>.
 
       	</div>
@@ -88,7 +88,7 @@
       	<div class="row" id="releases">
       	<div class="col-md-12">
       	<h1>Download the latest release</h1>
-      	<p>We provide a <i>bundled</i> release containing all external dependencies, and we provide a release containing just the YASQE core. If you choose to use the regular release, make sure to include <a href="http://jquery.com" target="_blank">jQuery</a> and <a href="http://codemirror.net" target="_blank">CodeMirror</a> in your page as well.</p>
+      	<p>We provide a <i>bundled</i> release containing all external dependencies, and we provide a release containing just the YASHE core. If you choose to use the regular release, make sure to include <a href="http://jquery.com" target="_blank">jQuery</a> and <a href="http://codemirror.net" target="_blank">CodeMirror</a> in your page as well.</p>
       	</div>
       	</div>
       	<div id="downloads">
@@ -96,24 +96,24 @@
 	      		<div id="cdnDownload" class="row">
 	      			<div class="well col-md-12" style="margin-bottom: 0px">
 			      		<h3>CDN</h3>
-			      		<p>The YASQE files are hosted via <a href="http://www.jsdelivr.com/#!yasqe" target="_blank">JsDelivr</a>. This CDN is the easiest way to include YASQE in your website.</p>
+			      		<p>The YASHE files are hosted via <a href="http://www.jsdelivr.com/#!yashe" target="_blank">JsDelivr</a>. This CDN is the easiest way to include YASHE in your website.</p>
 			      		<strong>CSS</strong>
-			      		<div><code id="yasqeCss"></code></div>
+			      		<div><code id="yasheCss"></code></div>
 			      		<strong>JS</strong> <small>Choose either the bundled or the core version</small>
-			      		<div><code id="yasqeJsBundled"></code></div>
-			      		<div><code id="yasqeJs"></code></div>
+			      		<div><code id="yasheJsBundled"></code></div>
+			      		<div><code id="yasheJs"></code></div>
 		      		</div>
 	      		</div>
 	      		<div class="row">
 		      		<div class="well col-md-6">
 			      		<h3>GitHub</h3>
-			      		<p>Visit the GitHub repository to download the YASQE .css and .js files (find them in the <code>dist</code> directory).</p>
-			      		<a class="btn btn-large btn-info" href="https://github.com/YASGUI/YASQE" target="_blank">Download latest release from GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png"></a>
+			      		<p>Visit the GitHub repository to download the YASHE .css and .js files (find them in the <code>dist</code> directory).</p>
+			      		<a class="btn btn-large btn-info" href="https://github.com/YASGUI/YASHE" target="_blank">Download latest release from GitHub&nbsp;<img style="height: 22px;" src="doc/imgs/blacktocat.png"></a>
 		      		</div>
 		      		<div class="well col-md-6">
 			      		<h3><img style="height: 26px;" src="doc/imgs/npm.png"></h3>
-			      		<p>YASQE is registered as a node package as well, so you'll be able to use the node package manager to keep your version of YASQE up to date.</p>
-			      		<a class="btn btn-large btn-info" href="https://www.npmjs.org/package/yasgui-yasqe" target="_blank">Show NPM Package</a>
+			      		<p>YASHE is registered as a node package as well, so you'll be able to use the node package manager to keep your version of YASHE up to date.</p>
+			      		<a class="btn btn-large btn-info" href="https://www.npmjs.org/package/yasgui-yashe" target="_blank">Show NPM Package</a>
 		      		</div>
 	      		</div>
 	      	</div>
@@ -122,13 +122,13 @@
         <div class="row" id="used">
         <div class="col-md-12">
         <h1>Used by</h1>
-        <p><a href="http://doc.yasgui.org" target="_blank">YASGUI</a> (or one of its components, <a href="http://yasqe.yasgui.org" target="_blank">YASQE</a>/<a href="http://yasr.yasgui.org" target="_blank">YASR</a>) is integrated in common triple-stores such as <a href="https://jena.apache.org/" target="_blank">Apache Jena</a>
+        <p><a href="http://doc.yasgui.org" target="_blank">YASGUI</a> (or one of its components, <a href="http://yashe.yasgui.org" target="_blank">YASHE</a>/<a href="http://yasr.yasgui.org" target="_blank">YASR</a>) is integrated in common triple-stores such as <a href="https://jena.apache.org/" target="_blank">Apache Jena</a>
         , <a href="http://rdf4j.org/" target="_blank">OpenRDF Sesame</a>
         and <a href="http://www.swi-prolog.org/web/ClioPatria/" target="_blank">ClioPatria</a>.
         </p>
         <p>It has seen uptake in Linked Data tools as well, including</p>
         <ul>
-        <li><a href="https://github.com/scampi/gosparqled" target="_blank">Gosparqled</a> <small>(<a href="http://scampi.github.io/gosparqled/" target="_blank">demo</a>)</small>, an extension of YASQE providing context-dependent property and class autocompletions</li>
+        <li><a href="https://github.com/scampi/gosparqled" target="_blank">Gosparqled</a> <small>(<a href="http://scampi.github.io/gosparqled/" target="_blank">demo</a>)</small>, an extension of YASHE providing context-dependent property and class autocompletions</li>
         <li><a href="https://github.com/jiemakel/snapper" target="_blank">Snapper</a> <small>(<a href="http://jiemakel.github.io/snapper/#/" target="_blank">demo</a>)</small>, a browser based Turtle editor</li>
         <li><a href="https://github.com/jiemakel/visu" target="_blank">Visu</a> <small>(<a href="http://demo.seco.tkk.fi/visu/" target="_blank">demo</a>)</small>, the first library to extend YASR with Google Chart functionality</li>
         <li><a href="https://github.com/Data2Semantics/brwsr" target="_blank">Brwsr</a>, a Linked Data browser</li>
@@ -152,11 +152,11 @@
         <div class="row" id="forked">
         <div class="col-md-12">
         <h1>Forked by</h1>
-        <p>Forks of <a href="http://yasqe.yasgui.org" target="_blank">YASQE</a> have been developed:
+        <p>Forks of <a href="http://yashe.yasgui.org" target="_blank">YASHE</a> have been developed:
         </p>
         <ul>
         <li><a href="https://perfectkb.github.io/yate/" target="_blank">YATE</a> for the RDF 1.1 Turtle syntax.</li>
-        <li><a href="https://thesmartenergy.github.io/sparql-generate-yasqe/" target="_blank">YASQE for SPARQL-Generate</a> for the <a href="https://w3id.org/sparql-generate" target="_blank">SPARQL-Generate</a> language, an extension of SPARQL 1.1 for querying not only RDF datasets but also documents in arbitrary formats.</li>
+        <li><a href="https://thesmartenergy.github.io/sparql-generate-yashe/" target="_blank">YASHE for SPARQL-Generate</a> for the <a href="https://w3id.org/sparql-generate" target="_blank">SPARQL-Generate</a> language, an extension of SPARQL 1.1 for querying not only RDF datasets but also documents in arbitrary formats.</li>
         </ul>
         </div>
         </div>
@@ -181,12 +181,12 @@
 
 
 
- <script src="dist/yasqe.bundled.min.js"></script>
+ <script src="dist/yashe.bundled.min.js"></script>
 <script src="doc/doc.min.js"></script>
 <script type="text/javascript">
-	var yasqe = YASQE(document.getElementById("showcase"), {
+	var yashe = YASHE(document.getElementById("showcase"), {
     sparql: {
-      showQueryButton: true, 
+      showQueryButton: true,
       callbacks:{
         success: function(data){
           console.log("success", data);
