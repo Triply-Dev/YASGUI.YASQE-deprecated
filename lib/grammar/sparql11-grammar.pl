@@ -648,32 +648,41 @@ blankNode ==> ['ANON'].
 % tokens defined by regular expressions elsewhere
 tm_regex([
 
-'IRI_REF',
-
-'VAR1',
-'VAR2',
+'CODE',
+'REPEAT_RANGE',
+'RDF_TYPE',
+'IRIREF',
+'PNAME_NS',
+'PNAME_LN',
+'ATPNAME_NS',
+'ATPNAME_LN',
+'REGEXP',
+'BLANK_NODE_LABEL',
 'LANGTAG',
-
-'DOUBLE',
-'DECIMAL',
 'INTEGER',
-'DOUBLE_POSITIVE',
-'DECIMAL_POSITIVE',
-'INTEGER_POSITIVE',
-'INTEGER_NEGATIVE',
-'DECIMAL_NEGATIVE',
-'DOUBLE_NEGATIVE',
-
-'STRING_LITERAL_LONG1',
-'STRING_LITERAL_LONG2',
+'DECIMAL',
+'DOUBLE',
+'EXPONENT',
 'STRING_LITERAL1',
 'STRING_LITERAL2',
+'STRING_LITERAL_LONG1',
+'STRING_LITERAL_LONG2',
+'LANG_STRING_LITERAL1',
+'LANG_STRING_LITERAL2',
+'LANG_STRING_LITERAL_LONG1',
+'LANG_STRING_LITERAL_LONG2',
+'UCHAR',
+'ECHAR',
+'PN_CHARS_BASE',
+'PN_CHARS_U',
+'PN_CHARS',
+'PN_PREFIX',
+'PN_LOCAL',
+'PLX',
+'PERCENT',
+'HEX',
+'PN_LOCAL_ESC'
 
-'NIL',
-'ANON',
-'PNAME_LN',
-'PNAME_NS',
-'BLANK_NODE_LABEL'
 ]).
 
 % Terminals where name of terminal is uppercased token content
@@ -699,7 +708,7 @@ tm_keywords([
 'TOTALDIGITS',
 'FRACTIONDIGITS',
 'CLOSED',
-'EXTRA',
+'EXTRA'
 ]).
 
 % Other tokens representing fixed, case sensitive, strings
