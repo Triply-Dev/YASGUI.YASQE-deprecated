@@ -681,7 +681,10 @@ tm_regex([
 'PLX',
 'PERCENT',
 'HEX',
-'PN_LOCAL_ESC'
+'PN_LOCAL_ESC'.
+'start',
+'true',
+'false'
 
 ]).
 
@@ -719,6 +722,9 @@ tm_keywords([
 % e.g. DOUBLE, DECIMAL, INTEGER
 % e.g. INTEGER_POSITIVE, PLUS
 tm_punct([
+
+'='= '=',
+
 '*'= '\\*',
 'a'= 'a',
 '.'= '\\.',
@@ -732,7 +738,7 @@ tm_punct([
 ']'= '\\]',
 '||'= '\\|\\|',
 '&&'= '&&',
-'='= '=',
+
 '!='= '!=',
 '!'= '!',
 '<='= '<=',
