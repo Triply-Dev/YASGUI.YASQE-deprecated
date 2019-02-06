@@ -50,7 +50,43 @@ shapeExpression ==> [shapeOr].
 inlineShapeExpression ==> [inlineShapeOr].
 
 %[21]
-shapeOrRef ==> [or(shapeDefinition,shapeRef)]
+shapeOrRef ==> [or(shapeDefinition,shapeRef)].
+
+%[22]
+inlineShapeOrRef ==> [or(inlineShapeDefinition,shapeRef)].
+
+%[26]
+nonLiteralKind ==> ['IRI'].
+nonLiteralKind ==> ['BNODE'].
+nonLiteralKind ==> ['NONLITERAL'].
+
+%[27]
+xsFacet ==> [or(stringFacet,numericFacet)].
+
+%[29]
+stringLength ==> ['LENGTH'].
+stringLength ==> ['MINLENGTH'].
+stringLength ==> ['MAXLENGTH'].
+
+%[30]
+numericRange ==> ['MININCLUSIVE'].
+numericRange ==> ['MINEXCLUSIVE'].
+numericRange ==> ['MAXINCLUSIVE'].
+numericRange ==> ['MAXEXCLUSIVE'].
+
+%[31]
+numericLength ==> ['TOTALDIGITS'].
+numericLength ==> ['FRACTIONDIGITS'].
+
+%[36]
+tripleExpression ==> [oneOfTripleExpr].
+
+%[37]
+oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
+
+%[40]
+groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
+
 
 % tokens defined by regular expressions elsewhere
 tm_regex([
