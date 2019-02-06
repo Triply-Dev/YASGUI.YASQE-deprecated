@@ -23,6 +23,7 @@ stephen.cresswell@tso.co.uk
 
 :-dynamic '==>'/2.
 
+shexDoC ==> []
 
 
 
