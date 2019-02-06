@@ -87,6 +87,50 @@ oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
 %[40]
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
 
+%[13t]
+literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
+
+%[61]
+predicate ==> [or(iri,'RDF_TYPE')].
+
+%[62]
+datatype ==> [iri].
+
+%[63]
+shapeExprLabel ==> [or(iri,blankNode)].
+
+%[64]
+tripleExprLabel ==> [or(iri,blankNode)].
+
+%[16t]
+numericLiteral ==>['INTEGER'].
+numericLiteral ==>['DECIMAL'].
+numericLiteral ==>['DOUBLE'].
+
+%[134s]
+booleanLiteral ==> [or('true', 'false')].
+
+%[135s]
+string ==> ['STRING_LITERAL1'].
+string ==> ['STRING_LITERAL_LONG1'].
+string ==> ['STRING_LITERAL2'].
+string ==> ['STRING_LITERAL_LONG2'].
+
+%[66]
+langString ==> ['LANG_STRING_LITERAL1'].
+langString ==> ['LANG_STRING_LITERAL_LONG1'].
+langString ==> ['LANG_STRING_LITERAL2'].
+langString ==> ['LANG_STRING_LITERAL_LONG2'].
+
+%[136s]
+iri ==> [or('IRIREF',prefixedName)].
+
+%[137s]
+prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
+
+%[138s]
+blankNode ==> ['BLANK_NODE_LABEL'].
+
 
 % tokens defined by regular expressions elsewhere
 tm_regex([
