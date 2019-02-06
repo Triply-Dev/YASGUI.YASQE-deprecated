@@ -23,6 +23,7 @@ stephen.cresswell@tso.co.uk
 
 :-dynamic '==>'/2.
 
+%[1]
 shexDoC ==> []
 
 %[2]
@@ -40,14 +41,62 @@ importDecl ==> ['IMPORT','IRIREF'].
 %[5]
 notStartAction ==> [or(start,shapeExprDecl)].
 
+%[6]
+start ==> ['start','=',inlineShapeExpression].
+
+%[7]
+startActions ==> [+(codeDecl)].
+
 %[8]
 statement ==> [or(directive,notStartAction)].
+
+%[9]
+shapeExprDecl ==> [shapeExpressionLabel,or(shapeExpression,'EXTERNAL')].
 
 %[10]
 shapeExpression ==> [shapeOr].
 
 %[11]
 inlineShapeExpression ==> [inlineShapeOr].
+
+%[12]
+shapeOr ==> [shapeAnd,*('OR',shapeAnd)].
+
+%[13]
+inlineShapeOr ==> [inlineShapeAnd,*('OR',inlineShapeAnd)].
+
+%[14]
+shapeAnd ==> [shapeNot,*('AND',shapeNot)].
+
+%[15]
+inlineShapeAnd ==> [inlineShapeNot,*('AND',inlineShapeNot)].
+
+%[16]
+shapeNot ==> [?('NOT'),shapeAtom].
+
+%[17]
+inlineShapeNot ==> [?('NOT'),inlineShapeAtom].
+
+%[18]
+shapeAtom ==> [nonliteralConstraint,?(shapeOrRef)].
+shapeAtom ==> [litNodeConstraint].
+shapeAtom ==> [shapeOrRef,?(nonliteralConstraint)].
+shapeAtom ==> ['(',shapeExpression,')'].
+shapeAtom ==> ['.'].
+
+%[19]
+shapeAtomNoRef ==> [nonLiteNodeConstraint,?(shareOrRef)].
+shapeAtomNoRef ==> [liteNodeConstraint].
+shapeAtomNoRef ==> [shareOrRef,?(nonLiteNodeConstraint)].
+shapeAtomNoRef ==> ['(',shapeExpression,')'].
+shapeAtomNoRef ==> ['.'].
+
+%[20]
+inlineShapeAtom ==> [nonLiteNodeConstraint,?(inlineShareOrRef)].
+inlineShapeAtom ==> [liteNodeConstraint].
+inlineShapeAtom ==> [inlineShareOrRef,?(nonLiteNodeConstraint)].
+inlineShapeAtom ==> ['(',shapeExpression,')'].
+inlineShapeAtom ==> ['.'].
 
 %[21]
 shapeOrRef ==> [or(shapeDefinition,shapeRef)].
