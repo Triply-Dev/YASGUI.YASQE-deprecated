@@ -25,6 +25,111 @@ stephen.cresswell@tso.co.uk
 
 shexDoC ==> []
 
+%[2]
+directive ==> [or(baseDecl,prefixDecl,importDecl)].
+
+%[3]
+baseDecl ==> ['BASE','IRI_REF'].
+
+%[4]
+prefixDecl ==> ['PREFIX','PNAME_NS','IRIREF'].
+
+%[4.5]
+importDecl ==> ['IMPORT','IRIREF'].
+
+%[5]
+notStartAction ==> [or(start,shapeExprDecl)].
+
+%[8]
+statement ==> [or(directive,notStartAction)].
+
+%[10]
+shapeExpression ==> [shapeOr].
+
+%[11]
+inlineShapeExpression ==> [inlineShapeOr].
+
+%[21]
+shapeOrRef ==> [or(shapeDefinition,shapeRef)].
+
+%[22]
+inlineShapeOrRef ==> [or(inlineShapeDefinition,shapeRef)].
+
+%[26]
+nonLiteralKind ==> ['IRI'].
+nonLiteralKind ==> ['BNODE'].
+nonLiteralKind ==> ['NONLITERAL'].
+
+%[27]
+xsFacet ==> [or(stringFacet,numericFacet)].
+
+%[29]
+stringLength ==> ['LENGTH'].
+stringLength ==> ['MINLENGTH'].
+stringLength ==> ['MAXLENGTH'].
+
+%[30]
+numericRange ==> ['MININCLUSIVE'].
+numericRange ==> ['MINEXCLUSIVE'].
+numericRange ==> ['MAXINCLUSIVE'].
+numericRange ==> ['MAXEXCLUSIVE'].
+
+%[31]
+numericLength ==> ['TOTALDIGITS'].
+numericLength ==> ['FRACTIONDIGITS'].
+
+%[36]
+tripleExpression ==> [oneOfTripleExpr].
+
+%[37]
+oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
+
+%[40]
+groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
+
+%[13t]
+literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
+
+%[61]
+predicate ==> [or(iri,'RDF_TYPE')].
+
+%[62]
+datatype ==> [iri].
+
+%[63]
+shapeExprLabel ==> [or(iri,blankNode)].
+
+%[64]
+tripleExprLabel ==> [or(iri,blankNode)].
+
+%[16t]
+numericLiteral ==>['INTEGER'].
+numericLiteral ==>['DECIMAL'].
+numericLiteral ==>['DOUBLE'].
+
+%[134s]
+booleanLiteral ==> [or('true', 'false')].
+
+%[135s]
+string ==> ['STRING_LITERAL1'].
+string ==> ['STRING_LITERAL_LONG1'].
+string ==> ['STRING_LITERAL2'].
+string ==> ['STRING_LITERAL_LONG2'].
+
+%[66]
+langString ==> ['LANG_STRING_LITERAL1'].
+langString ==> ['LANG_STRING_LITERAL_LONG1'].
+langString ==> ['LANG_STRING_LITERAL2'].
+langString ==> ['LANG_STRING_LITERAL_LONG2'].
+
+%[136s]
+iri ==> [or('IRIREF',prefixedName)].
+
+%[137s]
+prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
+
+%[138s]
+blankNode ==> ['BLANK_NODE_LABEL'].
 
 
 % tokens defined by regular expressions elsewhere
