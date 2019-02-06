@@ -25,7 +25,32 @@ stephen.cresswell@tso.co.uk
 
 shexDoC ==> []
 
+%[2]
+directive ==> [or(baseDecl,prefixDecl,importDecl)].
 
+%[3]
+baseDecl ==> ['BASE','IRI_REF'].
+
+%[4]
+prefixDecl ==> ['PREFIX','PNAME_NS','IRIREF'].
+
+%[4.5]
+importDecl ==> ['IMPORT','IRIREF'].
+
+%[5]
+notStartAction ==> [or(start,shapeExprDecl)].
+
+%[8]
+statement ==> [or(directive,notStartAction)].
+
+%[10]
+shapeExpression ==> [shapeOr].
+
+%[11]
+inlineShapeExpression ==> [inlineShapeOr].
+
+%[21]
+shapeOrRef ==> [or(shapeDefinition,shapeRef)]
 
 % tokens defined by regular expressions elsewhere
 tm_regex([
