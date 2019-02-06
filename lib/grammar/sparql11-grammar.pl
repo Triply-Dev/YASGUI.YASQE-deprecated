@@ -104,6 +104,21 @@ shapeOrRef ==> [or(shapeDefinition,shapeRef)].
 %[22]
 inlineShapeOrRef ==> [or(inlineShapeDefinition,shapeRef)].
 
+%[23]
+shapeRef ==> ['ATPNAME_LN'].
+shapeRef ==> ['ATPNAME_NS'].
+shapeRef ==> ['@',shapeExprLabel].
+
+%[24]
+litNodeConstraint ==> ['LITERAL',*(xsFacet)].
+litNodeConstraint ==> [datatype,*(xsFacet)].
+litNodeConstraint ==> [valueSet,*(xsFacet)].
+litNodeConstraint ==> [+(numericFacet)].
+
+%[25]
+nonLitNodeConstraint ==> [nonLiteralKind,*(stringFacet)].
+nonLitNodeConstraint ==> [+(stringFacet)].
+
 %[26]
 nonLiteralKind ==> ['IRI'].
 nonLiteralKind ==> ['BNODE'].
@@ -112,26 +127,54 @@ nonLiteralKind ==> ['NONLITERAL'].
 %[27]
 xsFacet ==> [or(stringFacet,numericFacet)].
 
+%[28]
+stringFacet ==> [stringLength,'INTEGER'].
+stringFacet ==> ['REGEXP'].
+
 %[29]
 stringLength ==> ['LENGTH'].
 stringLength ==> ['MINLENGTH'].
 stringLength ==> ['MAXLENGTH'].
 
 %[30]
+numericFacet ==> [numericRange,numericLiteral].
+numericFacet ==> [numericLength,'INTEGER'].
+
+%[31]
 numericRange ==> ['MININCLUSIVE'].
 numericRange ==> ['MINEXCLUSIVE'].
 numericRange ==> ['MAXINCLUSIVE'].
 numericRange ==> ['MAXEXCLUSIVE'].
 
-%[31]
+%[32]
 numericLength ==> ['TOTALDIGITS'].
 numericLength ==> ['FRACTIONDIGITS'].
+
+%[33]
+shapeDefinition ==>
+      [*(or(extraPropertySet,'CLOSED')),
+      '{',?(tripleExpression),'}'
+      ,*(anotation),semanticActions]
+
+%[34]
+inlineShapeDefinition ==>
+      [*(or(extraPropertySet,'CLOSED')),
+      '{',?(tripleExpression),'}']
+
+%[35]
+extraPropertySet ==> ['EXTRA',+(predicate)]
 
 %[36]
 tripleExpression ==> [oneOfTripleExpr].
 
 %[37]
 oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
+
+%[38]
+
+
+%[39]
+
 
 %[40]
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
