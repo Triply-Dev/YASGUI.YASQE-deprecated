@@ -31,6 +31,7 @@
   		right: 0px;
   		bottom: 0px;
   		font-size: 90%;
+		z-index: 1200;
   	}
 
 
@@ -62,9 +63,11 @@
     	    white-space: pre-wrap;
     	    /* css-3 */
     	    white-space: normal;
+	    z-index: 1200;
     	}
     	.notificationLoader {
     		width: 18px;
     		height: 18px;
     		vertical-align: middle;
+		z-index: 1200;
     	}
