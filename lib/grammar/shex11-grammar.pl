@@ -26,7 +26,7 @@ stephen.cresswell@tso.co.uk
 :-dynamic '==>'/2.
 
 %[1]
-shexDoC ==> []
+shexDoC ==> [*(directive),?(or(notStartAction,startActions),*(statement)), $ ].
 
 %[2]
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
@@ -270,6 +270,10 @@ tripleExprLabel ==> [or(iri,blankNode)].
 numericLiteral ==>['INTEGER'].
 numericLiteral ==>['DECIMAL'].
 numericLiteral ==>['DOUBLE'].
+
+%[65]
+rdfLiteral ==> [or(langString,[string,?('^^',datatype)]].
+
 
 %[134s]
 booleanLiteral ==> [or('true', 'false')].
