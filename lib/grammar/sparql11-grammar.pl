@@ -218,24 +218,38 @@ valueSetValue ==> [languajeRange].
 valueSetValue ==> [+(exclusion)].
 
 %[50]
+exclusion ==> ['-',or(iri,literal,'LANGTAG'),?('~')].
+
 %[51]
+iriRange ==> [iri,?('~',*(exclusion))].
+
 %[52]
+iriExclusion ==> ['-',iri,?('~')].
+
 %[53]
+literalRange ==> [literal,?('~',*(literalExclusion))].
+
 %[54]
+literalExclusion ==> ['-',literal,?('~')].
+
 %[55]
+languageRange ==> ['LANGTAG',?('~',*(languageExclusion))].
+languageRange ==> ['@','~',*(languageExclusion)].
+
 %[56]
+languageExclusion ==> ['-','LANGTAG',?(~)].
+
 %[57]
+include ==> ['&',tripleExprLabel].
+
 %[58]
+anotation ==>['//',predicate,or(iri,literal)].
+
 %[59]
+semanticActions ==> [*(codeDecl)].
 
-
-
-
-
-
-
-
-
+%[60]
+codeDecl ==> ['%',iri,or('CODE','%')].
 
 %[13t]
 literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
