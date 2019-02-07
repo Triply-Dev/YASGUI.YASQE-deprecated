@@ -153,18 +153,13 @@ numericLength ==> ['TOTALDIGITS'].
 numericLength ==> ['FRACTIONDIGITS'].
 
 %[33]
-shapeDefinition ==>
-      [*(or(extraPropertySet,'CLOSED')),
-      '{',?(tripleExpression),'}'
-      ,*(anotation),semanticActions]
+shapeDefinition ==>[*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}',*(anotation),semanticActions].
 
 %[34]
-inlineShapeDefinition ==>
-      [*(or(extraPropertySet,'CLOSED')),
-      '{',?(tripleExpression),'}']
+inlineShapeDefinition ==> [*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}'].
 
 %[35]
-extraPropertySet ==> ['EXTRA',+(predicate)]
+extraPropertySet ==> ['EXTRA',+(predicate)].
 
 %[36]
 tripleExpression ==> [oneOfTripleExpr].
@@ -173,7 +168,7 @@ tripleExpression ==> [oneOfTripleExpr].
 oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
 
 %[38]
-multiElementOneOf ==> [groupTripleExpr,+('|',groupTripleExpr).
+multiElementOneOf ==> [groupTripleExpr,+('|',groupTripleExpr)].
 
 %[40]
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
@@ -272,7 +267,7 @@ numericLiteral ==>['DECIMAL'].
 numericLiteral ==>['DOUBLE'].
 
 %[65]
-rdfLiteral ==> [or(langString,[string,?('^^',datatype)]].
+rdfLiteral ==> [or(langString,[string,?('^^',datatype)])].
 
 
 %[134s]
@@ -336,7 +331,7 @@ tm_regex([
 'PLX',
 'PERCENT',
 'HEX',
-'PN_LOCAL_ESC'.
+'PN_LOCAL_ESC',
 'start',
 'true',
 'false'
@@ -391,7 +386,7 @@ tm_punct([
 '*'= '\\*',
 '+'= '\\+',
 '?' = '\\?',
-'^'= '\\^'
+'^'= '\\^',
 '['= '\\[',
 ']'= '\\]',
 '-'= '-',

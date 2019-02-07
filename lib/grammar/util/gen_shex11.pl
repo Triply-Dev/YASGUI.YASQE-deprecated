@@ -1,11 +1,11 @@
 
-top_symbol(sparql11).
+top_symbol(shexDoC).
 output_file('_tokenizer-table.js').
 
 js_vars([
-  startSymbol='"sparql11"',
+  startSymbol='"shexDoC"',
   acceptEmpty=true
 ]).
 
 :-reconsult(gen_ll1).
-:-reconsult('../sparql11-grammar.pl').
+:-reconsult('../shex11-grammar.pl').
