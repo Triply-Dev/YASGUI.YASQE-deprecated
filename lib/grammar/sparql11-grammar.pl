@@ -13,6 +13,8 @@ inside unless you want sequence as a single disjunct.
 *, +, ? - generally used as 1-ary terms
 
 stephen.cresswell@tso.co.uk
+
+
 */
 
 % We need to be careful with end-of-input marker $
@@ -171,13 +173,69 @@ tripleExpression ==> [oneOfTripleExpr].
 oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
 
 %[38]
-
-
-%[39]
-
+multiElementOneOf ==> [groupTripleExpr,+('|',groupTripleExpr).
 
 %[40]
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
+
+%[41]
+singleElementGroup ==> [unaryTripleExpr,?(';')].
+
+%[42]
+multiElementGroup ==> [unaryTripleExpr,+(';',unaryTripleExpr),?(';')].
+
+%[43]
+unaryTripleExpr ==> [?('$',tripleExprLabel),or(tripleConstraint,bracketedTripleExpr)].
+unaryTripleExpr ==> [include].
+
+%[44]
+bracketedTripleExpr ==> ['(',tripleExpression,')',
+                        ?(cardinality),*(anotation),
+                        semanticActions].
+
+%[45]
+tripleConstraint ==> [?(senseFlags),predicate,
+                    inlineShapeExpression,
+                    ?(cardinality),*(anotation),
+                    semanticActions].
+
+%[46]
+cardinality ==> ['*'].
+cardinality ==> ['+'].
+cardinality ==> ['?'].
+cardinality ==> ['REPEAT_RANGE'].
+
+%[47]
+senseFlags ==> ['^'].
+
+%[48]
+valueSet ==> ['[',*(valueSetValue),']'].
+
+%[49]
+valueSetValue ==> [iriRange].
+valueSetValue ==> [literalRange].
+valueSetValue ==> [languajeRange].
+valueSetValue ==> [+(exclusion)].
+
+%[50]
+%[51]
+%[52]
+%[53]
+%[54]
+%[55]
+%[56]
+%[57]
+%[58]
+%[59]
+
+
+
+
+
+
+
+
+
 
 %[13t]
 literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
