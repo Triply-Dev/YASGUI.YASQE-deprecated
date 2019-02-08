@@ -26,7 +26,7 @@ stephen.cresswell@tso.co.uk
 :-dynamic '==>'/2.
 
 %[1]
-shexDoC ==> [*(directive),?(or(notStartAction,startActions),*(statement)), $ ].
+shexDoC ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
 
 %[2]
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
@@ -62,16 +62,16 @@ shapeExpression ==> [shapeOr].
 inlineShapeExpression ==> [inlineShapeOr].
 
 %[12]
-shapeOr ==> [shapeAnd,*('OR',shapeAnd)].
+shapeOr ==> [shapeAnd,*(['OR',shapeAnd])].
 
 %[13]
-inlineShapeOr ==> [inlineShapeAnd,*('OR',inlineShapeAnd)].
+inlineShapeOr ==> [inlineShapeAnd,*(['OR',inlineShapeAnd])].
 
 %[14]
-shapeAnd ==> [shapeNot,*('AND',shapeNot)].
+shapeAnd ==> [shapeNot,*(['AND',shapeNot])].
 
 %[15]
-inlineShapeAnd ==> [inlineShapeNot,*('AND',inlineShapeNot)].
+inlineShapeAnd ==> [inlineShapeNot,*(['AND',inlineShapeNot])].
 
 %[16]
 shapeNot ==> [?('NOT'),shapeAtom].
@@ -168,7 +168,7 @@ tripleExpression ==> [oneOfTripleExpr].
 oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
 
 %[38]
-multiElementOneOf ==> [groupTripleExpr,+('|',groupTripleExpr)].
+multiElementOneOf ==> [groupTripleExpr,+(['|',groupTripleExpr])].
 
 %[40]
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
@@ -177,10 +177,10 @@ groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
 singleElementGroup ==> [unaryTripleExpr,?(';')].
 
 %[42]
-multiElementGroup ==> [unaryTripleExpr,+(';',unaryTripleExpr),?(';')].
+multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr]),?(';')].
 
 %[43]
-unaryTripleExpr ==> [?('$',tripleExprLabel),or(tripleConstraint,bracketedTripleExpr)].
+unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripleExpr)].
 unaryTripleExpr ==> [include].
 
 %[44]
@@ -216,19 +216,19 @@ valueSetValue ==> [+(exclusion)].
 exclusion ==> ['-',or(iri,literal,'LANGTAG'),?('~')].
 
 %[51]
-iriRange ==> [iri,?('~',*(exclusion))].
+iriRange ==> [iri,?(['~',*(exclusion)])].
 
 %[52]
 iriExclusion ==> ['-',iri,?('~')].
 
 %[53]
-literalRange ==> [literal,?('~',*(literalExclusion))].
+literalRange ==> [literal,?(['~',*(literalExclusion]))].
 
 %[54]
 literalExclusion ==> ['-',literal,?('~')].
 
 %[55]
-languageRange ==> ['LANGTAG',?('~',*(languageExclusion))].
+languageRange ==> ['LANGTAG',?(['~',*(languageExclusion)])].
 languageRange ==> ['@','~',*(languageExclusion)].
 
 %[56]
@@ -267,7 +267,7 @@ numericLiteral ==>['DECIMAL'].
 numericLiteral ==>['DOUBLE'].
 
 %[65]
-rdfLiteral ==> [or(langString,[string,?('^^',datatype)])].
+rdfLiteral ==> [or(langString,[string,?(['^^',datatype])])].
 
 
 %[134s]
@@ -293,7 +293,6 @@ prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
 
 %[138s]
 blankNode ==> ['BLANK_NODE_LABEL'].
-
 
 % tokens defined by regular expressions elsewhere
 tm_regex([
