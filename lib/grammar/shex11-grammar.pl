@@ -28,6 +28,7 @@ stephen.cresswell@tso.co.uk
 %[1] OK
 shexDoC ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
 
+
 %[2] OK
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
 
@@ -165,20 +166,135 @@ extraPropertySet ==> ['EXTRA',+(predicate)].
 tripleExpression ==> [oneOfTripleExpr].
 
 %[37] OK
-oneOfTripleExpr ==> [groupTripleExpr].
-oneOfTripleExpr ==> [multiElementOneOf].
-
+oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
 
 %[38] OK
-multiElementOneOf ==> [groupTripleExpr,multiElementOneOfSeparator)].
-
-%[39]
-multiElementOneOfSeparator ==> [+(['|',groupTripleExpr]].
+multiElementOneOf ==> [groupTripleExpr,+(['|',groupTripleExpr])].
 
 %[40] OK
 groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
 
+%[41] OK
+singleElementGroup ==> [unaryTripleExpr,?(';')].
 
+%[42] OK
+multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr]),?(';')].
+
+%[43] OK
+unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripleExpr)].
+unaryTripleExpr ==> [include].
+
+
+%[44] OK
+bracketedTripleExpr ==> ['(',tripleExpression,')',
+                        ?(cardinality),*(anotation),
+                        semanticActions].
+
+%[45]  OK
+tripleConstraint ==> [?(senseFlags),predicate,
+                    inlineShapeExpression,
+                    ?(cardinality),*(anotation),
+                    semanticActions].
+
+%[46] OK
+cardinality ==> ['*'].
+cardinality ==> ['+'].
+cardinality ==> ['?'].
+cardinality ==> ['REPEAT_RANGE'].
+
+%[47] OK
+senseFlags ==> ['^'].
+
+%[48] OK
+valueSet ==> ['[',*(valueSetValue),']'].
+
+%[49] OK
+valueSetValue ==> [iriRange].
+valueSetValue ==> [literalRange].
+valueSetValue ==> [languageRange].
+valueSetValue ==> [+(exclusion)].
+
+%[50] OK
+exclusion ==> ['-',or(iri,literal,'LANGTAG'),?('~')].
+
+%[51] OK
+iriRange ==> [iri,?(['~',*(exclusion)])].
+
+%[52] OK
+iriExclusion ==> ['-',iri,?('~')].
+
+%[53] OK
+literalRange ==> [literal,?(['~',*(literalExclusion)])].
+
+%[54] OK
+literalExclusion ==> ['-',literal,?('~')].
+
+%[55] OK
+languageRange ==> ['LANGTAG',?(['~',*(languageExclusion)])].
+languageRange ==> ['@','~',*(languageExclusion)].
+
+%[56] OK
+languageExclusion ==> ['-','LANGTAG',?('~')].
+
+%[57] OK
+include ==> ['&',tripleExprLabel].
+
+%[58] OK
+anotation ==>['//',predicate,or(iri,literal)].
+
+%[59] OK
+semanticActions ==> [*(codeDecl)].
+
+%[60] OK
+codeDecl ==> ['%',iri,or('CODE','%')].
+
+%[13t] OK
+literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
+
+%[61] OK
+predicate ==> [or(iri,'RDF_TYPE')].
+
+%[62] OK
+datatype ==> [iri].
+
+%[63] OK
+shapeExprLabel ==> [or(iri,blankNode)].
+
+%[64] OK
+tripleExprLabel ==> [or(iri,blankNode)].
+
+%[16t] OK
+numericLiteral ==>['INTEGER'].
+numericLiteral ==>['DECIMAL'].
+numericLiteral ==>['DOUBLE'].
+
+%[65] OK
+rdfLiteral ==> [or(langString,[string,?(['^^',datatype])])].
+
+
+%[134s] OK
+booleanLiteral ==> [or('true', 'false')].
+
+%[135s] OK
+string ==> ['STRING_LITERAL1'].
+string ==> ['STRING_LITERAL_LONG1'].
+string ==> ['STRING_LITERAL2'].
+string ==> ['STRING_LITERAL_LONG2'].
+
+%[66] OK
+langString ==> ['LANG_STRING_LITERAL1'].
+langString ==> ['LANG_STRING_LITERAL_LONG1'].
+langString ==> ['LANG_STRING_LITERAL2'].
+langString ==> ['LANG_STRING_LITERAL_LONG2'].
+
+%[136s] OK
+iri ==> [or('IRIREF',prefixedName)].
+
+%[137s] OK
+prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
+
+%[138s]  OK
+blankNode ==> ['BLANK_NODE_LABEL'].
 % tokens defined by regular expressions elsewhere
 tm_regex([
 
