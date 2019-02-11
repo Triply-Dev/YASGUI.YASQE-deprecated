@@ -25,8 +25,9 @@ stephen.cresswell@tso.co.uk
 
 :-dynamic '==>'/2.
 
-%[1]
+%[1] OK
 shexDoC ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
+
 
 %[2] OK
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
@@ -294,7 +295,6 @@ prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
 
 %[138s]  OK
 blankNode ==> ['BLANK_NODE_LABEL'].
-
 % tokens defined by regular expressions elsewhere
 tm_regex([
 
