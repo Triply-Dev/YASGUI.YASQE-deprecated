@@ -154,7 +154,7 @@ numericLength ==> ['TOTALDIGITS'].
 numericLength ==> ['FRACTIONDIGITS'].
 
 %[33] OK
-shapeDefinition ==>[*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}',*(anotation),semanticActions].
+shapeDefinition ==>[*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}',*(annotation),semanticActions].
 
 %[34] OK
 inlineShapeDefinition ==> [*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}'].
@@ -187,13 +187,13 @@ unaryTripleExpr ==> [include].
 
 %[44] OK
 bracketedTripleExpr ==> ['(',tripleExpression,')',
-                        ?(cardinality),*(anotation),
+                        ?(cardinality),*(annotation),
                         semanticActions].
 
 %[45]  OK
 tripleConstraint ==> [?(senseFlags),predicate,
                     inlineShapeExpression,
-                    ?(cardinality),*(anotation),
+                    ?(cardinality),*(annotation),
                     semanticActions].
 
 %[46] OK
@@ -240,7 +240,7 @@ languageExclusion ==> ['-','LANGTAG',?('~')].
 include ==> ['&',tripleExprLabel].
 
 %[58] OK
-anotation ==>['//',predicate,or(iri,literal)].
+annotation ==>['//',predicate,or(iri,literal)].
 
 %[59] OK
 semanticActions ==> [*(codeDecl)].
