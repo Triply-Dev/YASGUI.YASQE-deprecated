@@ -171,19 +171,15 @@ oneOfTripleExpr ==> [multiElementOneOf].
 
 
 %[38] OK
-multiElementOneOf ==> [aux,+(aux2)].
-aux ==> [groupTripleExpr].
-aux2 ==> ['|',groupTripleExpr].
+multiElementOneOf ==> [groupTripleExpr,+('|',groupTripleExpr)].
 
 %[40] OK
-groupTripleExpr ==> [singleElementGroup].
-groupTripleExpr ==> [multiElementGroup].
+groupTripleExpr ==> [unaryTripleExpr,*([';',unaryTripleExpr])].
+groupTripleExpr ==> [unaryTripleExpr,*([';',unaryTripleExpr]),?(';')].
 
-%[41] OK
-singleElementGroup ==> [unaryTripleExpr,?(';')].
+%aux ==>[unaryTripleExpr].
+%groupTripleExpr ==>[aux,+([';',unaryTripleExpr])].
 
-%[42] OK
-multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr]),?(';')].
 
 
 %[43] OK
