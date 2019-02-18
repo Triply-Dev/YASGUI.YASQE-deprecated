@@ -1,20 +1,13 @@
 
 /*
-
 SPARQL 1.1 grammar rules based on the Last Call Working Draft of 24/07/2012:
   http://www.w3.org/TR/2012/WD-sparql11-query-20120724/#sparqlGrammar
-
 Be careful with grammar notation - it is EBNF in prolog syntax!
-
 [...] lists always represent sequence.
 or can be used as binary operator or n-ary prefix term - do not put [...]
 inside unless you want sequence as a single disjunct.
-
 *, +, ? - generally used as 1-ary terms
-
 stephen.cresswell@tso.co.uk
-
-
 */
 
 % We need to be careful with end-of-input marker $
@@ -25,275 +18,282 @@ stephen.cresswell@tso.co.uk
 
 :-dynamic '==>'/2.
 
-
-%[1]
+%[1] OK
 shexDoC ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
 
-%[2]
+
+%[2] OK
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
 
-%[3]
-baseDecl ==> ['BASE','IRI_REF'].
+%[3] OK
+baseDecl ==> ['BASE','IRIREF'].
 
-%[4]
+%[4] OK
 prefixDecl ==> ['PREFIX','PNAME_NS','IRIREF'].
 
-%[4.5]
+%[4.5] OK
 importDecl ==> ['IMPORT','IRIREF'].
 
-%[5]
+%[5] OK
 notStartAction ==> [or(start,shapeExprDecl)].
 
-%[6]
+%[6] OK
 start ==> ['start','=',inlineShapeExpression].
 
-%[7]
+%[7] OK
 startActions ==> [+(codeDecl)].
 
-%[8]
+%[8] OK
 statement ==> [or(directive,notStartAction)].
 
-%[9]
-shapeExprDecl ==> [shapeExpressionLabel,or(shapeExpression,'EXTERNAL')].
+%[9] OK
+shapeExprDecl ==> [shapeExprLabel,or(shapeExpression,'EXTERNAL')].
 
-%[10]
+%[10] OK
 shapeExpression ==> [shapeOr].
 
-%[11]
+%[11] OK
 inlineShapeExpression ==> [inlineShapeOr].
 
-%[12]
+%[12] OK
 shapeOr ==> [shapeAnd,*(['OR',shapeAnd])].
 
-%[13]
+%[13] OK
 inlineShapeOr ==> [inlineShapeAnd,*(['OR',inlineShapeAnd])].
 
-%[14]
+%[14] OK
 shapeAnd ==> [shapeNot,*(['AND',shapeNot])].
 
-%[15]
+%[15] OK
 inlineShapeAnd ==> [inlineShapeNot,*(['AND',inlineShapeNot])].
 
-%[16]
+%[16] OK
 shapeNot ==> [?('NOT'),shapeAtom].
 
-%[17]
+%[17] OK
 inlineShapeNot ==> [?('NOT'),inlineShapeAtom].
 
-%[18]
-shapeAtom ==> [nonliteralConstraint,?(shapeOrRef)].
+%[18] OK
+shapeAtom ==> [nonLitNodeConstraint,?(shapeOrRef)].
 shapeAtom ==> [litNodeConstraint].
-shapeAtom ==> [shapeOrRef,?(nonliteralConstraint)].
+shapeAtom ==> [shapeOrRef,?(nonLitNodeConstraint)].
 shapeAtom ==> ['(',shapeExpression,')'].
 shapeAtom ==> ['.'].
 
-%[19]
-shapeAtomNoRef ==> [nonLiteNodeConstraint,?(shareOrRef)].
-shapeAtomNoRef ==> [liteNodeConstraint].
-shapeAtomNoRef ==> [shareOrRef,?(nonLiteNodeConstraint)].
+%[19] OK
+shapeAtomNoRef ==> [nonLitNodeConstraint,?(shapeOrRef)].
+shapeAtomNoRef ==> [litNodeConstraint].
+shapeAtomNoRef ==> [shapeDefinition,?(nonLitNodeConstraint)].
 shapeAtomNoRef ==> ['(',shapeExpression,')'].
 shapeAtomNoRef ==> ['.'].
 
-%[20]
-inlineShapeAtom ==> [nonLiteNodeConstraint,?(inlineShareOrRef)].
-inlineShapeAtom ==> [liteNodeConstraint].
-inlineShapeAtom ==> [inlineShareOrRef,?(nonLiteNodeConstraint)].
+%[20] OK
+inlineShapeAtom ==> [nonLitNodeConstraint,?(inlineShapeOrRef)].
+inlineShapeAtom ==> [litNodeConstraint].
+inlineShapeAtom ==> [inlineShapeOrRef,?(nonLitNodeConstraint)].
 inlineShapeAtom ==> ['(',shapeExpression,')'].
 inlineShapeAtom ==> ['.'].
 
-%[21]
+%[21] OK
 shapeOrRef ==> [or(shapeDefinition,shapeRef)].
 
-%[22]
+%[22] OK
 inlineShapeOrRef ==> [or(inlineShapeDefinition,shapeRef)].
 
-%[23]
+%[23] OK
 shapeRef ==> ['ATPNAME_LN'].
 shapeRef ==> ['ATPNAME_NS'].
 shapeRef ==> ['@',shapeExprLabel].
 
-%[24]
+%[24] OK
 litNodeConstraint ==> ['LITERAL',*(xsFacet)].
 litNodeConstraint ==> [datatype,*(xsFacet)].
 litNodeConstraint ==> [valueSet,*(xsFacet)].
 litNodeConstraint ==> [+(numericFacet)].
 
-%[25]
+%[25] OK
 nonLitNodeConstraint ==> [nonLiteralKind,*(stringFacet)].
 nonLitNodeConstraint ==> [+(stringFacet)].
 
-%[26]
+%[26] OK
 nonLiteralKind ==> ['IRI'].
 nonLiteralKind ==> ['BNODE'].
 nonLiteralKind ==> ['NONLITERAL'].
 
-%[27]
+%[27] OK
 xsFacet ==> [or(stringFacet,numericFacet)].
 
-%[28]
+%[28] OK
 stringFacet ==> [stringLength,'INTEGER'].
 stringFacet ==> ['REGEXP'].
 
-%[29]
+%[29] OK
 stringLength ==> ['LENGTH'].
 stringLength ==> ['MINLENGTH'].
 stringLength ==> ['MAXLENGTH'].
 
-%[30]
+%[30] OK
 numericFacet ==> [numericRange,numericLiteral].
 numericFacet ==> [numericLength,'INTEGER'].
 
-%[31]
+%[31] OK
 numericRange ==> ['MININCLUSIVE'].
 numericRange ==> ['MINEXCLUSIVE'].
 numericRange ==> ['MAXINCLUSIVE'].
 numericRange ==> ['MAXEXCLUSIVE'].
 
-%[32]
+%[32] OK
 numericLength ==> ['TOTALDIGITS'].
 numericLength ==> ['FRACTIONDIGITS'].
 
-%[33]
-shapeDefinition ==>[*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}',*(anotation),semanticActions].
+%[33] OK
+shapeDefinition ==>[*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}',*(annotation),semanticActions].
 
-%[34]
+%[34] OK
 inlineShapeDefinition ==> [*(or(extraPropertySet,'CLOSED')),'{',?(tripleExpression),'}'].
 
-%[35]
+%[35] OK
 extraPropertySet ==> ['EXTRA',+(predicate)].
 
-%[36]
+%[36] OK
 tripleExpression ==> [oneOfTripleExpr].
 
-%[37]
-oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)].
+%[37] OK
+%oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)]. MISSING THIS CORRECT RULE
+oneOfTripleExpr ==> [multiElementOneOf].
 
-%[38]
+
+%[38] OK
 multiElementOneOf ==> [groupTripleExpr,+(['|',groupTripleExpr])].
 
-%[40]
-groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].
+%[40] OK
+%groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].  MISSING THIS CORRECT RULE
+groupTripleExpr ==> [multiElementGroup].
 
-%[41]
+
+%[41] OK
 singleElementGroup ==> [unaryTripleExpr,?(';')].
 
-%[42]
-multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr]),?(';')].
+%[42] OK
+multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr])]. %MISSING  ?(';')
 
-%[43]
+%[43] OK
 unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripleExpr)].
 unaryTripleExpr ==> [include].
 
-%[44]
+
+%[44] OK
 bracketedTripleExpr ==> ['(',tripleExpression,')',
-                        ?(cardinality),*(anotation),
+                        ?(cardinality),*(annotation),
                         semanticActions].
 
-%[45]
+%[45]  OK
 tripleConstraint ==> [?(senseFlags),predicate,
                     inlineShapeExpression,
-                    ?(cardinality),*(anotation),
+                    ?(cardinality),*(annotation),
                     semanticActions].
 
-%[46]
+%[46] OK
 cardinality ==> ['*'].
 cardinality ==> ['+'].
 cardinality ==> ['?'].
 cardinality ==> ['REPEAT_RANGE'].
 
-%[47]
+%[47] OK
 senseFlags ==> ['^'].
 
-%[48]
+%[48] OK
 valueSet ==> ['[',*(valueSetValue),']'].
 
-%[49]
+%[49] OK
 valueSetValue ==> [iriRange].
 valueSetValue ==> [literalRange].
-valueSetValue ==> [languajeRange].
-valueSetValue ==> [+(exclusion)].
+valueSetValue ==> [languageRange].
+%valueSetValue ==> [+(exclusion)]. MISSING THIS CORRECT RULE
 
-%[50]
+%[50] OK
 exclusion ==> ['-',or(iri,literal,'LANGTAG'),?('~')].
 
-%[51]
+%[51] OK
 iriRange ==> [iri,?(['~',*(exclusion)])].
 
-%[52]
+%[52] OK
 iriExclusion ==> ['-',iri,?('~')].
 
-%[53]
-literalRange ==> [literal,?(['~',*(literalExclusion]))].
+%[53] OK
+literalRange ==> [literal,?(['~',*(literalExclusion)])].
 
-%[54]
-literalExclusion ==> ['-',literal,?('~')].
+%[54] OK
+%literalExclusion ==> ['-',literal,?('~')]. MISSING THIS CORRECT RULE
+literalExclusion ==> ['.'].
 
-%[55]
+%[55] OK
 languageRange ==> ['LANGTAG',?(['~',*(languageExclusion)])].
 languageRange ==> ['@','~',*(languageExclusion)].
 
-%[56]
-languageExclusion ==> ['-','LANGTAG',?(~)].
+%[56] OK
+%languageExclusion ==> ['-','LANGTAG',?('~')]. MISSING THIS CORRECT RULE
+languageExclusion ==> ['.'].
 
-%[57]
+
+%[57] OK
 include ==> ['&',tripleExprLabel].
 
-%[58]
-anotation ==>['//',predicate,or(iri,literal)].
+%[58] OK
+annotation ==>['//',predicate,or(iri,literal)].
 
-%[59]
+%[59] OK
 semanticActions ==> [*(codeDecl)].
 
-%[60]
+%[60] OK
 codeDecl ==> ['%',iri,or('CODE','%')].
 
-%[13t]
+%[13t] OK
 literal ==> [or(rdfLiteral,numericLiteral,booleanLiteral)].
 
-%[61]
+%[61] OK
 predicate ==> [or(iri,'RDF_TYPE')].
 
-%[62]
+%[62] OK
 datatype ==> [iri].
 
-%[63]
+%[63] OK
 shapeExprLabel ==> [or(iri,blankNode)].
 
-%[64]
+%[64] OK
 tripleExprLabel ==> [or(iri,blankNode)].
 
-%[16t]
+%[16t] OK
 numericLiteral ==>['INTEGER'].
 numericLiteral ==>['DECIMAL'].
 numericLiteral ==>['DOUBLE'].
 
-%[65]
+%[65] OK
 rdfLiteral ==> [or(langString,[string,?(['^^',datatype])])].
 
 
-%[134s]
+%[134s] OK
 booleanLiteral ==> [or('true', 'false')].
 
-%[135s]
+%[135s] OK
 string ==> ['STRING_LITERAL1'].
 string ==> ['STRING_LITERAL_LONG1'].
 string ==> ['STRING_LITERAL2'].
 string ==> ['STRING_LITERAL_LONG2'].
 
-%[66]
+%[66] OK
 langString ==> ['LANG_STRING_LITERAL1'].
 langString ==> ['LANG_STRING_LITERAL_LONG1'].
 langString ==> ['LANG_STRING_LITERAL2'].
 langString ==> ['LANG_STRING_LITERAL_LONG2'].
 
-%[136s]
+%[136s] OK
 iri ==> [or('IRIREF',prefixedName)].
 
-%[137s]
+%[137s] OK
 prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
 
-%[138s]
-blankNode ==> ['BLANK_NODE_LABEL'].=> ['BLANK_NODE_LABEL'].
+
 
 % tokens defined by regular expressions elsewhere
 tm_regex([
