@@ -3,17 +3,17 @@ var $ = require("jquery"),
   utils = require("../utils.js"),
   yutils = require("yasgui-utils"),
   Trie = require("../../lib/trie.js"),
-  YASQE = require("../main.js");
+  YASHE = require("../main.js");
 
-module.exports = function(YASQE, yasqe) {
+module.exports = function(YASHE, yashe) {
   var completionNotifications = {};
   var completers = {};
   var tries = {};
 
-  yasqe.on("cursorActivity", function(yasqe, eventInfo) {
+  yashe.on("cursorActivity", function(yashe, eventInfo) {
     autoComplete(true);
   });
-  yasqe.on("change", function() {
+  yashe.on("change", function() {
     var needPossibleAdjustment = [];
     for (var notificationName in completionNotifications) {
       if (completionNotifications[notificationName].is(":visible")) {
@@ -22,7 +22,7 @@ module.exports = function(YASQE, yasqe) {
     }
     if (needPossibleAdjustment.length > 0) {
       //position completion notifications
-      var scrollBar = $(yasqe.getWrapperElement()).find(".CodeMirror-vscrollbar");
+      var scrollBar = $(yashe.getWrapperElement()).find(".CodeMirror-vscrollbar");
       var offset = 0;
       if (scrollBar.is(":visible")) {
         offset = scrollBar.outerWidth();
@@ -46,12 +46,12 @@ module.exports = function(YASQE, yasqe) {
       tries[completer.name].insert(completions[i]);
     }
     // store in localstorage as well
-    var storageId = utils.getPersistencyId(yasqe, completer.persistent);
-    if (storageId) yutils.storage.set(storageId, completions, "month", yasqe.options.onQuotaExceeded);
+    var storageId = utils.getPersistencyId(yashe, completer.persistent);
+    if (storageId) yutils.storage.set(storageId, completions, "month", yashe.options.onQuotaExceeded);
   };
 
   var initCompleter = function(name, completionInit) {
-    var completer = (completers[name] = new completionInit(yasqe, name));
+    var completer = (completers[name] = new completionInit(yashe, name));
     completer.name = name;
     if (completer.bulk) {
       var storeArrayAsBulk = function(suggestions) {
@@ -67,7 +67,7 @@ module.exports = function(YASQE, yasqe) {
         // if completions are defined in localstorage, use those! (calling the
         // function may come with overhead (e.g. async calls))
         var completionsFromStorage = null;
-        var persistencyIdentifier = utils.getPersistencyId(yasqe, completer.persistent);
+        var persistencyIdentifier = utils.getPersistencyId(yashe, completer.persistent);
         if (persistencyIdentifier) completionsFromStorage = yutils.storage.get(persistencyIdentifier);
         if (completionsFromStorage && completionsFromStorage.length > 0) {
           storeArrayAsBulk(completionsFromStorage);
@@ -87,7 +87,7 @@ module.exports = function(YASQE, yasqe) {
   };
 
   var autoComplete = function(fromAutoShow) {
-    if (yasqe.somethingSelected()) return;
+    if (yashe.somethingSelected()) return;
     var tryHintType = function(completer) {
       if (
         fromAutoShow && // from autoShow, i.e. this gets called each time the editor content changes
@@ -104,28 +104,28 @@ module.exports = function(YASQE, yasqe) {
       if (!completer.bulk && completer.async) {
         hintConfig.async = true;
       }
-      var wrappedHintCallback = function(yasqe, callback) {
+      var wrappedHintCallback = function(yashe, callback) {
         return getCompletionHintsObject(completer, callback);
       };
-      var result = YASQE.showHint(yasqe, wrappedHintCallback, hintConfig);
+      var result = YASHE.showHint(yashe, wrappedHintCallback, hintConfig);
       return true;
     };
     for (var completerName in completers) {
-      if ($.inArray(completerName, yasqe.options.autocompleters) == -1) continue; //this completer is disabled
+      if ($.inArray(completerName, yashe.options.autocompleters) == -1) continue; //this completer is disabled
       var completer = completers[completerName];
       if (!completer.isValidCompletionPosition) continue; //no way to check whether we are in a valid position
 
       if (!completer.isValidCompletionPosition()) {
         //if needed, fire callbacks for when we are -not- in valid completion position
         if (completer.callbacks && completer.callbacks.invalidPosition) {
-          completer.callbacks.invalidPosition(yasqe, completer);
+          completer.callbacks.invalidPosition(yashe, completer);
         }
         //not in a valid position, so continue to next completion candidate type
         continue;
       }
       // run valid position handler, if there is one (if it returns false, stop the autocompletion!)
       if (completer.callbacks && completer.callbacks.validPosition) {
-        if (completer.callbacks.validPosition(yasqe, completer) === false) continue;
+        if (completer.callbacks.validPosition(yashe, completer) === false) continue;
       }
       var success = tryHintType(completer);
       if (success) break;
@@ -152,7 +152,7 @@ module.exports = function(YASQE, yasqe) {
       return getSuggestionsAsHintObject(suggestions, completer, partialToken);
     };
 
-    var token = yasqe.getCompleteToken();
+    var token = yashe.getCompleteToken();
     if (completer.preProcessToken) {
       token = completer.preProcessToken(token);
     }
@@ -190,7 +190,7 @@ module.exports = function(YASQE, yasqe) {
       });
     }
 
-    var cur = yasqe.getCursor();
+    var cur = yashe.getCursor();
     var returnObj = {
       completionToken: token.string,
       list: hintList,
@@ -207,7 +207,7 @@ module.exports = function(YASQE, yasqe) {
     if (completer.callbacks) {
       for (var callbackName in completer.callbacks) {
         if (completer.callbacks[callbackName]) {
-          YASQE.on(returnObj, callbackName, completer.callbacks[callbackName]);
+          YASHE.on(returnObj, callbackName, completer.callbacks[callbackName]);
         }
       }
     }
@@ -221,7 +221,7 @@ module.exports = function(YASQE, yasqe) {
       getEl: function(completer) {
         return $(completionNotifications[completer.name]);
       },
-      show: function(yasqe, completer) {
+      show: function(yashe, completer) {
         //only draw when the user needs to use a keypress to summon autocompletions
         if (!completer.autoshow) {
           if (!completionNotifications[completer.name])
@@ -229,10 +229,10 @@ module.exports = function(YASQE, yasqe) {
           completionNotifications[completer.name]
             .show()
             .text("Press CTRL - <spacebar> to autocomplete")
-            .appendTo($(yasqe.getWrapperElement()));
+            .appendTo($(yashe.getWrapperElement()));
         }
       },
-      hide: function(yasqe, completer) {
+      hide: function(yashe, completer) {
         if (completionNotifications[completer.name]) {
           completionNotifications[completer.name].hide();
         }
@@ -248,9 +248,9 @@ module.exports = function(YASQE, yasqe) {
 /**
  * function which fires after the user selects a completion. this function checks whether we actually need to store this one (if completion is same as current token, don't do anything)
  */
-var selectHint = function(yasqe, data, completion) {
-  if (completion.text != yasqe.getTokenAt(yasqe.getCursor()).string) {
-    yasqe.replaceRange(completion.text, data.from, data.to);
+var selectHint = function(yashe, data, completion) {
+  if (completion.text != yashe.getTokenAt(yashe.getCursor()).string) {
+    yashe.replaceRange(completion.text, data.from, data.to);
   }
 };
 

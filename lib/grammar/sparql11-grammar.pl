@@ -7,45 +7,44 @@ SPARQL 1.1 grammar rules based on the Last Call Working Draft of 24/07/2012:
 Be careful with grammar notation - it is EBNF in prolog syntax!
 
 [...] lists always represent sequence.
-or can be used as binary operator or n-ary prefix term - do not put [...]
+or can be used as binary operator or n-ary prefix term - do not put [...] 
 inside unless you want sequence as a single disjunct.
 
-*, +, ? - generally used as 1-ary terms
+*, +, ? - generally used as 1-ary terms 
 
 stephen.cresswell@tso.co.uk
-
-
 */
 
 % We need to be careful with end-of-input marker $
-% Since we never actually receive this from Codemirror,
+% Since we never actually receive this from Codemirror, 
 % we can't have it appear on RHS of deployed rules.
-% However, we do need it to check whether rules *could* precede
+% However, we do need it to check whether rules *could* precede 
 % end-of-input, so use it with top-level
 
 :-dynamic '==>'/2.
 
+
 %[1] OK
-shexDoC ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
+sparql11  ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
 
 
 %[2] OK
 directive ==> [or(baseDecl,prefixDecl,importDecl)].
 
 %[3] OK
-baseDecl ==> ['BASE','IRIREF'].
+baseDecl ==> ['BASE','IRI_REF'].
 
 %[4] OK
-prefixDecl ==> ['PREFIX','PNAME_NS','IRIREF'].
+prefixDecl ==> ['PREFIX','PNAME_NS','IRI_REF'].
 
 %[4.5] OK
-importDecl ==> ['IMPORT','IRIREF'].
+importDecl ==> ['IMPORT','IRI_REF'].
 
 %[5] OK
-notStartAction ==> [or(start,shapeExprDecl)].
+notStartAction ==> [or(startt,shapeExprDecl)].
 
 %[6] OK
-start ==> ['start','=',inlineShapeExpression].
+startt ==> ['start','=',inlineShapeExpression].
 
 %[7] OK
 startActions ==> [+(codeDecl)].
@@ -295,10 +294,14 @@ langString ==> ['LANG_STRING_LITERAL2'].
 langString ==> ['LANG_STRING_LITERAL_LONG2'].
 
 %[136s] OK
-iri ==> [or('IRIREF',prefixedName)].
+iri ==> [or('IRI_REF',prefixedName)].
 
 %[137s] OK
 prefixedName ==> [ or('PNAME_LN', 'PNAME_NS') ].
+
+%[138]
+blankNode ==> ['BLANK_NODE_LABEL'].
+
 
 
 
@@ -308,7 +311,7 @@ tm_regex([
 'CODE',
 'REPEAT_RANGE',
 'RDF_TYPE',
-'IRIREF',
+'IRI_REF',
 'PNAME_NS',
 'PNAME_LN',
 'ATPNAME_NS',
@@ -339,7 +342,8 @@ tm_regex([
 'PERCENT',
 'HEX',
 'PN_LOCAL_ESC',
-'start',
+'
+',
 'true',
 'false'
 
@@ -347,6 +351,7 @@ tm_regex([
 
 % Terminals where name of terminal is uppercased token content
 tm_keywords([
+
 'BASE',
 'PREFIX',
 'IMPORT',
@@ -369,6 +374,7 @@ tm_keywords([
 'FRACTIONDIGITS',
 'CLOSED',
 'EXTRA'
+
 ]).
 
 % Other tokens representing fixed, case sensitive, strings
@@ -399,7 +405,7 @@ tm_punct([
 '-'= '-',
 '~'='\\~',
 '&'='&',
-'//'='//',
+'//'='\\/\\/',
 '%'='%',
 '^^'= '\\^\\^'
 
