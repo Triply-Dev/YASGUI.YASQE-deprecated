@@ -25,7 +25,7 @@ stephen.cresswell@tso.co.uk
 
 
 %[1] OK
-sparql11  ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
+shexDoC  ==> [*(directive),?([or(notStartAction,startActions),*(statement)]), $ ].
 
 
 %[2] OK
