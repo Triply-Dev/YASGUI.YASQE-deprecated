@@ -8,8 +8,8 @@ var $ = require("jquery"), utils = require("./utils.js"), yutils = require("yasg
  * Converts rdf:type to http://.../type and converts <http://...> to http://...
  * Stores additional info such as the used namespace and prefix in the token object
  */
-var preprocessResourceTokenForCompletion = function(yasqe, token) {
-  var queryPrefixes = yasqe.getPrefixesFromQuery();
+var preprocessResourceTokenForCompletion = function(yashe, token) {
+  var queryPrefixes = yashe.getPrefixesFromQuery();
   if (!token.string.indexOf("<") == 0) {
     token.tokenPrefix = token.string.substring(0, token.string.indexOf(":") + 1);
 
@@ -37,7 +37,7 @@ var preprocessResourceTokenForCompletion = function(yasqe, token) {
   return token;
 };
 
-var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedString) {
+var postprocessResourceTokenForCompletion = function(yashe, token, suggestedString) {
   if (token.tokenPrefix && token.autocompletionString && token.tokenPrefixUri) {
     // we need to get the suggested string back to prefixed form
     suggestedString = token.tokenPrefix + suggestedString.substring(token.tokenPrefixUri.length);
@@ -50,9 +50,9 @@ var postprocessResourceTokenForCompletion = function(yasqe, token, suggestedStri
 
 //Use protocol relative request when served via http[s]*. Otherwise (e.g. file://, fetch via http)
 var reqProtocol = window.location.protocol.indexOf("http") === 0 ? "https://" : "http://";
-var fetchFromLov = function(yasqe, completer, token, callback) {
+var fetchFromLov = function(yashe, completer, token, callback) {
   if (!token || !token.string || token.string.trim().length == 0) {
-    yasqe.autocompleters.notifications.getEl(completer).empty().append("Nothing to autocomplete yet!");
+    yashe.autocompleters.notifications.getEl(completer).empty().append("Nothing to autocomplete yet!");
     return false;
   }
   var maxResults = 50;
@@ -91,19 +91,19 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
       } else {
         //if notification bar is there, show feedback, or close
         if (results.length > 0) {
-          yasqe.autocompleters.notifications.hide(yasqe, completer);
+          yashe.autocompleters.notifications.hide(yashe, completer);
         } else {
-          yasqe.autocompleters.notifications.getEl(completer).text("0 matches found...");
+          yashe.autocompleters.notifications.getEl(completer).text("0 matches found...");
         }
         callback(results);
         // requests done! Don't call this function again
       }
     }).fail(function(jqXHR, textStatus, errorThrown) {
-      yasqe.autocompleters.notifications.getEl(completer).empty().append("Failed fetching suggestions..");
+      yashe.autocompleters.notifications.getEl(completer).empty().append("Failed fetching suggestions..");
     });
   };
   //if notification bar is there, show a loader
-  yasqe.autocompleters.notifications
+  yashe.autocompleters.notifications
     .getEl(completer)
     .empty()
     .append($("<span>Fetchting autocompletions &nbsp;</span>"))

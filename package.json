@@ -1,11 +1,11 @@
 {
-  "name": "yasgui-yashe",
-  "description": "Yet Another Shape Expressions Editor",
+  "name": "yasgui-yasqe",
+  "description": "Yet Another SPARQL Query Editor",
   "version": "2.11.21",
   "main": "src/main.js",
   "license": "MIT",
-  "author": "Pablo Menéndez",
-  "homepage": "http://weso.github.io/yashe",
+  "author": "Laurens Rietveld",
+  "homepage": "http://yasqe.yasgui.org",
   "scripts": {
     "dev": "gulp serve",
     "build": "gulp",
@@ -47,7 +47,7 @@
     "vinyl-transform": "1.0.0",
     "watchify": "^3.7.0"
   },
-  "bugs": "https://github.com/weso/YASHE/issues/",
+  "bugs": "https://github.com/YASGUI/YASQE/issues/",
   "keywords": [
     "JavaScript",
     "SPARQL",
@@ -64,7 +64,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/weso/YASHE.git"
+    "url": "https://github.com/YASGUI/YASQE.git"
   },
   "dependencies": {
     "codemirror": "5.17.0",
