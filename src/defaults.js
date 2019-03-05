@@ -10,7 +10,7 @@ YASHE.defaults = $.extend(true, {}, YASHE.defaults, {
   /**
 	 * Query string
 	 */
-  value: "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nSELECT * WHERE {\n  ?sub ?pred ?obj .\n} \nLIMIT 10",
+  value: "PREFIX :  <http://example.org/> PREFIX schema: <http://schema.org/> PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> :User IRI { schema:name   xsd:string  ;  schema:birthDate     xsd:date?  ;  schema:gender        [ schema:Male schema:Female ];  schema:knows         @:User*",
   highlightSelectionMatches: {
     showToken: /\w/
   },
