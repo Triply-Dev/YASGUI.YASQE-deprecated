@@ -1,11 +1,11 @@
 "use strict";
 var $ = require("jquery");
-module.exports = function(yasqe) {
+module.exports = function(yashe) {
   return {
     isValidCompletionPosition: function() {
-      var token = yasqe.getTokenAt(yasqe.getCursor());
+      var token = yashe.getTokenAt(yashe.getCursor());
       if (token.type != "ws") {
-        token = yasqe.getCompleteToken(token);
+        token = yashe.getCompleteToken(token);
         if (token && (token.string[0] === '?' || token.string[0] === '$')) {
           return true;
         }
@@ -17,7 +17,7 @@ module.exports = function(yasqe) {
       var distinctVars = {};
       //do this outside of codemirror. I expect jquery to be faster here (just finding dom elements with classnames)
       //and: this'll still work when the query is incorrect (i.e., when simply typing '?')
-      $(yasqe.getWrapperElement()).find(".cm-atom").each(function() {
+      $(yashe.getWrapperElement()).find(".cm-atom").each(function() {
         var variable = this.innerHTML;
         if (variable[0] === '?' || variable[0] === '$') {
           //ok, lets check if the next element in the div is an atom as well. In that case, they belong together (may happen sometimes when query is not syntactically valid)
