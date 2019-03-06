@@ -166,7 +166,7 @@ tripleExpression ==> [oneOfTripleExpr].
 
 %[37] OK
 %oneOfTripleExpr ==> [or(groupTripleExpr,multiElementOneOf)]. MISSING THIS CORRECT RULE
-oneOfTripleExpr ==> [multiElementOneOf].
+oneOfTripleExpr ==> [groupTripleExpr].
 
 
 %[38] OK
@@ -188,8 +188,10 @@ unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripl
 unaryTripleExpr ==> [include].
 
 
+
 %[44] OK
 bracketedTripleExpr ==> ['(',tripleExpression,')',
+
                         ?(cardinality),*(annotation),
                         semanticActions].
 
@@ -355,6 +357,7 @@ tm_keywords([
 'BASE',
 'PREFIX',
 'IMPORT',
+'start',
 'EXTERNAL',
 'OR',
 'AND',

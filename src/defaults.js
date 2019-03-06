@@ -10,7 +10,10 @@ YASHE.defaults = $.extend(true, {}, YASHE.defaults, {
   /**
 	 * Query string
 	 */
-  value: "PREFIX :  <http://example.org/> PREFIX schema: <http://schema.org/> PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> :User IRI { schema:name   xsd:string  ;  schema:birthDate     xsd:date?  ;  schema:gender        [ schema:Male schema:Female ];  schema:knows         @:User*",
+  value: "PREFIX :  <http://example.org/> \n"+
+         "PREFIX schema: <http://schema.org/> \n"+
+         "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> \n"+
+         "\n :User IRI { \n    schema:name     xsd:string  ; \n    schema:birthDate     xsd:date?  ; \n    schema:gender        [ schema:Male schema:Female ];  \n     schema:knows         @:User*",
   highlightSelectionMatches: {
     showToken: /\w/
   },
