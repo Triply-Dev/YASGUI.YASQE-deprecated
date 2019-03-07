@@ -1,8 +1,11 @@
 
 /*
+
 SPARQL 1.1 grammar rules based on the Last Call Working Draft of 24/07/2012:
   http://www.w3.org/TR/2012/WD-sparql11-query-20120724/#sparqlGrammar
+
 Be careful with grammar notation - it is EBNF in prolog syntax!
+
 [...] lists always represent sequence.
 or can be used as binary operator or n-ary prefix term - do not put [...] 
 inside unless you want sequence as a single disjunct.
@@ -169,16 +172,15 @@ oneOfTripleExpr ==> [groupTripleExpr].
 %[38] OK
 multiElementOneOf ==> [groupTripleExpr,+(['|',groupTripleExpr])].
 
-%[40] OK
-%groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].  MISSING THIS CORRECT RULE
-groupTripleExpr ==> [multiElementGroup].
 
+%[40] NOW THIS RULE ONLY CALL THE elementGroup RULE
+groupTripleExpr ==> [elementGroup].
 
-%[41] OK
-singleElementGroup ==> [unaryTripleExpr,?(';')].
+%[41] THIS RULE HAS BEEN REPLACED BY RULE 42
+%singleElementGroup ==> [unaryTripleExpr,';'].
 
-%[42] OK
-multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr])]. %MISSING  ?(';')
+%[42] THIS RULE NOW REPRESENTS THE RULE 41 (singleElementGroup) TOGETHER WITH RULE 42(multiELementGroup) to make it LL1
+elementGroup ==> [unaryTripleExpr,';',*([unaryTripleExpr,';'])]. 
 
 %[43] OK
 unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripleExpr)].
