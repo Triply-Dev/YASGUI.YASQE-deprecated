@@ -172,16 +172,15 @@ oneOfTripleExpr ==> [groupTripleExpr].
 %[38] OK
 multiElementOneOf ==> [groupTripleExpr,+(['|',groupTripleExpr])].
 
-%[40] OK
-%groupTripleExpr ==> [or(singleElementGroup,multiElementGroup)].  MISSING THIS CORRECT RULE
-groupTripleExpr ==> [multiElementGroup].
 
+%[40] NOW THIS RULE ONLY CALL THE elementGroup RULE
+groupTripleExpr ==> [elementGroup].
 
-%[41] OK
-singleElementGroup ==> [unaryTripleExpr,?(';')].
+%[41] THIS RULE HAS BEEN REPLACED BY RULE 42
+%singleElementGroup ==> [unaryTripleExpr,';'].
 
-%[42] OK
-multiElementGroup ==> [unaryTripleExpr,+([';',unaryTripleExpr])]. %MISSING  ?(';')
+%[42] THIS RULE NOW REPRESENTS THE RULE 41 (singleElementGroup) TOGUETHER WITH RULE 42(multiELementGroup) to make it LL1
+elementGroup ==> [unaryTripleExpr,';',*([unaryTripleExpr,';'])]. 
 
 %[43] OK
 unaryTripleExpr ==> [?(['$',tripleExprLabel]),or(tripleConstraint,bracketedTripleExpr)].
