@@ -179,7 +179,7 @@ groupTripleExpr ==> [elementGroup].
 %[41] THIS RULE HAS BEEN REPLACED BY RULE 42
 %singleElementGroup ==> [unaryTripleExpr,';'].
 
-%[42] THIS RULE NOW REPRESENTS THE RULE 41 (singleElementGroup) TOGUETHER WITH RULE 42(multiELementGroup) to make it LL1
+%[42] THIS RULE NOW REPRESENTS THE RULE 41 (singleElementGroup) TOGETHER WITH RULE 42(multiELementGroup) to make it LL1
 elementGroup ==> [unaryTripleExpr,';',*([unaryTripleExpr,';'])]. 
 
 %[43] OK
