@@ -44,6 +44,8 @@ publishers.  Here is a partial list:
   * [**Comunica widget**](https://github.com/comunica/jQuery-Widget.js)
     Web-based Linked Data query engine
     ([demo](http://query.linkeddatafragments.org/)
+  * [SEPA](https://github.com/arces-wot/SEPA)
+    Sparql Event Processing Architecture
   
 ### Data Publishers
 
