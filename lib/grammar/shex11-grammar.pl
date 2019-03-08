@@ -111,6 +111,7 @@ shapeRef ==> ['ATPNAME_LN'].
 shapeRef ==> ['ATPNAME_NS'].
 shapeRef ==> ['@',shapeExprLabel].
 
+
 %[24] OK
 litNodeConstraint ==> ['LITERAL',*(xsFacet)].
 litNodeConstraint ==> [datatype,*(xsFacet)].
@@ -192,7 +193,7 @@ unaryTripleExpr ==> [include].
 %[44] OK
 bracketedTripleExpr ==> ['(',tripleExpression,')',
 
-                        ?(cardinality),*(annotation),
+                        ?(or),*(annotation),
                         semanticActions].
 
 %[45]  OK
@@ -306,7 +307,6 @@ blankNode ==> ['BLANK_NODE_LABEL'].
 
 
 
-
 % tokens defined by regular expressions elsewhere
 tm_regex([
 
@@ -318,6 +318,7 @@ tm_regex([
 'PNAME_LN',
 'ATPNAME_NS',
 'ATPNAME_LN',
+'AT_IRI',
 'REGEXP',
 'BLANK_NODE_LABEL',
 'LANGTAG',
@@ -348,7 +349,6 @@ tm_regex([
 ',
 'true',
 'false'
-
 ]).
 
 % Terminals where name of terminal is uppercased token content
