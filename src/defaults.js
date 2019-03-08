@@ -7,13 +7,21 @@
 var $ = require("jquery"), YASHE = require("./main.js");
 YASHE.defaults = $.extend(true, {}, YASHE.defaults, {
   mode: "sparql11",
+
   /**
-	 * Query string
+	 *Default shape String
 	 */
-  value: "PREFIX :  <http://example.org/> \n"+
-         "PREFIX schema: <http://schema.org/> \n"+
-         "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> \n"+
-         "\n :User IRI { \n    schema:name     xsd:string  ; \n    schema:birthDate     xsd:date?  ; \n    schema:gender        [ schema:Male schema:Female ];  \n     schema:knows         @:User*",
+  value: "PREFIX :       <http://example.org/>\n"+
+  "PREFIX schema: <http://schema.org/>\n"+
+  "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>\n\n"+
+  
+ ":User IRI {\n"+ 
+ "  schema:name          xsd:string  ;\n"+
+ "  schema:birthDate     xsd:date?  ;\n"+
+ "  schema:gender        [ schema:Male schema:Female ] ;\n"+
+ "  schema:knows         @:User* ;\n"+
+ "}",
+
   highlightSelectionMatches: {
     showToken: /\w/
   },
