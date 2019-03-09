@@ -19,7 +19,7 @@ YASHE.defaults = $.extend(true, {}, YASHE.defaults, {
  "  schema:name          xsd:string  ;\n"+
  "  schema:birthDate     xsd:date?  ;\n"+
  "  schema:gender        [ schema:Male schema:Female ] ;\n"+
- "  schema:knows         @:User* ;\n"+
+ "  schema:knows         @:User* \n"+
  "}",
 
   highlightSelectionMatches: {
