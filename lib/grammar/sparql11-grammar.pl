@@ -346,7 +346,7 @@ propertyList ==> [propertyListNotEmpty].
 propertyList ==> [].
 %[77]
 propertyListNotEmpty ==> 
-	[verb,objectList,*([';',?([verb,objectList])])].
+	[verbPath or verbSimple,objectList,*([';',?([verbPath or verbSimple,objectList])])].
 % storeProperty is a dummy for side-effect of remembering property
 storeProperty==>[].
 %[78]
