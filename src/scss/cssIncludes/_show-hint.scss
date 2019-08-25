@@ -19,6 +19,8 @@
 
   max-height: 20em;
   overflow-y: auto;
+
+  z-index: 1200;
 }
 
 .CodeMirror-hint {
