@@ -62,15 +62,8 @@
   .yasqe .cm-animate-fat-cursor {
     width: auto;
     border: 0;
-    -webkit-animation: blink 1.06s steps(1) infinite;
     animation: blink 1.06s steps(1) infinite;
     background-color: #7e7; }
-
-@-webkit-keyframes blink {
-  0% { }
-  50% {
-    background-color: transparent; }
-  100% { } }
 
 @keyframes blink {
   0% { }
@@ -247,7 +240,6 @@
     position: relative;
     overflow: visible;
     -webkit-tap-highlight-color: transparent;
-    -webkit-font-variant-ligatures: none;
     font-variant-ligatures: none; }
   .yasqe .CodeMirror-wrap pre {
     word-wrap: break-word;
@@ -340,10 +332,6 @@
     content: "\25BE"; }
   .yasqe .CodeMirror-foldgutter-folded:after {
     content: "\25B8"; }
-
-@-webkit-keyframes spin {
-  100% {
-    -webkit-transform: rotate(360deg); } }
   .yasqe .yasqe_btn {
     color: #333;
     border: 1px solid transparent;
@@ -412,11 +400,9 @@
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
         width: 600px;
         height: auto;
-        display: -webkit-box;
         display: flex; }
         .yasqe .yasqe_buttons div.yasqe_sharePopup .inputWrapper {
-          -webkit-box-flex: 100;
-                  flex-grow: 100; }
+          flex-grow: 100; }
         .yasqe .yasqe_buttons div.yasqe_sharePopup input {
           float: left;
           width: 100%;
@@ -454,8 +440,7 @@
         box-sizing: border-box;
         border: solid 4px rgba(0, 0, 0, 0.2);
         border-top-color: #000;
-        -webkit-animation: spin 1s infinite linear;
-                animation: spin 1s infinite linear; }
+        animation: spin 1s infinite linear; }
   .yasqe .fullscreenToggleBtns {
     display: inline-block;
     margin-top: 3px; }
@@ -536,7 +521,8 @@
     /* Opera 7 */
     white-space: pre-wrap;
     /* css-3 */
-    white-space: normal; }
+    white-space: normal;
+    z-index: 1200; }
   .yasqe .notificationLoader {
     width: 18px;
     height: 18px;
@@ -544,7 +530,7 @@
 
 .CodeMirror-hints {
   position: absolute;
-  z-index: 10;
+  z-index: 1200;
   overflow: hidden;
   list-style: none;
   margin: 0;
@@ -556,7 +542,8 @@
   font-size: 90%;
   font-family: monospace;
   max-height: 20em;
-  overflow-y: auto; }
+  overflow-y: auto;
+  z-index: 1200; }
 
 .CodeMirror-hint {
   margin: 0;
