@@ -105,7 +105,7 @@ module.exports.appendPrefixIfNeeded = function(yasqe, completerName) {
         line: cur.line,
         ch: token.start
       }); // needs to be null (beginning of line), or whitespace
-      if (lastNonWsTokenString != "PREFIX" && (previousToken.type == "ws" || previousToken.type == null)) {
+      if (lastNonWsTokenString != "PREFIX" && (previousToken.type == "ws" || previousToken.type == null || previousToken.string == "^^")) {
         // check whether it isnt defined already (saves us from looping
         // through the array)
         var currentPrefix = token.string.substring(0, colonIndex + 1);
