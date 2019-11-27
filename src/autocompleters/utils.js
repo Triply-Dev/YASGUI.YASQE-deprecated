@@ -106,7 +106,7 @@ var fetchFromLov = function(yasqe, completer, token, callback) {
   yasqe.autocompleters.notifications
     .getEl(completer)
     .empty()
-    .append($("<span>Fetchting autocompletions &nbsp;</span>"))
+    .append($("<span>Fetching autocompletions &nbsp;</span>"))
     .append($(yutils.svg.getElement(require("../imgs.js").loader)).addClass("notificationLoader"));
   doRequests();
 };
