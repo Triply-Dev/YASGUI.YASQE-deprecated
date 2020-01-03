@@ -66,3 +66,4 @@ publishers.  Here is a partial list:
 
  * [**YATE**](https://perfectkb.github.io/yate/) is a fork for the RDF 1.1 Turtle syntax
  * [**YASQE for SPARQL-Generate**](https://thesmartenergy.github.io/sparql-generate-yasqe/) is a fork for the [**SPARQL-Generate language**](https://w3id.org/sparql-generate), an extension of SPARQL 1.1 for querying not only RDF datasets but also documents in arbitrary formats.  
+ * [**YASHE**](http://www.weso.es/YASHE/) is a fork for the [ShEx](http://shex.io/) syntax 
