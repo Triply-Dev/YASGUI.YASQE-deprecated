@@ -1,3 +1,12 @@
+# This repository is deprecated.
+
+For the Yasgui monorepo see https://github.com/TriplyDB/Yasgui.
+
+For Yasgui documentation, see https://triply.cc/docs/yasgui
+
+
+-----
+
 [![NPM](https://img.shields.io/npm/v/yasgui-yasqe.svg)](https://www.npmjs.org/package/yasgui-yasqe)
 [![Bower](https://img.shields.io/bower/v/yasgui-yasqe.svg)](https://github.com/OpenTriply/YASQE)
 
